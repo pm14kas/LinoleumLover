@@ -1,0 +1,217 @@
+player = {};
+function player:new()
+	self.width = 50;
+	self.height = 100
+	self.startX = 50;
+	self.startY = 50;
+	self.speedX = 10;
+	self.speedXSprint = 190 * love.physics.getMeter();
+	self.speedXRegular = 300 * love.physics.getMeter();
+	self.speedXMax = 10 * love.physics.getMeter();
+	self.jumpSpeed = 2.5 * love.physics.getMeter();
+	self.isSprint = false;
+	self.isMoveLeft = false;
+	self.isMoveRight = false;
+	self.isJump = false;
+	self.isStand = false;
+	self.isLeftWallClimb = false;
+	self.isRightWallClimb = false;
+	self.speedWallClimb = 5 * love.physics.getMeter();
+	self.jumpAmount = 0;
+	self.jumpAmountMax = 1;
+	
+	self.body = love.physics.newBody(world, self.startX, self.startY, "dynamic");
+	self.body:setMass(100);
+	self.body:setFixedRotation(true);
+	self.shape = love.physics.newRectangleShape(self.width, self.height);
+	self.fixture = love.physics.newFixture(self.body, self.shape);
+	
+	self.sprite = love.graphics.newImage("graphics/particle/sprite_doublejump.png");
+	self.particleEmitter = love.graphics.newParticleSystem(self.sprite, 30);
+	self.particleEmitter:setParticleLifetime(0.1, 0.5);
+	self.particleEmitter:setSizes(0.3)
+	self.particleEmitter:setLinearAcceleration(-5, 0, 5, 100 * love.physics.getMeter());
+	self.particleEmitter:setEmissionArea("uniform", self.width * 0.4, 0, 0, true);
+	self.particleEmitter:setColors(255, 255, 255, 255, 255, 255, 255, 0);
+end
+
+function player:respawn()
+	self.body:destroy();
+	self:new();
+end
+
+function actualJump(fixture, x, y, xn, yn, fraction)
+	if (player.isJump) then
+		if player.isLeftWallClimb then
+			player.body:setLinearVelocity(0, 0);
+			player.body:applyLinearImpulse(player.jumpSpeed * love.physics.getMeter(), -player.jumpSpeed * love.physics.getMeter())
+			player.isJump = false;
+		elseif player.isRightWallClimb then
+			player.body:setLinearVelocity(0, 0);
+			player.body:applyLinearImpulse(-player.jumpSpeed * love.physics.getMeter(), -player.jumpSpeed * love.physics.getMeter())
+			player.isJump = false;
+		else
+			local x, y = player.body:getLinearVelocity();
+			player.body:setLinearVelocity(x, 0);
+			player.body:applyLinearImpulse(0, -player.jumpSpeed * love.physics.getMeter())
+			player.isJump = false;
+		end
+		player.isStand = false;
+	end
+	return 1
+end
+
+
+function IsStandCallback(fixture, x, y, xn, yn, fraction)
+	player.jumpAmount = player.jumpAmountMax;
+	player.isStand = true;
+	return 1;
+end
+
+function jumpKeyPressed( key, scancode, isrepeat) 
+	if key == "space" then
+		player.isJump = true;
+	end
+end
+
+function IsLeftWallClimbCallback(fixture, x, y, xn, yn, fraction)
+	player.isLeftWallClimb = true;
+	player.isJump = false;
+	player.jumpAmount = player.jumpAmountMax;
+	return 1;
+end
+
+function IsRightWallClimbCallback(fixture, x, y, xn, yn, fraction)
+	player.isRightWallClimb = true;
+	player.isJump = false;
+	player.jumpAmount = player.jumpAmountMax;
+	return 1;
+end
+
+function player:move(dt)
+	if self.isSprint then
+		self.speedX = self.speedXSprint;
+	else 
+		self.speedX = self.speedXRegular;
+	end
+
+	local rayCastDepth = 1;
+
+	self.isStand = false;
+	world:rayCast(self.body:getX() - self.width * 0.5, 
+		self.body:getY() + self.height * 0.5, 
+		self.body:getX() - self.width * 0.5, 
+		self.body:getY() + self.height * 0.5 + rayCastDepth, 
+		IsStandCallback
+	);
+	world:rayCast(self.body:getX(), 
+		self.body:getY() + self.height * 0.5, 
+		self.body:getX(), 
+		self.body:getY() + self.height * 0.5 + rayCastDepth, 
+		IsStandCallback
+	);
+	world:rayCast(self.body:getX() + self.width * 0.5, 
+		self.body:getY() + self.height * 0.5, 
+		self.body:getX() + self.width * 0.5, 
+		self.body:getY() + self.height * 0.5 + rayCastDepth, 
+		IsStandCallback
+	);
+	
+	if self.isJump then
+		if (self.isStand) then
+			world:rayCast(self.body:getX() - self.width * 0.5, 
+				self.body:getY() + self.height * 0.5, 
+				self.body:getX() - self.width * 0.5, 
+				self.body:getY() + self.height * 0.5 + rayCastDepth, 
+				actualJump
+			);
+			world:rayCast(self.body:getX(), 
+				self.body:getY() + self.height * 0.5, 
+				self.body:getX(), 
+				self.body:getY() + self.height * 0.5 + rayCastDepth, 
+				actualJump
+			);
+			world:rayCast(self.body:getX() + self.width * 0.5,
+				self.body:getY() + self.height * 0.5, 
+				self.body:getX() + self.width * 0.5, 
+				self.body:getY() + self.height * 0.5 + rayCastDepth, 
+				actualJump
+			);
+		elseif (self.jumpAmount > 0) then
+			self.jumpAmount = self.jumpAmount - 1;
+			if not (self.isLeftWallClimb or self.isRightWallClimb) then
+				player.particleEmitter:emit(30);
+			end
+			actualJump()
+		end
+	end
+	
+	if self.isStand then
+		self.isLeftWallClimb = false;
+		self.isRightWallClimb = false;
+	else
+		self.isLeftWallClimb = false;
+		world:rayCast(
+			self.body:getX() - self.width * 0.5, 
+			self.body:getY() - self.height * 0.5, 
+			self.body:getX() - self.width * 0.5 - rayCastDepth, 
+			self.body:getY() - self.height * 0.5, 
+			IsLeftWallClimbCallback
+		);
+		world:rayCast(
+			self.body:getX() - self.width * 0.5, 
+			self.body:getY(), 
+			self.body:getX() - self.width * 0.5 - rayCastDepth, 
+			self.body:getY(), 
+			IsLeftWallClimbCallback
+		);
+		world:rayCast(
+			self.body:getX() - self.width * 0.5, 
+			self.body:getY() + self.height * 0.5, 
+			self.body:getX() - self.width * 0.5 - rayCastDepth, 
+			self.body:getY() + self.height * 0.5, 
+			IsLeftWallClimbCallback
+		);
+		
+		self.isRightWallClimb = false;
+		world:rayCast(
+			self.body:getX() + self.width * 0.5, 
+			self.body:getY() - self.height * 0.5, 
+			self.body:getX() + self.width * 0.5 + rayCastDepth, 
+			self.body:getY() - self.height * 0.5, 
+			IsRightWallClimbCallback
+		);
+		world:rayCast(
+			self.body:getX() + self.width * 0.5, 
+			self.body:getY(), 
+			self.body:getX() + self.width * 0.5 + rayCastDepth, 
+			self.body:getY(), 
+			IsRightWallClimbCallback
+		);
+		world:rayCast(
+			self.body:getX() + self.width * 0.5, 
+			self.body:getY() + self.height * 0.5, 
+			self.body:getX() + self.width * 0.5 + rayCastDepth, 
+			self.body:getY() + self.height * 0.5, 
+			IsRightWallClimbCallback
+		);
+	end
+
+	if self.isMoveLeft then
+		self.body:applyForce(-self.speedX, 0)
+	end
+	if self.isMoveRight then
+		self.body:applyForce(self.speedX, 0)
+	end
+	
+	local x, y = self.body:getLinearVelocity();
+	if (math.abs(x) > self.speedXMax) then
+		self.body:setLinearVelocity(self.speedXMax * math.sign(x), y);
+	end;
+	
+	if (self.isRightWallClimb or self.isLeftWallClimb) then
+		self.body:applyForce(0, self.speedWallClimb * 10);
+	end
+	
+	self.particleEmitter:update(dt);
+end
