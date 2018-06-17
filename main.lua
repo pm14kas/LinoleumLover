@@ -1,7 +1,20 @@
 love.window.setMode( 0, 0, {
 	fullscreen = true,
 	msaa = 2,
-} );
+});
+
+sw, sh = love.graphics.getDimensions();
+
+layout = {
+	w = 1366, 
+	h = 768
+}
+function layout.getX(x)
+	return sw * x / layout.w
+end
+function layout.getY(x)
+	return sh * x / layout.h
+end
 
 function math.sign(x)
 	return x > 0 and 1 or x < 0 and -1 or 0;
@@ -23,11 +36,11 @@ function level:appendBlock(x, y, width, height, color)
 	if #color ~= 3 then color = {0, 0, 0} end;
 	
 	local block = {};
-	block.width = width; 
-	block.height = height; 
-	block.startX = x; 
-	block.startY = y; 
-	block.color = color; --{color[0], color[1], color[2]};
+	block.width = layout.getX(width); 
+	block.height = layout.getY(height); 
+	block.startX = layout.getX(x); 
+	block.startY = layout.getY(y); 
+	block.color = color;
 	block.body = love.physics.newBody(world, block.startX, block.startY, "static");
 	block.shape = love.physics.newRectangleShape(block.width, block.height);
 	block.fixture = love.physics.newFixture(block.body, block.shape);
@@ -37,7 +50,6 @@ end
 
 
 function love.load()
-	sw, sh = love.graphics.getDimensions();
 	world = love.physics.newWorld(0, 9.8 * 2 * love.physics.getMeter())
 	player:new();
 	
@@ -65,9 +77,9 @@ function love.draw()
 	elseif (player.isRightWallClimb) then
 		love.graphics.rectangle("fill", player.body:getX(), player.body:getY()-player.height * 0.2, -player.width, player.height * 0.3);
 	end
+
 	love.graphics.setColor(1,1,1)
 	love.graphics.draw(player.particleEmitter, player.body:getX(), player.body:getY() + player.height * 0.5)
-
 	
 	for k, v in ipairs(level) do
 		love.graphics.setColor(v.color)
@@ -79,7 +91,7 @@ function love.draw()
 		love.graphics.print("*", 10, 10);
 	end
 	
-	if math.between(player.body:getX(), 1150, 2000) and math.between(player.body:getY(), 200, 500) then
+	if math.between(player.body:getX(), layout.getX(1150), layout.getY(2000)) and math.between(player.body:getY(), layout.getX(200), layout.getY(500)) then
 		love.graphics.print("CONGRATULATIONS! YOU ARE WIENER!", sw * 0.5 - 140, sh * 0.5);
 	end
 end
@@ -102,12 +114,6 @@ function love.update(dt)
 		player.isSprint = true;
 	else 
 		player.isSprint = false;
-	end
-
-	if love.keyboard.isDown("w") or love.keyboard.isDown("space") then
-		--player.isJump = true;
-	else
-		--player.isJump = false;
 	end
 	
 	if love.keyboard.isDown("a") then

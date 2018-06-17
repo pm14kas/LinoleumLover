@@ -1,14 +1,15 @@
 player = {};
 function player:new()
-	self.width = 50;
-	self.height = 100
-	self.startX = 50;
-	self.startY = 50;
-	self.speedX = 10;
-	self.speedXSprint = 190 * love.physics.getMeter();
-	self.speedXRegular = 300 * love.physics.getMeter();
-	self.speedXMax = 10 * love.physics.getMeter();
-	self.jumpSpeed = 2.5 * love.physics.getMeter();
+	self.width = layout.getX(50);
+	self.height = layout.getY(100);
+	self.startX = layout.getX(50);
+	self.startY = layout.getY(50);
+	self.speedX = layout.getX(10);
+	self.speedXSprint = layout.getX(190 * love.physics.getMeter());
+	self.speedXRegular = layout.getX(300 * love.physics.getMeter());
+	self.speedXMax = layout.getX(10 * love.physics.getMeter());
+	self.jumpSpeed = layout.getY(2.5 * love.physics.getMeter());
+
 	self.isSprint = false;
 	self.isMoveLeft = false;
 	self.isMoveRight = false;
@@ -16,7 +17,8 @@ function player:new()
 	self.isStand = false;
 	self.isLeftWallClimb = false;
 	self.isRightWallClimb = false;
-	self.speedWallClimb = 5 * love.physics.getMeter();
+
+	self.speedWallClimb = layout.getY(5) * love.physics.getMeter();
 	self.jumpAmount = 0;
 	self.jumpAmountMax = 1;
 	
