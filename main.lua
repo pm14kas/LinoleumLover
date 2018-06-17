@@ -73,7 +73,7 @@ function love.draw()
 	love.graphics.polygon("fill", player.body:getWorldPoints(player.shape:getPoints()))
 	
 	if (player.isLeftWallClimb) then
-		love.graphics.rectangle("fill", player.body:getX(), player.body:getY()-player.height * 0.2, player.width,  player.height * 0.3);
+		love.graphics.rectangle("fill", player.body:getX(), player.body:getY()-player.height * 0.2, player.width, player.height * 0.3);
 	elseif (player.isRightWallClimb) then
 		love.graphics.rectangle("fill", player.body:getX(), player.body:getY()-player.height * 0.2, -player.width, player.height * 0.3);
 	end
