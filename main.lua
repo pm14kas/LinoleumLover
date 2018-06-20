@@ -24,16 +24,56 @@ function math.between(x, a, b)
 	if x > a and x < b then return true else return false end;
 end;
 
+keyboardEvent = {
+	doublePressDuration = 0.2;
+	leftKeyTimer = 0;
+	rightKeyTimer = 0;
+};
+
 require("player");
 
 level = {};
+
+function level:new()
+	level.blocks = {};
+	level.goal = {}
+	
+	level.maps = {
+		[0] = {
+			[0] = {-50, 300, 600, 50, {0, 0, 1}},
+			[1] = {300, 250, 100, 50, {0.5, 0.5, 1}},
+			[2] = {600, 250, 50, 500, {0.5, 0.0, 0}},
+			[3] = {900, 250, 100, 50, {0.5, 0.5, 1}},
+			[4] = {1250, 300, 600, 50, {0.0, 0.5, 0}},
+			["target"] = {1300, 225}
+		},
+	}
+end
+
+function level:changeLevel(levelNumber)
+	level.blocks = {};
+	self:appendBlock(sw * 0.5, 0, sw, 1); --top
+	self:appendBlock(sw * 0.5, sh, sw, 1); -- bottom
+	self:appendBlock(0, sh * 0.5, 1, sh);
+	self:appendBlock(sw, sh * 0.5, 1, sh);
+	
+	if self.maps[levelNumber] then
+		for k, v in ipairs(self.maps[levelNumber]) do
+			if k ~= "target" then
+				self:appendBlock(v);
+			end
+		end
+	end
+	
+	self:makeTarget(self.maps[levelNumber]["target"][0], self.maps[levelNumber]["target"][1]);
+end
+
 function level:appendBlock(x, y, width, height, color)
 	if not x then x = 0 end;
 	if not y then y = 0 end;
 	if not width then width = 0 end;
 	if not height then height = 0 end;
-	if not color then color = {0, 0, 0} end;
-	if #color ~= 3 then color = {0, 0, 0} end;
+	if not color then color = {1, 1, 1} end;
 	
 	local block = {};
 	block.width = layout.getX(width); 
@@ -45,31 +85,46 @@ function level:appendBlock(x, y, width, height, color)
 	block.shape = love.physics.newRectangleShape(block.width, block.height);
 	block.fixture = love.physics.newFixture(block.body, block.shape);
 	block.fixture:setFriction(0.99);
-	table.insert(self, block);
+	table.insert(self.blocks, block);
 end
+
+function level:makeTarget(x, y)
+	if not x then x = 0 end;
+	if not y then y = 0 end;
+	if not width then width = 50 end;
+	if not height then height = 100 end;
+	
+	local block = {};
+	block.width = layout.getX(width); 
+	block.height = layout.getY(height); 
+	block.startX = layout.getX(x); 
+	block.startY = layout.getY(y); 
+	block.color = {255, 255, 255};
+	block.body = love.physics.newBody(world, block.startX, block.startY, "static");
+	block.shape = love.physics.newRectangleShape(block.width, block.height);
+	block.fixture = love.physics.newFixture(block.body, block.shape);
+	block.fixture:setFriction(0.99);
+	self.target = block;
+end
+
+
 
 
 function love.load()
 	world = love.physics.newWorld(0, 9.8 * 2 * love.physics.getMeter())
 	player:new();
 	
-	level:appendBlock(sw * 0.5, 0, sw, 1); --top
-	--level:appendBlock(sw * 0.5, sh, sw, 1); -- bottom
-	level:appendBlock(0, sh * 0.5, 1, sh);
-	level:appendBlock(sw, sh * 0.5, 1, sh);
-
-	level:appendBlock(-50, 300, 600, 50, {0, 0, 1});
-	level:appendBlock(300, 250, 100, 50, {0.5, 0.5, 1});
-	level:appendBlock(600, 250, 50, 500, {0.5, 0.0, 0});
-	
-	level:appendBlock(900, 250, 100, 50, {0.5, 0.5, 1});
-	level:appendBlock(1250, 300, 600, 50, {0.0, 0.5, 0});
-	
-
+	level:new();
+	level:changeLevel(0);
 end
 
 function love.draw()
-	love.graphics.setColor(255,0,0)
+	if (player.isLeftDash or player.isRightDash) then 
+		love.graphics.setColor(255,0,255);
+	else
+		love.graphics.setColor(255,0,0);
+	end
+		
 	love.graphics.polygon("fill", player.body:getWorldPoints(player.shape:getPoints()))
 	
 	if (player.isLeftWallClimb) then
@@ -81,9 +136,14 @@ function love.draw()
 	love.graphics.setColor(1,1,1)
 	love.graphics.draw(player.particleEmitter, player.body:getX(), player.body:getY() + player.height * 0.5)
 	
-	for k, v in ipairs(level) do
+	for k, v in ipairs(level.blocks) do
 		love.graphics.setColor(v.color)
 		love.graphics.polygon("fill", v.body:getWorldPoints(v.shape:getPoints()))
+	end
+	
+	if (level.target) then
+		love.graphics.setColor(level.target.color)
+		love.graphics.polygon("fill", level.target.body:getWorldPoints(level.target.shape:getPoints()))
 	end
 	
 	love.graphics.setColor(1,1,1)
@@ -91,7 +151,7 @@ function love.draw()
 		love.graphics.print("*", 10, 10);
 	end
 	
-	if math.between(player.body:getX(), layout.getX(1150), layout.getY(2000)) and math.between(player.body:getY(), layout.getX(200), layout.getY(500)) then
+	if player.body:isTouching(level.target.body) then
 		love.graphics.print("CONGRATULATIONS! YOU ARE WIENER!", sw * 0.5 - 140, sh * 0.5);
 	end
 end
@@ -99,6 +159,24 @@ end
 function love.keypressed(key)
 	if key == 'space' then
 		player.isJump = true;
+	elseif key == "a" then
+		if not player.isLeftDash then
+			if love.timer.getTime() < keyboardEvent.leftKeyTimer + keyboardEvent.doublePressDuration and player.isDashAvailable and not player.isLeftWallClimb then
+				player.isLeftDash = true;
+				player.dashTimer = love.timer.getTime();
+			else
+				keyboardEvent.leftKeyTimer = love.timer.getTime();
+			end
+		end
+	elseif key == "d" then
+		if not player.isRightDash then
+			if love.timer.getTime() < keyboardEvent.leftKeyTimer + keyboardEvent.doublePressDuration and player.isDashAvailable and not player.isRightWallClimb then
+				player.isRightDash = true;
+				player.dashTimer = love.timer.getTime();
+			else
+				keyboardEvent.leftKeyTimer = love.timer.getTime();
+			end
+		end
 	end
 end
 

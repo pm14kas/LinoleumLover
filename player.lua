@@ -8,7 +8,10 @@ function player:new()
 	self.speedXSprint = layout.getX(190 * love.physics.getMeter());
 	self.speedXRegular = layout.getX(300 * love.physics.getMeter());
 	self.speedXMax = layout.getX(10 * love.physics.getMeter());
-	self.jumpSpeed = layout.getY(2.5 * love.physics.getMeter());
+	self.jumpImpulse = layout.getY(2.5 * love.physics.getMeter());
+	self.dashSpeed = layout.getX(90 * love.physics.getMeter());
+	self.dashDuration = 0.1;
+	self.dashTimer = 0;
 
 	self.isSprint = false;
 	self.isMoveLeft = false;
@@ -17,6 +20,9 @@ function player:new()
 	self.isStand = false;
 	self.isLeftWallClimb = false;
 	self.isRightWallClimb = false;
+	self.isLeftDash = false;
+	self.isRightDash = false;
+	self.isDashAvailable = false;
 
 	self.speedWallClimb = layout.getY(5) * love.physics.getMeter();
 	self.jumpAmount = 0;
@@ -46,16 +52,16 @@ function actualJump(fixture, x, y, xn, yn, fraction)
 	if (player.isJump) then
 		if player.isLeftWallClimb then
 			player.body:setLinearVelocity(0, 0);
-			player.body:applyLinearImpulse(player.jumpSpeed * love.physics.getMeter(), -player.jumpSpeed * love.physics.getMeter())
+			player.body:applyLinearImpulse(player.jumpImpulse * love.physics.getMeter(), -player.jumpImpulse * love.physics.getMeter())
 			player.isJump = false;
 		elseif player.isRightWallClimb then
 			player.body:setLinearVelocity(0, 0);
-			player.body:applyLinearImpulse(-player.jumpSpeed * love.physics.getMeter(), -player.jumpSpeed * love.physics.getMeter())
+			player.body:applyLinearImpulse(-player.jumpImpulse * love.physics.getMeter(), -player.jumpImpulse * love.physics.getMeter())
 			player.isJump = false;
 		else
 			local x, y = player.body:getLinearVelocity();
 			player.body:setLinearVelocity(x, 0);
-			player.body:applyLinearImpulse(0, -player.jumpSpeed * love.physics.getMeter())
+			player.body:applyLinearImpulse(0, -player.jumpImpulse * love.physics.getMeter())
 			player.isJump = false;
 		end
 		player.isStand = false;
@@ -67,6 +73,7 @@ end
 function IsStandCallback(fixture, x, y, xn, yn, fraction)
 	player.jumpAmount = player.jumpAmountMax;
 	player.isStand = true;
+	player.isDashAvailable = true;
 	return 1;
 end
 
@@ -78,6 +85,7 @@ end
 
 function IsLeftWallClimbCallback(fixture, x, y, xn, yn, fraction)
 	player.isLeftWallClimb = true;
+	player.isDashAvailable = true;
 	player.isJump = false;
 	player.jumpAmount = player.jumpAmountMax;
 	return 1;
@@ -85,6 +93,7 @@ end
 
 function IsRightWallClimbCallback(fixture, x, y, xn, yn, fraction)
 	player.isRightWallClimb = true;
+	player.isDashAvailable = true;
 	player.isJump = false;
 	player.jumpAmount = player.jumpAmountMax;
 	return 1;
@@ -119,7 +128,7 @@ function player:move(dt)
 		IsStandCallback
 	);
 	
-	if self.isJump then
+	if self.isJump and not (self.isLeftDash or self.isRightDash) then
 		if (self.isStand) then
 			world:rayCast(self.body:getX() - self.width * 0.5, 
 				self.body:getY() + self.height * 0.5, 
@@ -206,10 +215,32 @@ function player:move(dt)
 		self.body:applyForce(self.speedX, 0)
 	end
 	
-	local x, y = self.body:getLinearVelocity();
-	if (math.abs(x) > self.speedXMax) then
-		self.body:setLinearVelocity(self.speedXMax * math.sign(x), y);
-	end;
+	if self.isLeftDash and love.timer.getTime() < self.dashTimer + self.dashDuration and self.isDashAvailable then
+		self.isDashAvailable = false;
+		self.body:setLinearVelocity(-self.dashSpeed, 0);
+		self.particleEmitter:emit(5);
+		self.isLeftDash = true;
+	elseif love.timer.getTime() > self.dashTimer + self.dashDuration and love.timer.getTime() < self.dashTimer + self.dashDuration * 1.1 then
+		self.isLeftDash = false;
+		self.body:setLinearVelocity(0, 0);
+	end
+	
+	if self.isRightDash and love.timer.getTime() < self.dashTimer + self.dashDuration then
+		self.isDashAvailable = false;
+		self.body:setLinearVelocity(self.dashSpeed, 0);
+		self.particleEmitter:emit(5);
+		self.isRightDash = true;
+	elseif love.timer.getTime() > self.dashTimer + self.dashDuration and love.timer.getTime() < self.dashTimer + self.dashDuration * 1.1 then
+		self.isRightDash = false;
+		self.body:setLinearVelocity(0, 0);
+	end
+	
+	if not (self.isLeftDash or self.isRightDash) then
+		local x, y = self.body:getLinearVelocity();
+		if math.abs(x) > self.speedXMax then
+			self.body:setLinearVelocity(self.speedXMax * math.sign(x), y);
+		end
+	end
 	
 	if (self.isRightWallClimb or self.isLeftWallClimb) then
 		self.body:applyForce(0, self.speedWallClimb * 10);
