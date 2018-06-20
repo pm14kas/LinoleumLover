@@ -8,7 +8,7 @@ function player:new()
 	self.speedXSprint = layout.getX(190 * love.physics.getMeter());
 	self.speedXRegular = layout.getX(300 * love.physics.getMeter());
 	self.speedXMax = layout.getX(10 * love.physics.getMeter());
-	self.jumpImpulse = layout.getY(2.5 * love.physics.getMeter());
+	self.jumpImpulse = 0.5 * self.width * self.height;
 	self.dashSpeed = layout.getX(90 * love.physics.getMeter());
 	self.dashDuration = 0.1;
 	self.dashTimer = 0;
@@ -52,16 +52,16 @@ function actualJump(fixture, x, y, xn, yn, fraction)
 	if (player.isJump) then
 		if player.isLeftWallClimb then
 			player.body:setLinearVelocity(0, 0);
-			player.body:applyLinearImpulse(player.jumpImpulse * love.physics.getMeter(), -player.jumpImpulse * love.physics.getMeter())
+			player.body:applyLinearImpulse(player.jumpImpulse, -player.jumpImpulse)
 			player.isJump = false;
 		elseif player.isRightWallClimb then
 			player.body:setLinearVelocity(0, 0);
-			player.body:applyLinearImpulse(-player.jumpImpulse * love.physics.getMeter(), -player.jumpImpulse * love.physics.getMeter())
+			player.body:applyLinearImpulse(-player.jumpImpulse, -player.jumpImpulse)
 			player.isJump = false;
 		else
 			local x, y = player.body:getLinearVelocity();
 			player.body:setLinearVelocity(x, 0);
-			player.body:applyLinearImpulse(0, -player.jumpImpulse * love.physics.getMeter())
+			player.body:applyLinearImpulse(0, -player.jumpImpulse)
 			player.isJump = false;
 		end
 		player.isStand = false;
@@ -220,7 +220,7 @@ function player:move(dt)
 		self.body:setLinearVelocity(-self.dashSpeed, 0);
 		self.particleEmitter:emit(5);
 		self.isLeftDash = true;
-	elseif love.timer.getTime() > self.dashTimer + self.dashDuration and love.timer.getTime() < self.dashTimer + self.dashDuration * 1.1 then
+	elseif love.timer.getTime() > self.dashTimer + self.dashDuration and love.timer.getTime() < self.dashTimer + self.dashDuration * 1.5 then
 		self.isLeftDash = false;
 		self.body:setLinearVelocity(0, 0);
 	end
@@ -230,7 +230,7 @@ function player:move(dt)
 		self.body:setLinearVelocity(self.dashSpeed, 0);
 		self.particleEmitter:emit(5);
 		self.isRightDash = true;
-	elseif love.timer.getTime() > self.dashTimer + self.dashDuration and love.timer.getTime() < self.dashTimer + self.dashDuration * 1.1 then
+	elseif love.timer.getTime() > self.dashTimer + self.dashDuration and love.timer.getTime() < self.dashTimer + self.dashDuration * 1.5 then
 		self.isRightDash = false;
 		self.body:setLinearVelocity(0, 0);
 	end
@@ -247,4 +247,54 @@ function player:move(dt)
 	end
 	
 	self.particleEmitter:update(dt);
+end
+
+function player:update(dt)
+	if love.keyboard.isDown("lshift") then
+		self.isSprint = true;
+	else 
+		self.isSprint = false;
+	end
+	
+	if love.keyboard.isDown("a") then
+		self.isMoveLeft = true;
+	else 
+		self.isMoveLeft = false;
+	end
+	
+	if love.keyboard.isDown("d") then
+		self.isMoveRight = true;
+	else 
+		self.isMoveRight = false;
+	end
+	
+	self:move(dt);
+	
+	if self.body:getY() > sh + 50 then
+		self:respawn();
+	end
+
+	if self.body:isTouching(level.target.body) then
+		level:changeLevel(level.target.nextMap)
+		--love.graphics.print("CONGRATULATIONS! YOU ARE WIENER!", sw * 0.5 - 140, sh * 0.5);
+	end
+end
+
+function player:draw()
+	if (self.isLeftDash or self.isRightDash) then 
+		love.graphics.setColor(255,0,255);
+	else
+		love.graphics.setColor(255,0,0);
+	end
+		
+	love.graphics.polygon("fill", self.body:getWorldPoints(self.shape:getPoints()))
+	
+	if (self.isLeftWallClimb) then
+		love.graphics.rectangle("fill", self.body:getX(), self.body:getY()-self.height * 0.2, self.width, self.height * 0.3);
+	elseif (self.isRightWallClimb) then
+		love.graphics.rectangle("fill", self.body:getX(), self.body:getY()-self.height * 0.2, -self.width, self.height * 0.3);
+	end
+
+	love.graphics.setColor(1,1,1)
+	love.graphics.draw(self.particleEmitter, self.body:getX(), self.body:getY() + self.height * 0.5)
 end
