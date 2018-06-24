@@ -16,20 +16,13 @@ function layout.getY(x)
 	return sh * x / layout.h
 end
 
-function math.sign(x)
-	return x > 0 and 1 or x < 0 and -1 or 0;
-end
-
-function math.between(x, a, b)
-	if x > a and x < b then return true else return false end;
-end;
-
 keyboardEvent = {
 	doublePressDuration = 0.2;
 	leftKeyTimer = 0;
 	rightKeyTimer = 0;
 };
 
+require("functions");
 require("player");
 require("level");
 function love.load()
@@ -46,7 +39,7 @@ function love.draw()
 	
 	love.graphics.setColor(1,1,1)
 	if (player.jumpAmount > 0) then
-		love.graphics.print("*" .. love.physics.getMeter(), 10, 10);
+		love.graphics.print("*", 10, 10);
 	end
 end
 

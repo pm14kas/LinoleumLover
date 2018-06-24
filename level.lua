@@ -1,27 +1,28 @@
-level = {};
-
-level.maps = {
-	[0] = {
-		blocks = {
-			{x = -50,  y = 300, w = 600, h = 50,  color = {0, 0, 1}},
-			{x = 300,  y = 250, w = 100, h = 50,  color = {0.5, 0.5, 1}},
-			{x = 600,  y = 250, w = 50,  h = 500, color = {0.5, 0.0, 0}},
-			{x = 900,  y = 250, w = 100, h = 50,  color = {0.5, 0.5, 1}},
-			{x = 1250, y = 300, w = 600, h = 50,  color = {0.0, 0.5, 0}},
+level = {
+	maps = file_exists("map.linoleum") and json.decode(read_file("map.linoleum")) or
+	{
+		[0] = {
+			blocks = {
+				{x = -50,  y = 300, w = 600, h = 50,  color = {0, 0, 1}},
+				{x = 300,  y = 250, w = 100, h = 50,  color = {0.5, 0.5, 1}},
+				{x = 600,  y = 250, w = 50,  h = 500, color = {0.5, 0.0, 0}},
+				{x = 900,  y = 250, w = 100, h = 50,  color = {0.5, 0.5, 1}},
+				{x = 1250, y = 300, w = 600, h = 50,  color = {0.0, 0.5, 0}},
+			},
+			["target"] = {x = 1300, y = 225, nextMap = "another"}
 		},
-		["target"] = {x = 1300, y = 225, nextMap = "another"}
-	},
-	["another"] = {
-		blocks = {
-			{x = 50,   y = 300, w = 600, h = 50,  color = {0, 0, 1}},
-			{x = 0,    y = 250, w = 100, h = 50,  color = {0.5, 0.5, 1}},
-			{x = 250,  y = 100, w = 50,  h = 500, color = {0.5, 0.0, 0}},
-			{x = 900,  y = 250, w = 100, h = 50,  color = {0.5, 0.5, 1}},
-			{x = 1250, y = 300, w = 600, h = 50,  color = {0.0, 0.5, 0}},
+		["another"] = {
+			blocks = {
+				{x = 50,   y = 300, w = 600, h = 50,  color = {0, 0, 1}},
+				{x = 0,    y = 250, w = 100, h = 50,  color = {0.5, 0.5, 1}},
+				{x = 250,  y = 100, w = 50,  h = 500, color = {0.5, 0.0, 0}},
+				{x = 900,  y = 250, w = 100, h = 50,  color = {0.5, 0.5, 1}},
+				{x = 1250, y = 300, w = 600, h = 50,  color = {0.0, 0.5, 0}},
+			},
+			["target"] = {x = 1300, y = 225, nextMap = "someNextLevel"}
 		},
-		["target"] = {x = 1300, y = 225, nextMap = "someNextLevel"}
-	},
-}
+	}
+};
 
 function level:new()
 	self.blocks = {};
