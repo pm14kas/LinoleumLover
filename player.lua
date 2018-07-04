@@ -1,9 +1,17 @@
 player = {};
-function player:new()
+function player:new(x, y)
+	if (x == nil) then
+		x = 50;
+	end
+
+	if (y == nil) then
+		y = 50;
+	end
+	
 	self.width = layout.getX(50);
 	self.height = layout.getY(100);
-	self.startX = layout.getX(50);
-	self.startY = layout.getY(50);
+	self.startX = layout.getX(x);
+	self.startY = layout.getY(y);
 	self.speedX = layout.getX(10);
 	self.speedXSprint = layout.getX(190 * love.physics.getMeter());
 	self.speedXRegular = layout.getX(300 * love.physics.getMeter());
@@ -43,9 +51,17 @@ function player:new()
 	self.particleEmitter:setColors(255, 255, 255, 255, 255, 255, 255, 0);
 end
 
-function player:respawn()
-	self.body:destroy();
-	self:new();
+function player:respawn(spawnx, spawny)
+	if ((self.body) and (not self.body:isDestroyed())) then
+		self.body:destroy();
+	end
+	self:new(spawnx, spawny);
+end
+
+function player:teleport(x, y)
+	vx, vy = self.body:getLinearVelocity();
+	self.body:setPosition(x, y);
+	self.body:setLinearVelocity(vx * 0.5, vy * 0.5);
 end
 
 function actualJump(fixture, x, y, xn, yn, fraction)
@@ -115,9 +131,21 @@ function player:move(dt)
 		self.body:getY() + self.height * 0.5 + rayCastDepth, 
 		IsStandCallback
 	);
+	world:rayCast(self.body:getX() - self.width * 0.25, 
+		self.body:getY() + self.height * 0.5, 
+		self.body:getX() - self.width * 0.25, 
+		self.body:getY() + self.height * 0.5 + rayCastDepth, 
+		IsStandCallback
+	);
 	world:rayCast(self.body:getX(), 
 		self.body:getY() + self.height * 0.5, 
 		self.body:getX(), 
+		self.body:getY() + self.height * 0.5 + rayCastDepth, 
+		IsStandCallback
+	);
+	world:rayCast(self.body:getX() + self.width * 0.25, 
+		self.body:getY() + self.height * 0.5, 
+		self.body:getX() + self.width * 0.25, 
 		self.body:getY() + self.height * 0.5 + rayCastDepth, 
 		IsStandCallback
 	);
@@ -136,9 +164,21 @@ function player:move(dt)
 				self.body:getY() + self.height * 0.5 + rayCastDepth, 
 				actualJump
 			);
+			world:rayCast(self.body:getX() - self.width * 0.25, 
+				self.body:getY() + self.height * 0.5, 
+				self.body:getX() - self.width * 0.25, 
+				self.body:getY() + self.height * 0.5 + rayCastDepth, 
+				actualJump
+			);
 			world:rayCast(self.body:getX(), 
 				self.body:getY() + self.height * 0.5, 
 				self.body:getX(), 
+				self.body:getY() + self.height * 0.5 + rayCastDepth, 
+				actualJump
+			);
+			world:rayCast(self.body:getX() + self.width * 0.25,
+				self.body:getY() + self.height * 0.5, 
+				self.body:getX() + self.width * 0.25, 
 				self.body:getY() + self.height * 0.5 + rayCastDepth, 
 				actualJump
 			);
@@ -171,9 +211,23 @@ function player:move(dt)
 		);
 		world:rayCast(
 			self.body:getX() - self.width * 0.5, 
+			self.body:getY() - self.height * 0.25, 
+			self.body:getX() - self.width * 0.5 - rayCastDepth, 
+			self.body:getY() - self.height * 0.25, 
+			IsLeftWallClimbCallback
+		);
+		world:rayCast(
+			self.body:getX() - self.width * 0.5, 
 			self.body:getY(), 
 			self.body:getX() - self.width * 0.5 - rayCastDepth, 
 			self.body:getY(), 
+			IsLeftWallClimbCallback
+		);
+		world:rayCast(
+			self.body:getX() - self.width * 0.5, 
+			self.body:getY() + self.height * 0.25, 
+			self.body:getX() - self.width * 0.5 - rayCastDepth, 
+			self.body:getY() + self.height * 0.25, 
 			IsLeftWallClimbCallback
 		);
 		world:rayCast(
@@ -194,9 +248,23 @@ function player:move(dt)
 		);
 		world:rayCast(
 			self.body:getX() + self.width * 0.5, 
+			self.body:getY() - self.height * 0.25, 
+			self.body:getX() + self.width * 0.5 + rayCastDepth, 
+			self.body:getY() - self.height * 0.25, 
+			IsRightWallClimbCallback
+		);
+		world:rayCast(
+			self.body:getX() + self.width * 0.5, 
 			self.body:getY(), 
 			self.body:getX() + self.width * 0.5 + rayCastDepth, 
 			self.body:getY(), 
+			IsRightWallClimbCallback
+		);
+		world:rayCast(
+			self.body:getX() + self.width * 0.5, 
+			self.body:getY() + self.height * 0.25, 
+			self.body:getX() + self.width * 0.5 + rayCastDepth, 
+			self.body:getY() + self.height * 0.25, 
 			IsRightWallClimbCallback
 		);
 		world:rayCast(
@@ -274,10 +342,22 @@ function player:update(dt)
 		self:respawn();
 	end
 
-	if self.body:isTouching(level.target.body) then
-		level:changeLevel(level.target.nextMap)
-		--love.graphics.print("CONGRATULATIONS! YOU ARE WIENER!", sw * 0.5 - 140, sh * 0.5);
+	for k, v in ipairs(level.hazards) do
+		if self.body and v.body and not self.body:isDestroyed() and not v.body:isDestroyed() and self.body:isTouching(v.body) then
+			level:goToSpawn(level.activeSpawn, true);
+			break;
+		end
 	end
+
+	for k, v in ipairs(level.portals) do
+		if self.body and v.body and not self.body:isDestroyed() and not v.body:isDestroyed() and self.body:isTouching(v.body) then
+			if v.spawn then
+				level:goToSpawn(v.spawn);
+				break;
+			end
+		end
+	end
+	
 end
 
 function player:draw()

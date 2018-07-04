@@ -1,9 +1,15 @@
 love.window.setMode(0, 0, {
 	--fullscreen = true,
-	msaa = 2,
+	--msaa = 2,
 });
 
+fontMistral = love.graphics.newFont("fonts/mistral.ttf", 100);
+love.graphics.setFont(fontMistral);
+
+love.window.setTitle("Linoleum");
+
 sw, sh = love.graphics.getDimensions();
+viewMode = true;
 
 layout = {
 	w = 1366, 
@@ -21,7 +27,7 @@ keyboardEvent = {
 	leftKeyTimer = 0;
 	rightKeyTimer = 0;
 };
-
+require("json.json");
 require("functions");
 require("player");
 require("level");
@@ -30,13 +36,14 @@ function love.load()
 	player:new();
 	
 	level:new();
-	level:changeLevel(0);
+	level:goToSpawn(level.activeSpawn);
 end
 
 function love.draw()
-	player:draw()
 	level:draw()
-	
+	if viewMode then
+		player:draw()
+	end
 	love.graphics.setColor(1,1,1)
 	if (player.jumpAmount > 0) then
 		love.graphics.print("*", 10, 10);
@@ -44,37 +51,45 @@ function love.draw()
 end
 
 function love.keypressed(key)
-	if key == 'space' then
-		player.isJump = true;
-	elseif key == "a" then
-		if not player.isLeftDash then
-			if love.timer.getTime() < keyboardEvent.leftKeyTimer + keyboardEvent.doublePressDuration and player.isDashAvailable and not player.isLeftWallClimb then
-				player.isLeftDash = true;
-				player.dashTimer = love.timer.getTime();
-			else
-				keyboardEvent.leftKeyTimer = love.timer.getTime();
+	if (viewMode) then
+		if key == 'space' then
+			player.isJump = true;
+		elseif key == "a" then
+			if not player.isLeftDash then
+				if love.timer.getTime() < keyboardEvent.leftKeyTimer + keyboardEvent.doublePressDuration and player.isDashAvailable and not player.isLeftWallClimb then
+					player.isLeftDash = true;
+					player.dashTimer = love.timer.getTime();
+				else
+					keyboardEvent.leftKeyTimer = love.timer.getTime();
+				end
+			end
+		elseif key == "d" then
+			if not player.isRightDash then
+				if love.timer.getTime() < keyboardEvent.leftKeyTimer + keyboardEvent.doublePressDuration and player.isDashAvailable and not player.isRightWallClimb then
+					player.isRightDash = true;
+					player.dashTimer = love.timer.getTime();
+				else
+					keyboardEvent.leftKeyTimer = love.timer.getTime();
+				end
 			end
 		end
-	elseif key == "d" then
-		if not player.isRightDash then
-			if love.timer.getTime() < keyboardEvent.leftKeyTimer + keyboardEvent.doublePressDuration and player.isDashAvailable and not player.isRightWallClimb then
-				player.isRightDash = true;
-				player.dashTimer = love.timer.getTime();
-			else
-				keyboardEvent.leftKeyTimer = love.timer.getTime();
-			end
-		end
+	end
+	if key == "m" then
+		viewMode = not viewMode;
 	end
 end
 
 function love.keyreleased( key )
-   if key == "space" then
-		player.isJump = false;
+	if viewMode then
+		if key == "space" then
+			player.isJump = false;
+		end
    end
 end
 
-
 function love.update(dt)
-	player:update(dt)
-	world:update(dt)
+	if viewMode then
+		player:update(dt)
+		world:update(dt)
+	end
 end

@@ -32,3 +32,24 @@ end
 function tern ( cond , T , F )
     if cond then return T else return F end
 end
+
+function encrypt(message, key)
+  unicode = require('utf8')
+  nKey = ''
+  for i = 1, unicode.len(key) do
+    nKey = nKey..key:byte(i)
+  end
+ 
+  math.randomseed(tonumber(nKey))
+ 
+  tKey = {}
+  sNewKey = ''
+  for j = 1, unicode.len(message) do
+    tKey[j] = ''
+    while unicode.len(tKey[j]) ~= unicode.len(message.byte(j)) do
+      tKey[j] = tKey[j]..math.random(0, 9)
+    end
+    sNewKey = sNewKey..unicode.char(bit.bxor(message:byte(j), tKey[j]))
+  end
+  return sNewKey
+end
