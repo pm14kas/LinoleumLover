@@ -18,7 +18,9 @@ function level:new()
 			blocks = {},
 			spawns = {},
 			targets = {},
-			blocksCount = 0,
+			decorations = {},
+			checkpoints = {},
+			blocksCount = 0
 		}
 	};
 	self.blocks = {};
@@ -26,6 +28,7 @@ function level:new()
 	self.portals = {};
 	self.hazards = {};
 	self.decorations = {};
+	self.checkpoints = {};
 	self.activeSpawn = self.data.activeSpawn;
 	self:clearBlocks();
 end
@@ -55,8 +58,15 @@ function level:goToSpawn(spawnName, force)
 end
 
 function level:changeLevel(levelId, spawnId)
+	static.isLoading = true;
 	self:clearBlocks();
+	tempSpawn = self.activeSpawn;
+	
 	self:new();
+	
+	if tempSpawn and tempSpawn ~= "" then
+		self.activeSpawn = tempSpawn;
+	end
 	
 	if not self.data.maps[levelId] then 
 		levelId = self.activeMap;
@@ -73,7 +83,11 @@ function level:changeLevel(levelId, spawnId)
 	end	
 	
 	for k, block in pairs(self.data.maps[self.activeMap].targets) do
-		self:appendPortal(block.x, block.y, block.w, block.h, block.spawn);
+		if block.type == "target" then
+			self:appendPortal(block.x, block.y, block.w, block.h, block.spawn);
+		elseif block.type == "checkpoint" then
+			self:appendCheckpoint(block.x, block.y, block.w, block.h, block.spawn);
+		end
 	end		
 	
 	for k, block in pairs(self.data.maps[self.activeMap].decorations) do
@@ -94,6 +108,7 @@ function level:changeLevel(levelId, spawnId)
 	self:appendBlock(0, layout.h, layout.w, 1); -- bottom
 	self:appendBlock(-1, 0, 1, layout.h); -- left
 	self:appendBlock(layout.w, 0, 1, layout.h); -- right
+	static.isLoading = false;
 end
 
 function level:appendBlock(x, y, width, height, color)
@@ -112,6 +127,8 @@ function level:appendBlock(x, y, width, height, color)
 	block.startX = block.startX + block.width * 0.5;
 	block.startY = block.startY + block.height * 0.5;
 	block.color = color;
+	block.type = "block";
+	
 	block.body = love.physics.newBody(world, block.startX, block.startY, "static");
 	block.shape = love.physics.newRectangleShape(block.width, block.height);
 	block.fixture = love.physics.newFixture(block.body, block.shape);
@@ -133,10 +150,13 @@ function level:appendHazard(x, y, width, height)
 	-- because misha is gay
 	block.startX = block.startX + block.width * 0.5;
 	block.startY = block.startY + block.height * 0.5;
+	block.type = "hazard";
+	
 	block.body = love.physics.newBody(world, block.startX, block.startY, "static");
 	block.shape = love.physics.newRectangleShape(block.width, block.height);
 	block.fixture = love.physics.newFixture(block.body, block.shape);
 	block.fixture:setFriction(0.99);
+	block.fixture:setSensor(true);
 	table.insert(self.hazards, block);
 end
 
@@ -156,6 +176,7 @@ function level:appendPortal(x, y, width, height, spawn)
 	block.startY = block.startY + block.height * 0.5;
 	block.color = {1,1,1};
 	block.spawn = spawn;
+	block.type = "portal";
 	
 	block.body = love.physics.newBody(world, block.startX, block.startY, "static");
 	block.shape = love.physics.newRectangleShape(block.width, block.height);
@@ -166,6 +187,34 @@ function level:appendPortal(x, y, width, height, spawn)
 	end
 	table.insert(self.portals, block);
 end
+
+function level:appendCheckpoint(x, y, width, height, spawn)
+	if not x then x = 0 end;
+	if not y then y = 0 end;
+	if not width then width = 0 end;
+	if not height then height = 0 end;
+	
+	local block = {};
+	block.width = layout.getX(width); 
+	block.height = layout.getY(height); 
+	block.startX = layout.getX(x); 
+	block.startY = layout.getY(y); 
+	-- because misha is gay
+	block.startX = block.startX + block.width * 0.5;
+	block.startY = block.startY + block.height * 0.5;
+	block.spawn = spawn;
+	block.type = "checkpoint";
+	
+	block.body = love.physics.newBody(world, block.startX, block.startY, "static");
+	block.shape = love.physics.newRectangleShape(block.width, block.height);
+	block.fixture = love.physics.newFixture(block.body, block.shape);
+	block.fixture:setFriction(0.99);
+	if block.spawn and block.spawn ~= "" then
+		block.fixture:setSensor(true);
+	end
+	table.insert(self.checkpoints, block);
+end
+
 
 function level:appendDecoration(x, y, width, height, color, type, value)
 	if not x then x = 0 end;
@@ -196,10 +245,14 @@ function level:clearBlocks()
 	for k, block in pairs(self.hazards) do
 		block.body:destroy();
 	end
+	for k, block in pairs(self.checkpoints) do
+		block.body:destroy();
+	end
 	self.blocks = {};
 	self.portals = {};
 	self.hazards = {};
 	self.decorations = {};
+	self.checkpoints = {};
 end
 
 function level:parseBlockName(blockName)

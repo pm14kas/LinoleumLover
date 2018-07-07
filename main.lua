@@ -3,6 +3,10 @@ love.window.setMode(0, 0, {
 	--msaa = 2,
 });
 
+static = {
+	isLoading = false;
+}
+
 fontMistral = love.graphics.newFont("fonts/mistral.ttf", 100);
 love.graphics.setFont(fontMistral);
 
@@ -40,6 +44,10 @@ function love.load()
 end
 
 function love.draw()
+	if static.isLoading then 
+		return;
+	end
+	
 	level:draw()
 	if viewMode then
 		player:draw()
@@ -47,6 +55,9 @@ function love.draw()
 	love.graphics.setColor(1,1,1)
 	if (player.jumpAmount > 0) then
 		love.graphics.print("*", 10, 10);
+	end
+	if player.isDashAvailable then
+		love.graphics.print(">", 50, 10, 0, 0.5, 0.5);
 	end
 end
 
@@ -65,11 +76,11 @@ function love.keypressed(key)
 			end
 		elseif key == "d" then
 			if not player.isRightDash then
-				if love.timer.getTime() < keyboardEvent.leftKeyTimer + keyboardEvent.doublePressDuration and player.isDashAvailable and not player.isRightWallClimb then
+				if love.timer.getTime() < keyboardEvent.rightKeyTimer + keyboardEvent.doublePressDuration and player.isDashAvailable and not player.isRightWallClimb then
 					player.isRightDash = true;
 					player.dashTimer = love.timer.getTime();
 				else
-					keyboardEvent.leftKeyTimer = love.timer.getTime();
+					keyboardEvent.rightKeyTimer = love.timer.getTime();
 				end
 			end
 		end

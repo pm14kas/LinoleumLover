@@ -82,15 +82,19 @@ function actualJump(fixture, x, y, xn, yn, fraction)
 		end
 		player.isStand = false;
 	end
-	return 1
+	return 0
 end
 
 
 function IsStandCallback(fixture, x, y, xn, yn, fraction)
-	player.jumpAmount = player.jumpAmountMax;
-	player.isStand = true;
-	player.isDashAvailable = true;
-	return 1;
+	if fixture:isSensor() then
+		return -1;
+	else
+		player.jumpAmount = player.jumpAmountMax;
+		player.isStand = true;
+		player.isDashAvailable = true;
+		return 0;
+	end
 end
 
 function jumpKeyPressed( key, scancode, isrepeat) 
@@ -100,19 +104,27 @@ function jumpKeyPressed( key, scancode, isrepeat)
 end
 
 function IsLeftWallClimbCallback(fixture, x, y, xn, yn, fraction)
-	player.isLeftWallClimb = true;
-	player.isDashAvailable = true;
-	player.isJump = false;
-	player.jumpAmount = player.jumpAmountMax;
-	return 1;
+	if fixture:isSensor() then
+		return -1;
+	else
+		player.isLeftWallClimb = true;
+		player.isDashAvailable = true;
+		player.isJump = false;
+		player.jumpAmount = player.jumpAmountMax;
+		return 0;
+	end
 end
 
 function IsRightWallClimbCallback(fixture, x, y, xn, yn, fraction)
-	player.isRightWallClimb = true;
-	player.isDashAvailable = true;
-	player.isJump = false;
-	player.jumpAmount = player.jumpAmountMax;
-	return 1;
+	if fixture:isSensor() then
+		return -1;
+	else
+		player.isRightWallClimb = true;
+		player.isDashAvailable = true;
+		player.isJump = false;
+		player.jumpAmount = player.jumpAmountMax;
+		return 0;
+	end
 end
 
 function player:move(dt)
@@ -341,18 +353,26 @@ function player:update(dt)
 	if self.body:getY() > sh + 50 then
 		self:respawn();
 	end
-
+ --self.body and v.body and not self.body:isDestroyed() and not v.body:isDestroyed() and
 	for k, v in ipairs(level.hazards) do
-		if self.body and v.body and not self.body:isDestroyed() and not v.body:isDestroyed() and self.body:isTouching(v.body) then
+		if  self.body:isTouching(v.body) then
 			level:goToSpawn(level.activeSpawn, true);
 			break;
 		end
 	end
 
 	for k, v in ipairs(level.portals) do
-		if self.body and v.body and not self.body:isDestroyed() and not v.body:isDestroyed() and self.body:isTouching(v.body) then
+		if self.body:isTouching(v.body) then
 			if v.spawn then
 				level:goToSpawn(v.spawn);
+				break;
+			end
+		end
+	end
+	for k, v in ipairs(level.checkpoints) do
+		if self.body:isTouching(v.body) then
+			if v.spawn then
+				level.activeSpawn = v.spawn;
 				break;
 			end
 		end
