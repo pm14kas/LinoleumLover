@@ -10,7 +10,8 @@ level.blockNameList = {
 	checkpoint = "Checkpoint",
 	item = "Item",
 	itemDash = "Dash",
-	itemDoubleJump = "Doublejump"
+	itemDoubleJump = "Doublejump",
+	itemWallClimb = "Wallclimb"
 };
 level.itemList = {};
 
@@ -280,14 +281,11 @@ function level:appendItem(x, y, width, height, type, name)
 	
 	local block = {};
 
-	block.width = 50;
-	block.height = 50;
+	block.width = layout.getX(50);
+	block.height = layout.getY(50);
 	
 	block.x = layout.getX(x + width * 0.5); 
 	block.y = layout.getY(y + height); 
-	
-	block.x = block.x - layout.getX(width) * 0.5;
-	block.y = block.y - layout.getY(height) * 0.5;
 	
 	block.name = name;
 
@@ -297,6 +295,8 @@ function level:appendItem(x, y, width, height, type, name)
 		block.picture = graphics.abilities.dash;
 	elseif (block.type == level.blockNameList.itemDoubleJump) then
 		block.picture = graphics.abilities.jump;
+	elseif (block.type == level.blockNameList.itemWallClimb) then
+		block.picture = graphics.abilities.wallclimb;
 	else
 		block.picture = graphics.default;
 	end
@@ -396,8 +396,8 @@ function level:draw()
 		for k, v in ipairs(self.items) do
 			love.graphics.draw(
 				v.picture.picture, 
-				v.x, 
-				v.y + layout.getY(math.sin(love.timer.getTime() * 10 + v.randomSeed) * 2), 
+				v.x - v.width * 0.5, 
+				v.y + layout.getY(math.sin(love.timer.getTime() * 10 + v.randomSeed) * 2) - v.height * 0.5, 
 				0, 
 				layout.getX(v.width/v.picture.picture:getWidth()), 
 				layout.getY(v.height/v.picture.picture:getHeight())

@@ -40,7 +40,18 @@ graphics = {
 		},
 		jump = {
 			picture = love.graphics.newImage("graphics/icons/icon_jump_double.png")
+		},
+		wallclimb = {
+			picture = love.graphics.newImage("graphics/icons/icon_wall_climb.png")
 		}
+	},
+	hud = {
+		dash = {
+			picture = love.graphics.newImage("graphics/icons/icon_dash_text.png")
+		},
+		jump = {
+			picture = love.graphics.newImage("graphics/icons/icon_jump_text.png")
+		}	
 	},
 	default = {
 		picture = love.graphics.newImage("graphics/icons/icon_404.png")	
@@ -74,7 +85,7 @@ function love.draw()
 	for i = 1, player.jumpAmount do
 		--love.graphics.print("*", 10, 10);
 		love.graphics.draw(
-			graphics.abilities.jump.picture, 
+			graphics.hud.jump.picture, 
 			layout.getX(10 + (i-1) * 40), 
 			layout.getY(10), 
 			0, 
@@ -86,7 +97,7 @@ function love.draw()
 	if player.isDashAvailable then
 		--love.graphics.print(">", 50, 10, 0, 0.5, 0.5);
 		love.graphics.draw(
-			graphics.abilities.dash.picture, 
+			graphics.hud.dash.picture, 
 			layout.getX(10 + player.jumpAmount * 40), 
 			layout.getY(10), 
 			0, 

@@ -32,7 +32,7 @@ function player:new(x, y)
 	self.isRightDash = false;
 	self.isDashAvailable = false;
 	
-	self.isWallClimbEnabled = true;
+	self.isWallClimbEnabled = false;
 	self.isDashEnabled = false;
 
 	self.speedWallClimb = layout.getY(5) * love.physics.getMeter();
@@ -84,25 +84,24 @@ function player:teleport(x, y)
 	self.body:setLinearVelocity(vx * 0.5, vy * 0.5);
 end
 
-function actualJump(fixture, x, y, xn, yn, fraction)
-	if (player.isJump) then
-		if player.isLeftWallClimb and player.isWallClimbEnabled then
-			player.body:setLinearVelocity(0, 0);
-			player.body:applyLinearImpulse(player.jumpImpulse, -player.jumpImpulse)
-			player.isJump = false;
-		elseif player.isRightWallClimb and player.isWallClimbEnabled then
-			player.body:setLinearVelocity(0, 0);
-			player.body:applyLinearImpulse(-player.jumpImpulse, -player.jumpImpulse)
-			player.isJump = false;
+function player:actualJump()
+	if (self.isJump) then
+		if self.isLeftWallClimb then
+			self.body:setLinearVelocity(0, 0);
+			self.body:applyLinearImpulse(self.jumpImpulse, -self.jumpImpulse)
+			self.isJump = false;
+		elseif self.isRightWallClimb then
+			self.body:setLinearVelocity(0, 0);
+			self.body:applyLinearImpulse(-self.jumpImpulse, -self.jumpImpulse)
+			self.isJump = false;
 		else
-			local x, y = player.body:getLinearVelocity();
-			player.body:setLinearVelocity(x, 0);
-			player.body:applyLinearImpulse(0, -player.jumpImpulse)
-			player.isJump = false;
+			local x, y = self.body:getLinearVelocity();
+			self.body:setLinearVelocity(x, 0);
+			self.body:applyLinearImpulse(0, -self.jumpImpulse)
+			self.isJump = false;
 		end
-		player.isStand = false;
+		self.isStand = false;
 	end
-	return 0
 end
 
 
@@ -126,11 +125,14 @@ end
 function IsLeftWallClimbCallback(fixture, x, y, xn, yn, fraction)
 	if fixture:isSensor() then
 		return -1;
-	else
+	elseif player.isWallClimbEnabled then
 		player.isLeftWallClimb = true;
 		player.isDashAvailable = true;
 		player.isJump = false;
 		player.jumpAmount = player.jumpAmountMax;
+		return 0;
+	else 
+		player.body:setX(player.body:getX() + 1);
 		return 0;
 	end
 end
@@ -138,11 +140,14 @@ end
 function IsRightWallClimbCallback(fixture, x, y, xn, yn, fraction)
 	if fixture:isSensor() then
 		return -1;
-	else
+	elseif player.isWallClimbEnabled then
 		player.isRightWallClimb = true;
 		player.isDashAvailable = true;
 		player.isJump = false;
 		player.jumpAmount = player.jumpAmountMax;
+		return 0;
+	else 
+		player.body:setX(player.body:getX() - 1);
 		return 0;
 	end
 end
@@ -189,43 +194,14 @@ function player:move(dt)
 	);
 	
 	if self.isJump and not (self.isLeftDash or self.isRightDash) then
-		if (self.isStand) then
-			world:rayCast(self.body:getX() - self.width * 0.5, 
-				self.body:getY() + self.height * 0.5, 
-				self.body:getX() - self.width * 0.5, 
-				self.body:getY() + self.height * 0.5 + rayCastDepth, 
-				actualJump
-			);
-			world:rayCast(self.body:getX() - self.width * 0.25, 
-				self.body:getY() + self.height * 0.5, 
-				self.body:getX() - self.width * 0.25, 
-				self.body:getY() + self.height * 0.5 + rayCastDepth, 
-				actualJump
-			);
-			world:rayCast(self.body:getX(), 
-				self.body:getY() + self.height * 0.5, 
-				self.body:getX(), 
-				self.body:getY() + self.height * 0.5 + rayCastDepth, 
-				actualJump
-			);
-			world:rayCast(self.body:getX() + self.width * 0.25,
-				self.body:getY() + self.height * 0.5, 
-				self.body:getX() + self.width * 0.25, 
-				self.body:getY() + self.height * 0.5 + rayCastDepth, 
-				actualJump
-			);
-			world:rayCast(self.body:getX() + self.width * 0.5,
-				self.body:getY() + self.height * 0.5, 
-				self.body:getX() + self.width * 0.5, 
-				self.body:getY() + self.height * 0.5 + rayCastDepth, 
-				actualJump
-			);
+		if (self.isStand or (self.isWallClimbEnabled and (self.isLeftWallClimb or self.isRightWallClimb))) then
+			self:actualJump();
 		elseif (self.jumpAmount > 0) then
 			self.jumpAmount = self.jumpAmount - 1;
 			if not (self.isLeftWallClimb or self.isRightWallClimb) then
 				player.particleEmitter:emit(30);
 			end
-			actualJump()
+			player:actualJump();
 		end
 	end
 	
@@ -395,6 +371,8 @@ function player:update(dt)
 		if self.body:isTouching(v.body) then
 			if (v.type == level.blockNameList.itemDash) then
 				self.isDashEnabled = true;
+			elseif (v.type == level.blockNameList.itemWallClimb) then
+				self.isWallClimbEnabled = true;
 			elseif (v.type == level.blockNameList.itemDoubleJump) then
 				self.jumpAmountMax = self.jumpAmountMax + 1; --must be later replaced with pre-defined value, now its just for testing purpose
 			end
