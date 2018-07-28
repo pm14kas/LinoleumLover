@@ -4,11 +4,12 @@ love.window.setMode(0, 0, {
 });
 
 static = {
-	isLoading = false;
-}
+	isLoading = false
+};
 
-fontMistral = love.graphics.newFont("fonts/mistral.ttf", 100);
-love.graphics.setFont(fontMistral);
+mistralFont = love.graphics.newFont("fonts/mistral.ttf", 1000)
+graphikFont = love.graphics.newFont("fonts/GraphikRegular.ttf", 1000);
+love.graphics.setFont(graphikFont);
 
 love.window.setTitle("Linoleum");
 
@@ -27,14 +28,31 @@ function layout.getY(x)
 end
 
 keyboardEvent = {
-	doublePressDuration = 0.2;
+	doublePressDuration = 0.25;
 	leftKeyTimer = 0;
 	rightKeyTimer = 0;
 };
+
+graphics = {
+	abilities = {
+		dash = {
+			picture = love.graphics.newImage("graphics/icons/icon_dash.png")
+		},
+		jump = {
+			picture = love.graphics.newImage("graphics/icons/icon_jump_double.png")
+		}
+	},
+	default = {
+		picture = love.graphics.newImage("graphics/icons/icon_404.png")	
+	}
+}
+
 require("json.json");
 require("functions");
+require("animation");
 require("player");
 require("level");
+
 function love.load()
 	world = love.physics.newWorld(0, 9.8 * 2 * love.physics.getMeter())
 	player:new();
@@ -53,11 +71,28 @@ function love.draw()
 		player:draw()
 	end
 	love.graphics.setColor(1,1,1)
-	if (player.jumpAmount > 0) then
-		love.graphics.print("*", 10, 10);
+	for i = 1, player.jumpAmount do
+		--love.graphics.print("*", 10, 10);
+		love.graphics.draw(
+			graphics.abilities.jump.picture, 
+			layout.getX(10 + (i-1) * 40), 
+			layout.getY(10), 
+			0, 
+			layout.getX(50/graphics.abilities.jump.picture:getWidth()), 
+			layout.getY(50/graphics.abilities.jump.picture:getHeight())
+		);
+
 	end
 	if player.isDashAvailable then
-		love.graphics.print(">", 50, 10, 0, 0.5, 0.5);
+		--love.graphics.print(">", 50, 10, 0, 0.5, 0.5);
+		love.graphics.draw(
+			graphics.abilities.dash.picture, 
+			layout.getX(10 + player.jumpAmount * 40), 
+			layout.getY(10), 
+			0, 
+			layout.getX(50/graphics.abilities.jump.picture:getWidth()), 
+			layout.getY(50/graphics.abilities.jump.picture:getHeight())
+		);
 	end
 end
 
