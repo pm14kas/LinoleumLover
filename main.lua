@@ -43,6 +43,9 @@ graphics = {
 		},
 		wallclimb = {
 			picture = love.graphics.newImage("graphics/icons/icon_wall_climb.png")
+		},
+		gun = {
+			picture = love.graphics.newImage("graphics/icons/icon_gun.png")
 		}
 	},
 	hud = {
@@ -51,7 +54,15 @@ graphics = {
 		},
 		jump = {
 			picture = love.graphics.newImage("graphics/icons/icon_jump_text.png")
+		},
+		gun = {
+			picture = love.graphics.newImage("graphics/icons/icon_gun.png")
 		}	
+	},
+	blocks = {
+		breakable = {
+			picture = love.graphics.newImage("graphics/icons/icon_gun.png")
+		}
 	},
 	default = {
 		picture = love.graphics.newImage("graphics/icons/icon_404.png")	
@@ -64,10 +75,58 @@ require("animation");
 require("player");
 require("level");
 
+function beginContact(a, b, coll)
+	if (a:getUserData() == "bulletUser") then
+		local ids = splitString(b:getUserData(), " ");
+		if (b:getUserData() == "player") then
+			a:getBody():destroy();
+		elseif (b:getUserData() == "bulletUser") then
+		elseif((#ids == 2) and ids[2] == level.blockNameList.blockBreakable) then
+			damage(level.blocks[ids[1]], 1);
+			a:getBody():destroy();
+		else
+			a:getBody():destroy();
+		end
+	end
+
+	if (b:getUserData() == "bulletUser") then
+		local ids = splitString(a:getUserData(), " ");
+		if (a:getUserData() == "player") then
+			b:getBody():destroy();
+		elseif (a:getUserData() == "bulletUser") then
+		elseif((#ids == 2) and ids[2] == level.blockNameList.blockBreakable) then
+			damage(level.blocks[ids[1]], 1);
+			b:getBody():destroy();
+		else
+			b:getBody():destroy();
+		end
+	end
+end
+ 
+function endContact(a, b, coll)
+end
+ 
+function preSolve(a, b, coll)
+end
+ 
+function postSolve(a, b, coll, normalimpulse, tangentimpulse)
+end
+
+function damage(item, amount)
+	if (item.health ~= nil) then
+		item.health = item.health - amount;
+		return true;
+	else
+		return false;
+	end
+end
+
 function love.load()
 	world = love.physics.newWorld(0, 9.8 * 2 * love.physics.getMeter())
+	world:setCallbacks(beginContact, endContact, preSolve, postSolve)
+
 	player:new();
-	
+
 	level:new();
 	level:goToSpawn(level.activeSpawn);
 end
@@ -82,6 +141,7 @@ function love.draw()
 		player:draw()
 	end
 	love.graphics.setColor(1,1,1)
+	local iconShift = 0;
 	for i = 1, player.jumpAmount do
 		--love.graphics.print("*", 10, 10);
 		love.graphics.draw(
@@ -92,18 +152,34 @@ function love.draw()
 			layout.getX(50/graphics.abilities.jump.picture:getWidth()), 
 			layout.getY(50/graphics.abilities.jump.picture:getHeight())
 		);
-
+		iconShift = iconShift + 1;
 	end
+	
 	if player.isDashAvailable then
 		--love.graphics.print(">", 50, 10, 0, 0.5, 0.5);
 		love.graphics.draw(
 			graphics.hud.dash.picture, 
-			layout.getX(10 + player.jumpAmount * 40), 
+			layout.getX(10 + iconShift * 50), 
 			layout.getY(10), 
 			0, 
 			layout.getX(50/graphics.abilities.jump.picture:getWidth()), 
 			layout.getY(50/graphics.abilities.jump.picture:getHeight())
 		);
+		iconShift = iconShift + 1;
+	end
+	
+	if player.isShootingEnabled then
+		--love.graphics.print(">", 50, 10, 0, 0.5, 0.5);
+		love.graphics.draw(
+			graphics.hud.gun.picture, 
+			layout.getX(10 + iconShift * 50), 
+			layout.getY(10), 
+			0, 
+			layout.getX(50/graphics.abilities.jump.picture:getWidth()), 
+			layout.getY(50/graphics.abilities.jump.picture:getHeight())
+		);
+		
+		iconShift = iconShift + 1;
 	end
 end
 
@@ -129,6 +205,8 @@ function love.keypressed(key)
 					keyboardEvent.rightKeyTimer = love.timer.getTime();
 				end
 			end
+		elseif key == "x" then
+			player:keyboardShoot();
 		end
 	end
 	if key == "m" then
@@ -147,6 +225,7 @@ end
 function love.update(dt)
 	if viewMode then
 		player:update(dt)
+		level:update(dt)
 		world:update(dt)
 	end
 end

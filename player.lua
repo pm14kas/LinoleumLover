@@ -32,6 +32,17 @@ function player:new(x, y)
 	self.isRightDash = false;
 	self.isDashAvailable = false;
 	
+	self.directionEnum = {left = 1, right = 2};
+	self.direction = self.directionEnum.left -- true goes to left, false goes to right
+	
+	self.lastShotTimer = 0.0;
+	self.lastShotTime = -1;
+	self.bulletSpeed = layout.getX(50 * love.physics.getMeter());
+	self.bulletLifetime = 10;
+	self.bulletList = {};
+	self.isShootingEnabled = false;
+	self.isShootingAvailable = false;
+	
 	self.isWallClimbEnabled = false;
 	self.isDashEnabled = false;
 
@@ -44,6 +55,8 @@ function player:new(x, y)
 	self.body:setFixedRotation(true);
 	self.shape = love.physics.newRectangleShape(self.width, self.height);
 	self.fixture = love.physics.newFixture(self.body, self.shape);
+	self.fixture:setUserData("player");
+	--self.fixture:setFriction(0.99);
 	
 	self.sprite = love.graphics.newImage("graphics/particle/sprite_doublejump.png");
 	self.particleEmitter = love.graphics.newParticleSystem(self.sprite, 30);
@@ -67,15 +80,29 @@ function player:respawn(spawnx, spawny)
 		self.body:destroy();
 	end
 	
+	for k, v in ipairs(self.bulletList) do
+		if (not v.body:isDestroyed()) then
+			v.body:destroy();
+		end
+	end
+	
+	self.bulletList = {};
+	
 	isDashEnabled = self.isDashEnabled;
 	isWallClimbEnabled = self.isWallClimbEnabled;
+	isShootingEnabled = self.isShootingEnabled;
 	jumpAmountMax = self.jumpAmountMax;
+	
+	direction = self.direction;
 	
 	self:new(spawnx, spawny);
 	
 	self.isDashEnabled = isDashEnabled;
 	self.isWallClimbEnabled = isWallClimbEnabled;
+	self.isShootingEnabled = isShootingEnabled;
 	self.jumpAmountMax = jumpAmountMax;
+	self.direction = direction;
+	
 end
 
 function player:teleport(x, y)
@@ -132,7 +159,9 @@ function IsLeftWallClimbCallback(fixture, x, y, xn, yn, fraction)
 		player.jumpAmount = player.jumpAmountMax;
 		return 0;
 	else 
-		player.body:setX(player.body:getX() + 1);
+		local x, y = player.body:getLinearVelocity();
+		player.body:setX(player.body:getX() + 0.5);
+		player.body:setLinearVelocity(0, y);
 		return 0;
 	end
 end
@@ -147,7 +176,9 @@ function IsRightWallClimbCallback(fixture, x, y, xn, yn, fraction)
 		player.jumpAmount = player.jumpAmountMax;
 		return 0;
 	else 
-		player.body:setX(player.body:getX() - 1);
+		local x, y = player.body:getLinearVelocity();
+		player.body:setX(player.body:getX() - 0.5);
+		player.body:setLinearVelocity(0, y);
 		return 0;
 	end
 end
@@ -158,7 +189,7 @@ function player:move(dt)
 	else 
 		self.speedX = self.speedXRegular;
 	end
-
+	
 	local rayCastDepth = 1;
 
 	self.isStand = false;
@@ -208,10 +239,12 @@ function player:move(dt)
 	self:checkWallClimbing(rayCastDepth);
 	
 	if self.isMoveLeft then
-		self.body:applyForce(-self.speedX, 0)
+		self.body:applyForce(-self.speedX, 0);
+		self.direction = self.directionEnum.left;
 	end
 	if self.isMoveRight then
-		self.body:applyForce(self.speedX, 0)
+		self.body:applyForce(self.speedX, 0);
+		self.direction = self.directionEnum.right;
 	end
 	
 	if not self.isDashEnabled then
@@ -222,7 +255,7 @@ function player:move(dt)
 		if self.isLeftDash and love.timer.getTime() < self.dashTimer + self.dashDuration and self.isDashAvailable then
 			self.isDashAvailable = false;
 			self.body:setLinearVelocity(-self.dashSpeed, 0);
-			self.particleEmitter:emit(5);
+			self.particleEmitter:emit(50);
 			self.isLeftDash = true;
 		elseif love.timer.getTime() > self.dashTimer + self.dashDuration and love.timer.getTime() < self.dashTimer + self.dashDuration * 1.5 then
 			self.isLeftDash = false;
@@ -232,7 +265,7 @@ function player:move(dt)
 		if self.isRightDash and love.timer.getTime() < self.dashTimer + self.dashDuration then
 			self.isDashAvailable = false;
 			self.body:setLinearVelocity(self.dashSpeed, 0);
-			self.particleEmitter:emit(5);
+			self.particleEmitter:emit(50);
 			self.isRightDash = true;
 		elseif love.timer.getTime() > self.dashTimer + self.dashDuration and love.timer.getTime() < self.dashTimer + self.dashDuration * 1.5 then
 			self.isRightDash = false;
@@ -247,8 +280,12 @@ function player:move(dt)
 		end
 	end
 	
-	if (self.isRightWallClimb or self.isLeftWallClimb) then
+	if (self.isRightWallClimb) then
 		self.body:applyForce(0, self.speedWallClimb * 10);
+		self.direction = self.directionEnum.left;
+	elseif (self.isLeftWallClimb) then
+		self.body:applyForce(0, self.speedWallClimb * 10);
+		self.direction = self.directionEnum.right;
 	end
 	
 	self.particleEmitter:update(dt);
@@ -335,6 +372,41 @@ function player:checkWallClimbing(rayCastDepth)
 	end
 end
 
+function player:createBullet() 
+	local block = {};
+	block.width = layout.getX(10); 
+	block.height = layout.getY(5); 
+	block.x = self.body:getX(); 
+	block.y = self.body:getY() - self.height * 0.2; 
+	block.createdAt = love.timer.getTime();
+	
+	block.body = love.physics.newBody(world, block.x, block.y, "dynamic");
+	block.body:setBullet(true);
+	block.body:setFixedRotation(true);
+	block.body:setGravityScale(0);
+	block.shape = love.physics.newRectangleShape(block.width, block.height);
+	block.fixture = love.physics.newFixture(block.body, block.shape);
+	block.fixture:setUserData("bulletUser");
+
+	local x, y = self.body:getLinearVelocity();
+	if self.direction == self.directionEnum.right then 
+		block.body:setX(block.body:getX() + (self.width + block.width) * 0.6);
+		block.body:setLinearVelocity(self.bulletSpeed + x, 0);
+	elseif self.direction == self.directionEnum.left then 
+		block.body:setX(block.body:getX() - (self.width + block.width) * 0.6);
+		block.body:setLinearVelocity(-self.bulletSpeed + x, 0);
+	end
+	
+	table.insert(self.bulletList, block);
+end
+
+function player:keyboardShoot()
+	if (self.isShootingEnabled and (love.timer.getTime() > self.lastShotTime + self.lastShotTimer)) then
+		self.lastShotTime = love.timer.getTime();
+		self:createBullet()
+	end
+end
+
 function player:update(dt)
 	if love.keyboard.isDown("lshift") then
 		self.isSprint = true;
@@ -360,28 +432,30 @@ function player:update(dt)
 		self:respawn();
 	end
  --self.body and v.body and not self.body:isDestroyed() and not v.body:isDestroyed() and
-	for k, v in ipairs(level.hazards) do
+	for k, v in pairs(level.hazards) do
 		if  self.body:isTouching(v.body) then
 			level:goToSpawn(level.activeSpawn, true);
 			break;
 		end
 	end
 	
-	for k, v in ipairs(level.items) do
+	for k, v in pairs(level.items) do
 		if self.body:isTouching(v.body) then
 			if (v.type == level.blockNameList.itemDash) then
 				self.isDashEnabled = true;
 			elseif (v.type == level.blockNameList.itemWallClimb) then
 				self.isWallClimbEnabled = true;
+			elseif (v.type == level.blockNameList.itemGun) then
+				self.isShootingEnabled = true;
 			elseif (v.type == level.blockNameList.itemDoubleJump) then
 				self.jumpAmountMax = self.jumpAmountMax + 1; --must be later replaced with pre-defined value, now its just for testing purpose
 			end
 			v.body:destroy();
-			table.remove(level.items, k);
+			level.items[k] = nil;
 		end
 	end
 
-	for k, v in ipairs(level.portals) do
+	for k, v in pairs(level.portals) do
 		if self.body:isTouching(v.body) then
 			if v.spawn then
 				level:goToSpawn(v.spawn);
@@ -389,7 +463,7 @@ function player:update(dt)
 			end
 		end
 	end 
-	for k, v in ipairs(level.checkpoints) do
+	for k, v in pairs(level.checkpoints) do
 		if self.body:isTouching(v.body) then
 			if v.spawn then
 				level.activeSpawn = v.spawn;
@@ -397,25 +471,50 @@ function player:update(dt)
 			end
 		end
 	end
+		
+	for k, v in ipairs(self.bulletList) do
+		if (v.body:isDestroyed()) then
+			table.remove(self.bulletList, k);
+		end
+		
+		if ((love.timer.getTime() > v.createdAt + self.bulletLifetime)) then
+			v.body:destroy();
+			table.remove(self.bulletList, k);
+		end
+	end
 	
 end
 
 function player:draw()
 	if (self.isLeftDash or self.isRightDash) then 
-		love.graphics.setColor(255, 255, 255);
+		love.graphics.setColor(1, 1, 1);
 	else
-		love.graphics.setColor(255, 0, 0);
+		love.graphics.setColor(1, 0, 0);
 	end
 		
 	local x, y = self.body:getPosition();
+	
+	love.graphics.polygon("fill", self.body:getWorldPoints(self.shape:getPoints()))
 
 	--animation:draw("player_walk", x - self.width * 0.5, y - self.height * 0.5, self.width, self.height);
-	love.graphics.polygon("fill", self.body:getWorldPoints(self.shape:getPoints()))
-	
 	if (self.isLeftWallClimb) then
 		love.graphics.rectangle("fill", self.body:getX(), self.body:getY()-self.height * 0.2, self.width, self.height * 0.3);
 	elseif (self.isRightWallClimb) then
 		love.graphics.rectangle("fill", self.body:getX(), self.body:getY()-self.height * 0.2, -self.width, self.height * 0.3);
+	end
+	
+	love.graphics.setColor(1, 1, 0);
+	if self.direction == self.directionEnum.left then 
+		love.graphics.rectangle("fill", self.body:getX() - self.width * 0.5, self.body:getY()-self.height * 0.5, self.width * 0.1, self.height * 0.3);
+	elseif self.direction == self.directionEnum.right then 
+		love.graphics.rectangle("fill", self.body:getX() + self.width * 0.4, self.body:getY()-self.height * 0.5, self.width * 0.1, self.height * 0.3);
+	end
+	
+	love.graphics.setColor(1, 1, 1);
+	for k, v in ipairs(self.bulletList) do		
+		if (not v.body:isDestroyed()) then
+			love.graphics.polygon("fill", v.body:getWorldPoints(v.shape:getPoints()));
+		end
 	end
 
 	love.graphics.setColor(1,1,1)
