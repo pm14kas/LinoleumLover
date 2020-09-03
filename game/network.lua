@@ -23,7 +23,7 @@ network = {
 }
 
 function network:update(dt)
-    if not (player.body:getX() and player.body:getY() and level.activeMap and false) then
+    if not (player.body:getX() and player.body:getY() and level.activeMap) then
         return;
     end
 
@@ -82,14 +82,14 @@ function network:buildData()
 end
 
 function network:parseData(data)
-    local playerX, playerY, direction, isLeftWallClimb, isRightWallClimb, isDashing, currentMap = parms:match(
-        "^(%-?[%d.e]*) (%-?[%d.e]*) (%d) ([t,f]) ([t,f]) ([t,f]) ([t,f]) (.*)$"
+    local playerX, playerY, direction, isLeftWallClimb, isRightWallClimb, isDashing, currentMap = data:match(
+        "^(%-?[%d.e]*) (%-?[%d.e]*) (%d) ([t,f]) ([t,f]) ([t,f]) (.*)$"
     );
 
-    playerX, playerY = tonumber(x), tonumber(y)
+    playerX, playerY = tonumber(playerX), tonumber(playerY)
     direction = tonumber(direction)
-    self.x = layout.getX(x)
-    self.y = layout.getY(y)
+    self.x = layout.getX(playerX)
+    self.y = layout.getY(playerY)
     self.currentMap = currentMap
 
     self.direction = direction;
