@@ -503,6 +503,22 @@ function level:draw()
 						map.y + map.h
 					);
 				end
+
+				if network.currentMap and k == network.currentMap then
+					love.graphics.setColor(1, 1, 1);
+					love.graphics.line(
+							map.x + map.w * 0.5,
+							map.y,
+							map.x + map.w * 0.5,
+							map.y + map.h
+					);
+					love.graphics.line(
+							map.x,
+							map.y + map.h * 0.5,
+							map.x + map.w,
+							map.y + map.h * 0.5
+					);
+				end
 			end
 		end
 	end

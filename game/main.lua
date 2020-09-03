@@ -231,10 +231,8 @@ function love.keyreleased( key )
 end
 
 function love.update(dt)
-	if viewMode then
-		network:update(dt)
-		player:update(dt)
-		level:update(dt)
-		world:update(dt)
-	end
+	network:update(dt)
+	player:update(dt)
+	level:update(dt)
+	world:update(dt)
 end

@@ -104,7 +104,12 @@ function network:draw()
     end
 
     if (level.activeMap == self.currentMap) then
-        love.graphics.setColor(0.2, 0.2, 1);
+        if (self.isDashing or self.isDashing) then
+            love.graphics.setColor(1, 1, 1);
+        else
+            love.graphics.setColor(0.2, 0.2, 1);
+        end
+
         love.graphics.rectangle("fill", self.x - self.width * 0.5, self.y-self.height * 0.5, self.width, self.height)
         if (self.isLeftWallClimb) then
             love.graphics.rectangle("fill", self.x, self.y - self.height * 0.2, self.width, self.height * 0.3);
