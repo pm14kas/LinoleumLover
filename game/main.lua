@@ -26,6 +26,12 @@ end
 function layout.getY(x)
 	return sh * x / layout.h
 end
+function layout.invertX(x)
+	return x * layout.w / sw;
+end
+function layout.invertY(y)
+	return y * layout.h / sh;
+end
 
 keyboardEvent = {
 	doublePressDuration = 0.25;
@@ -74,6 +80,7 @@ require("functions");
 require("animation");
 require("player");
 require("level");
+require("network");
 
 function beginContact(a, b, coll)
 	if (a:getUserData() == "bulletUser") then
@@ -138,6 +145,7 @@ function love.draw()
 	
 	level:draw()
 	if viewMode then
+		network:draw()
 		player:draw()
 	end
 	love.graphics.setColor(1,1,1)
@@ -224,6 +232,7 @@ end
 
 function love.update(dt)
 	if viewMode then
+		network:update(dt)
 		player:update(dt)
 		level:update(dt)
 		world:update(dt)
