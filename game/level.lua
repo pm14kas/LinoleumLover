@@ -82,79 +82,79 @@ function level:goToSpawn(spawnName, force)
 				love.graphics.clear(0, 0, 0);
 			end
 			level:changeLevel(map, spawnName);
-			if (force) then 
+			if (force) then
 				self.lastPortalPass = -1;
 			end
 		end
-	end 
+	end
 end
 
 function level:changeLevel(levelId, spawnId)
 	love.graphics.present();
-	
+
 	if self.activeMap then --and (not self.itemList[self.activeMap])) then
 		self.mapDiff[self.activeMap] = {};
 		self.mapDiff[self.activeMap].items = {};
 		self.mapDiff[self.activeMap].breakables = {};
 	end
-	
+
 	for k, v in pairs(self.items) do
 		self.mapDiff[self.activeMap].items[k] = true;
 	end
-	
+
 	for k, v in pairs(self.blocks) do
 		if (v.type == self.blockNameList.blockBreakable) then
 			self.mapDiff[self.activeMap].breakables[k] = true;
 		end
 	end
-	
+
 	self:clearBlocks();
 	tempSpawn = self.activeSpawn;
-	
+
 	--self:new();
-	
+
 	if tempSpawn and tempSpawn ~= "" then
 		self.activeSpawn = tempSpawn;
 	end
-	
-	if not self.data.maps[levelId] then 
+
+	if not self.data.maps[levelId] then
 		levelId = self.activeMap;
 	end
-	
+
 	self.activeMap = levelId;
 
 	for k, block in pairs(self.data.maps[self.activeMap].blocks) do
 		if (block.entityType == self.blockNameList.blockBreakable) then
-			if ((not self.mapDiff[self.activeMap]) or (self.mapDiff[self.activeMap] and self.mapDiff[self.activeMap].breakables[k])) then 
+			if ((not self.mapDiff[self.activeMap]) or (self.mapDiff[self.activeMap] and self.mapDiff[self.activeMap].breakables[k])) then
 				self:appendBlock(k, block.x, block.y, block.w, block.h, block.color, block.entityType);
 			end
 		else
 			self:appendBlock(k, block.x, block.y, block.w, block.h, block.color, block.entityType);
 		end
-	end	
-	
+	end
+
 	for k, block in pairs(self.data.maps[self.activeMap].hazards) do
 		self:appendHazard(k, block.x, block.y, block.w, block.h);
-	end	
-	
+	end
+
 	for k, block in pairs(self.data.maps[self.activeMap].portals) do
 		self:appendPortal(k, block.x, block.y, block.w, block.h, block.spawn);
-	end			
-	
+	end
+
 	for k, block in pairs(self.data.maps[self.activeMap].checkpoints) do
 		self:appendCheckpoint(k, block.x, block.y, block.w, block.h, block.spawn);
-	end		
-	
+	end
+
 	for k, block in pairs(self.data.maps[self.activeMap].decorations) do
 		self:appendDecoration(k, block.x, block.y, block.w, block.h, block.color, block.type, block.value);
-	end		
-	
+	end
+
 	for k, block in pairs(self.data.maps[self.activeMap].items) do
-		if ((not self.mapDiff[self.activeMap]) or (self.mapDiff[self.activeMap] and self.mapDiff[self.activeMap].items[k])) then 
+		if ((not self.mapDiff[self.activeMap]) or (self.mapDiff[self.activeMap] and self.mapDiff[self.activeMap].items[k])) then
 			self:appendItem(k, block.x, block.y, block.w, block.h, block.entityType, k);
 		end
-	end	
-	
+	end
+
 	for k, block in pairs(self.data.maps[self.activeMap].spawns) do
 		if (self.activeSpawn == nil) then
 			self.activeSpawn = k;
@@ -165,10 +165,10 @@ function level:changeLevel(levelId, spawnId)
 		end
 	end
 
-	self:appendBlock("topwall", 0, -1, layout.w, 1); --top
-	self:appendBlock("bottomwall", 0, layout.h, layout.w, 1); -- bottom
-	self:appendBlock("leftwall", -1, 0, 1, layout.h); -- left
-	self:appendBlock("rightwall", layout.w, 0, 1, layout.h); -- right
+    self:appendBlock("topwall", 0, -1, self.data.maps[self.activeMap].sizeX * layout.w, 1); --top
+    self:appendBlock("bottomwall", 0, self.data.maps[self.activeMap].sizeY * layout.h, self.data.maps[self.activeMap].sizeX * layout.w, 1); -- bottom
+    self:appendBlock("leftwall", -1, 0, 1, self.data.maps[self.activeMap].sizeY * layout.h); -- left
+    self:appendBlock("rightwall", self.data.maps[self.activeMap].sizeX * layout.w, 0, 1, self.data.maps[self.activeMap].sizeY * layout.h); -- right
 	static.isLoading = false;
 	self.lastPortalPass = love.timer.getTime();
 end
@@ -180,12 +180,12 @@ function level:appendBlock(name, x, y, width, height, color, type)
 	if not height then height = 0 end;
 	if not color then color = {1, 1, 1} end;
 	type = type or "Solid";
-	
+
 	local block = {};
-	block.width = layout.getX(width); 
-	block.height = layout.getY(height); 
-	block.x = layout.getX(x); 
-	block.y = layout.getY(y); 
+	block.width = layout.getX(width);
+	block.height = layout.getY(height);
+	block.x = layout.getX(x);
+	block.y = layout.getY(y);
 	-- because misha is gay
 	block.x = block.x + block.width * 0.5;
 	block.y = block.y + block.height * 0.5;
@@ -196,7 +196,7 @@ function level:appendBlock(name, x, y, width, height, color, type)
 		block.healthMax = 10;
 		block.picture = graphics.blocks.breakable.picture;
 	end
-	
+
 	block.body = love.physics.newBody(world, block.x, block.y, "static");
 	block.shape = love.physics.newRectangleShape(block.width, block.height);
 	block.fixture = love.physics.newFixture(block.body, block.shape);
@@ -210,17 +210,17 @@ function level:appendHazard(name, x, y, width, height)
 	if not y then y = 0 end;
 	if not width then width = 0 end;
 	if not height then height = 0 end;
-	
+
 	local block = {};
-	block.width = layout.getX(width); 
-	block.height = layout.getY(height); 
-	block.x = layout.getX(x); 
-	block.y = layout.getY(y); 
+	block.width = layout.getX(width);
+	block.height = layout.getY(height);
+	block.x = layout.getX(x);
+	block.y = layout.getY(y);
 	-- because misha is gay
 	block.x = block.x + block.width * 0.5;
 	block.y = block.y + block.height * 0.5;
 	--block.type = level.blockNameList.hazard;
-	
+
 	block.body = love.physics.newBody(world, block.x, block.y, "static");
 	block.shape = love.physics.newRectangleShape(block.width, block.height);
 	block.fixture = love.physics.newFixture(block.body, block.shape);
@@ -235,19 +235,19 @@ function level:appendPortal(name, x, y, width, height, spawn)
 	if not y then y = 0 end;
 	if not width then width = 0 end;
 	if not height then height = 0 end;
-	
+
 	local block = {};
-	block.width = layout.getX(width); 
-	block.height = layout.getY(height); 
-	block.x = layout.getX(x); 
-	block.y = layout.getY(y); 
+	block.width = layout.getX(width);
+	block.height = layout.getY(height);
+	block.x = layout.getX(x);
+	block.y = layout.getY(y);
 	-- because misha is gay
 	block.x = block.x + block.width * 0.5;
 	block.y = block.y + block.height * 0.5;
 	block.color = {1,1,1};
 	block.spawn = spawn;
 	--block.type = level.blockNameList.portal;
-	
+
 	block.body = love.physics.newBody(world, block.x, block.y, "static");
 	block.shape = love.physics.newRectangleShape(block.width, block.height);
 	block.fixture = love.physics.newFixture(block.body, block.shape);
@@ -264,12 +264,12 @@ function level:appendSpawn(name, x, y, width, height, spawn)
 	if not y then y = 0 end;
 	if not width then width = 0 end;
 	if not height then height = 0 end;
-	
+
 	local block = {};
-	block.width = layout.getX(width); 
-	block.height = layout.getY(height); 
-	block.x = layout.getX(x); 
-	block.y = layout.getY(y); 
+	block.width = layout.getX(width);
+	block.height = layout.getY(height);
+	block.x = layout.getX(x);
+	block.y = layout.getY(y);
 	-- because misha is gay
 	block.x = block.x + block.width * 0.5;
 	block.y = block.y + block.height * 0.5;
@@ -281,18 +281,18 @@ function level:appendCheckpoint(name, x, y, width, height, spawn)
 	if not y then y = 0 end;
 	if not width then width = 0 end;
 	if not height then height = 0 end;
-	
+
 	local block = {};
-	block.width = layout.getX(width); 
-	block.height = layout.getY(height); 
-	block.x = layout.getX(x); 
-	block.y = layout.getY(y); 
+	block.width = layout.getX(width);
+	block.height = layout.getY(height);
+	block.x = layout.getX(x);
+	block.y = layout.getY(y);
 	-- because misha is gay
 	block.x = block.x + block.width * 0.5;
 	block.y = block.y + block.height * 0.5;
 	block.spawn = spawn;
 	--block.type = level.blockNameList.checkpoint;
-	
+
 	block.body = love.physics.newBody(world, block.x, block.y, "static");
 	block.shape = love.physics.newRectangleShape(block.width, block.height);
 	block.fixture = love.physics.newFixture(block.body, block.shape);
@@ -309,12 +309,12 @@ function level:appendDecoration(name, x, y, width, height, color, type, value)
 	if not y then y = 0 end;
 	if not width then width = 0 end;
 	if not height then height = 0 end;
-	
+
 	local block = {};
-	block.width = layout.getX(width); 
-	block.height = layout.getY(height); 
-	block.x = layout.getX(x); 
-	block.y = layout.getY(y); 
+	block.width = layout.getX(width);
+	block.height = layout.getY(height);
+	block.x = layout.getX(x);
+	block.y = layout.getY(y);
 
 	block.color = {1,1,1};
 	block.type = type;
@@ -326,15 +326,15 @@ end
 function level:appendItem(name, x, y, width, height, type, name)
 	if not x then x = 0 end;
 	if not y then y = 0 end;
-	
+
 	local block = {};
 
 	block.width = layout.getX(50);
 	block.height = layout.getY(50);
-	
-	block.x = layout.getX(x + width * 0.5); 
-	block.y = layout.getY(y + height * 0.5); 
-	
+
+	block.x = layout.getX(x + width * 0.5);
+	block.y = layout.getY(y + height * 0.5);
+
 	block.name = name;
 
 	block.color = {1,1,1};
@@ -350,16 +350,16 @@ function level:appendItem(name, x, y, width, height, type, name)
 	else
 		block.picture = graphics.default;
 	end
-	
+
 	block.value = value;
 	block.randomSeed = love.math.random() * 100;
-	
+
 	block.body = love.physics.newBody(world, block.x, block.y, "static");
 	block.shape = love.physics.newRectangleShape(block.width, block.height);
 	block.fixture = love.physics.newFixture(block.body, block.shape);
 	block.fixture:setSensor(true);
 	block.fixture:setUserData("item");
-	
+
 	self.items[name] = block;
 end
 
@@ -417,7 +417,7 @@ function level:update(dt)
 		if (v.health and v.health <= 0) then
 			v.body:destroy();
 		end
-		
+
 		if (v.body:isDestroyed()) then
 			self.blocks[k] = nil;
 		end
@@ -427,21 +427,21 @@ end
 function level:draw()
 	if viewMode then
 		love.graphics.setBackgroundColor(self.data.maps[self.activeMap].backgroundColor);
-		
+
 		for k, block in pairs(self.decorations) do
 			love.graphics.setColor(block.color)
-			love.graphics.printf( 
-				block.value, 
-				block.x, 
-				block.y, 
-				math.max(block.width, love.graphics.getFont():getWidth(block.value)), 
-				"left", 
-				0, 
-				(block.width) / love.graphics.getFont():getWidth(block.value), 
-				(block.height) / love.graphics.getFont():getHeight() 
+			love.graphics.printf(
+				block.value,
+				block.x,
+				block.y,
+				math.max(block.width, love.graphics.getFont():getWidth(block.value)),
+				"left",
+				0,
+				(block.width) / love.graphics.getFont():getWidth(block.value),
+				(block.height) / love.graphics.getFont():getHeight()
 			)
 		end
-		
+
 		for k, v in pairs(self.blocks) do
 			if not v.body:isDestroyed() then
 				love.graphics.setColor(v.color)
@@ -456,28 +456,28 @@ function level:draw()
 		for k, v in pairs(self.hazards) do
 			love.graphics.polygon("fill", v.body:getWorldPoints(v.shape:getPoints()))
 		end
-		
+
 		for k, v in pairs(self.spawns) do
 			love.graphics.rectangle("fill", v.x, v.y, 50, 50)
 		end
 
-		
+
 		for k, v in pairs(self.portals) do
 			love.graphics.setColor(v.color)
 			love.graphics.polygon("fill", v.body:getWorldPoints(v.shape:getPoints()))
 		end
-		
+
 		for k, v in pairs(self.items) do
 			love.graphics.draw(
-				v.picture.picture, 
-				v.x - v.width * 0.5, 
-				v.y + layout.getY(math.sin(love.timer.getTime() * 10 + v.randomSeed) * 2) - v.height * 0.5, 
-				0, 
-				layout.getX(v.width/v.picture.picture:getWidth()), 
+				v.picture.picture,
+				v.x - v.width * 0.5,
+				v.y + layout.getY(math.sin(love.timer.getTime() * 10 + v.randomSeed) * 2) - v.height * 0.5,
+				0,
+				layout.getX(v.width/v.picture.picture:getWidth()),
 				layout.getY(v.height/v.picture.picture:getHeight())
 			);
 		end
-		
+
 		if (self.portal) then
 			love.graphics.setColor(self.portal.color)
 			love.graphics.polygon("fill", self.portal.body:getWorldPoints(self.portal.shape:getPoints()))
@@ -492,13 +492,13 @@ function level:draw()
 					love.graphics.setColor(1, 1, 1);
 					love.graphics.line(
 						map.x,
-						map.y, 
+						map.y,
 						map.x + map.w,
 						map.y + map.h
 					);
 					love.graphics.line(
 						map.x + map.w,
-						map.y, 
+						map.y,
 						map.x,
 						map.y + map.h
 					);

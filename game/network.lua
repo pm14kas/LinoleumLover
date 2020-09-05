@@ -1,7 +1,8 @@
 local enet = require "enet"
 local host = nil;
 local server = nil;
-local isServer = true;
+local isServer = false;
+local isMultiplayerActive = false;
 
 if isServer then
     host = enet.host_create("*:27015", 1);
@@ -23,6 +24,10 @@ network = {
 }
 
 function network:update(dt)
+    if not isMultiplayerActive then
+        return;
+    end
+
     if not (player.body:getX() and player.body:getY() and level.activeMap) then
         return;
     end
