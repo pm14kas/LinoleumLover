@@ -115,7 +115,14 @@ button:add("pipetka",
 					colorPick.rectG.x = levelbox:getActiveMap().backgroundColor[2] * 255 * colorPick.cell.w
 					colorPick.rectB.x = levelbox:getActiveMap().backgroundColor[3] * 255 * colorPick.cell.w
 				end
-			end
+            else
+                if levelbox.selectedMap then
+                    colorPick.currentColor = {r = levelbox:getSelectedMap().backgroundColor[1], g = levelbox:getSelectedMap().backgroundColor[2], b = levelbox:getSelectedMap().backgroundColor[3]}
+                    colorPick.rectR.x = levelbox:getSelectedMap().backgroundColor[1] * 255 * colorPick.cell.w
+                    colorPick.rectG.x = levelbox:getSelectedMap().backgroundColor[2] * 255 * colorPick.cell.w
+                    colorPick.rectB.x = levelbox:getSelectedMap().backgroundColor[3] * 255 * colorPick.cell.w
+                end
+            end
 		end
 	}
 )

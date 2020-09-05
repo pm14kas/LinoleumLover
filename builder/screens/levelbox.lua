@@ -344,7 +344,11 @@ function levelbox:getBlock(block, map)
 end
 
 function levelbox:getSelectedBlock()
-	return self:getBlock(self.selectedBlock)
+    return self:getBlock(self.selectedBlock)
+end
+
+function levelbox:getSelectedMap()
+    return self:getMap(self.selectedMap)
 end
 
 function levelbox:selectBlock(block)
