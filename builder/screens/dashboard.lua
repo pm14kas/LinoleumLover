@@ -30,9 +30,11 @@ button:add(
 		Y = buttonFont:getHeight() * 1.5 / 2,
 		value = "Map View",
 		onclick = function()
-			if levelbox:getMapView() and levelbox.selectedMap then
-				levelbox:setMapView(false)
-				button:get("mapViewTrigger").value = "Map View"
+			if levelbox:getMapView() then
+                if levelbox.selectedMap then
+                    levelbox:setMapView(false)
+                    button:get("mapViewTrigger").value = "Map View"
+                end
 			else
 				levelbox:setMapView(true)
 				button:get("mapViewTrigger").value = "Level View"

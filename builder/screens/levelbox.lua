@@ -59,6 +59,8 @@ levelbox = {
 			["map0"] = {
 				x = 0,
 				y = 0,
+                scale = 1,
+                offset = {x = 0, y = 0},
 				sizeX = 1,
 				sizeY = 1,
 				w = 30,
@@ -83,7 +85,11 @@ levelbox = {
 		activeMap = "map0",
 		screenScale = {w = w / layout.w, h = h / layout.h}
 	},
-	mapView = false,
+    mapView = {
+        set = false,
+        scale = 1,
+        offset = {x = 0, y = 0}
+    },
 	blockTypes = {
 		Block = {
 			new = function(name, map)
@@ -304,6 +310,8 @@ function levelbox:load()
 		if not map.z then map.z = 1 end
 		if not map.sizeX then map.sizeX = 1 end
 		if not map.sizeY then map.sizeY = 1 end
+		if not map.scale then map.scale = 1 end
+		if not map.offset then map.offset = {x = 0, y = 0} end
 	end
 
 	for klink, link in pairs(levelbox.links) do
@@ -431,32 +439,43 @@ end
 
 function levelbox:setMapView(flag)
 	if flag then
+        self:getActiveMap().scale = self.scale
+        self:getActiveMap().offset.x = self.offsetX
+        self:getActiveMap().offset.y = self.offsetY
 		self.grabbedBlock = nil
 		self.selectedBlock = nil
 		self.game.activeMap = nil
 		self.scaleMin = 1
 		self.w = screen:get("levelbox").w
 		self.h = screen:get("levelbox").h
-		self:centrize()
+        self.scale = self.mapView.scale
+        self.offsetX = self.mapView.offset.x
+        self.offsetY = self.mapView.offset.y
 	else
-		if levelbox:getMapView() then
+        self.mapView.scale = self.scale
+        self.mapView.offset.x = self.offsetX
+        self.mapView.offset.y = self.offsetY
+		if self:getMapView() then
 			self.game.activeMap = self.selectedMap
 			self.scaleMin = 1 / math.max(self:getActiveMap().sizeX, self:getActiveMap().sizeY)
 			self.w = screen:get("levelbox").w * self:getActiveMap().sizeX
 			self.h = screen:get("levelbox").h * self:getActiveMap().sizeY
-			self:centrize()
+
+            self.scale = self:getActiveMap().scale
+            self.offsetX = self:getActiveMap().offset.x
+            self.offsetY = self:getActiveMap().offset.y
 		end
 		self.grabbedMap = nil
 		self.selectedMap = nil
 	end
 	self.step = {w = self.w / layout.w, h = self.h / layout.h}
-	self.mapView = flag
+	self.mapView.set = flag
 	itemView:triggerMapView(flag)
 	contextMenu:setActiveScreen()
 end
 
 function levelbox:getMapView()
-	return self.mapView
+	return levelbox.mapView.set
 end
 
 function levelbox:link(spawn, target)
@@ -496,7 +515,7 @@ function levelbox:draw()
 	love.graphics.setColor(1,1,1)
 	love.graphics.rectangle("line", 0, 0, self.w, self.h)
 	local valueScale = {mapView = (50 / graphikFont:getHeight() / 10), levelView = (50 / graphikFont:getHeight() / 3)}
-	if self.mapView then
+	if self.getMapView() then
 		for k, map in self:orderBy("z", self.game.maps) do
 			love.graphics.setColor(map.backgroundColor)
 			love.graphics.rectangle("fill", map.x, map.y, map.w, map.h)
