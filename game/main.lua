@@ -128,6 +128,16 @@ function damage(item, amount)
 	end
 end
 
+camera = {
+    offsetX = 0,
+    offsetY = 0,
+};
+
+function camera:reset()
+    self.offsetX = math.min(math.max(sw * 0.5 - player.body:getX(), -sw * (level.data.maps[level.activeMap].sizeX - 1)), 0);
+    self.offsetY = math.min(math.max(sh * 0.5 - player.body:getY(), -sh * (level.data.maps[level.activeMap].sizeY - 1)), 0);
+end
+
 function love.load()
 	world = love.physics.newWorld(0, 9.8 * 2 * love.physics.getMeter())
 	world:setCallbacks(beginContact, endContact, preSolve, postSolve)
@@ -142,12 +152,35 @@ function love.draw()
 	if static.isLoading then 
 		return;
 	end
-	
+
+    local offsetValue = 100;
+
+    local requiredOffsetX = math.min(math.max(sw * 0.5 - player.body:getX(), -sw * (level.data.maps[level.activeMap].sizeX - 1) - offsetValue), offsetValue);
+    local requiredOffsetY = math.min(math.max(sh * 0.5 - player.body:getY(), -sh * (level.data.maps[level.activeMap].sizeY - 1) - offsetValue), offsetValue);
+
+
+    if (camera.offsetX - requiredOffsetX > offsetValue) then
+        camera.offsetX = requiredOffsetX + offsetValue;
+    elseif (camera.offsetX - requiredOffsetX < -offsetValue) then
+        camera.offsetX = requiredOffsetX - offsetValue;
+    end
+
+    if (camera.offsetY - requiredOffsetY > offsetValue) then
+        camera.offsetY = requiredOffsetY + offsetValue;
+    elseif (camera.offsetY - requiredOffsetY < -offsetValue) then
+        camera.offsetY = requiredOffsetY - offsetValue;
+    end
+
+    love.graphics.translate(camera.offsetX, camera.offsetY);
+
 	level:draw()
 	if viewMode then
 		network:draw()
 		player:draw()
 	end
+
+    love.graphics.translate(-camera.offsetX, -camera.offsetY);
+
 	love.graphics.setColor(1,1,1)
 	local iconShift = 0;
 	for i = 1, player.jumpAmount do
