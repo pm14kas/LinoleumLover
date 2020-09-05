@@ -105,10 +105,10 @@ levelbox = {
 				block.color = {0.1, 0.1, 0.1}
 				levelbox:getMap(map).spawns[name] = 
 				{
-					x = -levelbox.offsetX / levelbox.scale, 
-					y = -levelbox.offsetY / levelbox.scale,
-					w = 100,
-					h = 100,
+                    x = block.x,
+                    y = block.y,
+					w = block.w,
+					h = block.h,
 					link = "",
 					c = {1, 1, 1},
 					target = "",
@@ -129,8 +129,8 @@ levelbox = {
 				{
 					x = block.x, 
 					y = block.y,
-					w = 100,
-					h = 200,
+                    w = block.w,
+                    h = block.h,
 					link = "",
 					spawn = "",
 					c = {1, 0, 1},
@@ -534,11 +534,11 @@ function levelbox:draw()
 				map.w / self.w / map.sizeX, 
 				map.h / self.h / map.sizeY
 			)
-			for k, spawn in pairs(self.game.maps[k].spawns) do
+			for kspawn, spawn in pairs(self.game.maps[k].spawns) do
 				love.graphics.setColor(spawn.c)
 				love.graphics.rectangle("fill", spawn.x, spawn.y, spawn.w, spawn.h)
 			end
-			for k, target in pairs(self.game.maps[k].targets) do
+			for ktarget, target in pairs(self.game.maps[k].targets) do
 				love.graphics.setColor(target.c)
 				love.graphics.rectangle("fill", target.x, target.y, target.w, target.h)
 			end
@@ -555,15 +555,15 @@ function levelbox:draw()
 		love.graphics.setColor(0, 0, 0)
 		if self.linkingSpawn then
 			love.graphics.line(
-				self:getSpawn(self.linkingSpawn).x * self:getMap(self.linkingSpawn.map).w / self.w + self:getMap(self.linkingSpawn.map).x, 
-				self:getSpawn(self.linkingSpawn).y * self:getMap(self.linkingSpawn.map).h / self.h + self:getMap(self.linkingSpawn.map).y, 
+				self:getSpawn(self.linkingSpawn).x * self:getMap(self.linkingSpawn.map).w / self.w / self:getMap(self.linkingSpawn.map).sizeX + self:getMap(self.linkingSpawn.map).x,
+				self:getSpawn(self.linkingSpawn).y * self:getMap(self.linkingSpawn.map).h / self.h / self:getMap(self.linkingSpawn.map).sizeY + self:getMap(self.linkingSpawn.map).y,
 				cursor.x,
 				cursor.y
 			)
 		elseif self.linkingTarget then
 			love.graphics.line(
-				self:getTarget(self.linkingTarget).x * self:getMap(self.linkingTarget.map).w / self.w + self:getMap(self.linkingTarget.map).x, 
-				self:getTarget(self.linkingTarget).y * self:getMap(self.linkingTarget.map).h / self.h + self:getMap(self.linkingTarget.map).y, 
+				self:getTarget(self.linkingTarget).x * self:getMap(self.linkingTarget.map).w / self.w / self:getMap(self.linkingTarget.map).sizeX + self:getMap(self.linkingTarget.map).x,
+				self:getTarget(self.linkingTarget).y * self:getMap(self.linkingTarget.map).h / self.h / self:getMap(self.linkingTarget.map).sizeY + self:getMap(self.linkingTarget.map).y,
 				cursor.x, 
 				cursor.y
 			)
@@ -571,12 +571,10 @@ function levelbox:draw()
 
 		for k, link in pairs(self.links) do
 			love.graphics.line(
-				self:getSpawn(link.spawn).x * self:getMap(link.spawn.map).w / self.w + self:getMap(link.spawn.map).x,
-				self:getSpawn(link.spawn).y * self:getMap(link.spawn.map).h / self.h + self:getMap(link.spawn.map).y,
-				self:getTarget(
-					link.target
-					).x * self:getMap(link.target.map).w / self.w + self:getMap(link.target.map).x,
-				self:getTarget(link.target).y * self:getMap(link.target.map).h / self.h + self:getMap(link.target.map).y
+				self:getSpawn(link.spawn).x * self:getMap(link.spawn.map).w / self.w / self:getMap(link.spawn.map).sizeX + self:getMap(link.spawn.map).x,
+				self:getSpawn(link.spawn).y * self:getMap(link.spawn.map).h / self.h / self:getMap(link.spawn.map).sizeY + self:getMap(link.spawn.map).y,
+				self:getTarget(link.target).x * self:getMap(link.target.map).w / self.w / self:getMap(link.target.map).sizeX + self:getMap(link.target.map).x,
+				self:getTarget(link.target).y * self:getMap(link.target.map).h / self.h / self:getMap(link.target.map).sizeY + self:getMap(link.target.map).y
 			)
 		end
 	else

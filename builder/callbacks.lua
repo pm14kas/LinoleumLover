@@ -50,10 +50,10 @@ function love.mousepressed(clickX, clickY, buttonClick, istouch)
 						click.y < map.y + map.h + map.border / levelbox.scale + map.borderW / levelbox.scale / 2 then
 						if levelbox:getLinkmode() then
 							for klink, spawn in pairs(map.spawns) do
-								if	click.x > (spawn.x) * map.w / levelbox.w + map.x and
-									click.x < (spawn.x + spawn.w) * map.w / levelbox.w + map.x and
-									click.y > (spawn.y) * map.h / levelbox.h + map.y and
-									click.y < (spawn.y + spawn.h) * map.h / levelbox.h + map.y then
+								if	click.x > (spawn.x) * map.w / levelbox.w / map.sizeX + map.x and
+									click.x < (spawn.x + spawn.w) * map.w / levelbox.w / map.sizeX + map.x and
+									click.y > (spawn.y) * map.h / levelbox.h / map.sizeY + map.y and
+									click.y < (spawn.y + spawn.h) * map.h / levelbox.h / map.sizeY + map.y then
 									if levelbox.linkingTarget then
 										levelbox:link({spawn = klink, map = k}, levelbox.linkingTarget)
 									elseif not levelbox.linkingSpawn then
@@ -63,10 +63,10 @@ function love.mousepressed(clickX, clickY, buttonClick, istouch)
 								end
 							end
 							for klink, target in pairs(map.targets) do
-								if	click.x > (target.x) * map.w / levelbox.w + map.x and
-									click.x < (target.x + target.w) * map.w / levelbox.w + map.x and
-									click.y > (target.y) * map.h / levelbox.h + map.y and
-									click.y < (target.y + target.h) * map.h / levelbox.h + map.y then
+								if	click.x > (target.x) * map.w / levelbox.w / map.sizeX + map.x and
+									click.x < (target.x + target.w) * map.w / levelbox.w / map.sizeX + map.x and
+									click.y > (target.y) * map.h / levelbox.h / map.sizeY + map.y and
+									click.y < (target.y + target.h) * map.h / levelbox.h / map.sizeY + map.y then
 									if levelbox.linkingSpawn then
 										levelbox:link(levelbox.linkingSpawn, {target = klink, map = k})
 									elseif not levelbox.linkingTarget then
