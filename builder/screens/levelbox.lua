@@ -788,8 +788,8 @@ function levelbox:newMap(sizeX, sizeY)
 		local name = "map" .. self.game.mapsCount+1
 		self.game.maps[name] = 
 		{
-			x = -self.offsetX / self.scale, 
-			y = -self.offsetY / self.scale,
+            x = (cursor.x - self.offsetX) / self.scale,
+            y = (cursor.y - self.offsetY) / self.scale,
 			z = 1,
 			w = 30 * sizeX,
 			h = 30 * sizeY,
