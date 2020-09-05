@@ -902,6 +902,20 @@ function levelbox:save()
 	io.close(savefile)
 end
 
+function levelbox:getGrabbedBlock()
+    return self:getBlock(self.grabbedBlock)
+end
+
+function levelbox:setBlockProperty(name, prop, val)
+    local block = self:getBlock(name)
+    block[prop] = val
+    if block.type == "Spawn" then
+        self:getSpawn(name)[prop] = val
+    elseif self:getGrabbedBlock().type == "Portal" or self:getGrabbedBlock().type == "Checkpoint" then
+        self:getTarget(name)[prop] = val
+    end
+end
+
 function levelbox:update()
 	--love.mouse.setCursor(cursorSt)
 	if love.keyboard.isDown("space") then 
@@ -910,75 +924,65 @@ function levelbox:update()
 		self.moving = true
 	end
 	if self.grabbedBlock then
-		if  cursor.x > self:getBlock(self.grabbedBlock).x - self:getBlock(self.grabbedBlock).border / self.scale - self:getBlock(self.grabbedBlock).borderW / self.scale / 2 and
-			cursor.x < self:getBlock(self.grabbedBlock).x and
-			cursor.y > self:getBlock(self.grabbedBlock).y - self:getBlock(self.grabbedBlock).border / self.scale - self:getBlock(self.grabbedBlock).borderW / self.scale / 2 and
-			cursor.y < self:getBlock(self.grabbedBlock).y + self:getBlock(self.grabbedBlock).border / self.scale + self:getBlock(self.grabbedBlock).borderW / self.scale / 2 + self:getBlock(self.grabbedBlock).h 
+		if  cursor.x > self:getGrabbedBlock().x - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
+			cursor.x < self:getGrabbedBlock().x and
+			cursor.y > self:getGrabbedBlock().y - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
+			cursor.y < self:getGrabbedBlock().y + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / self.scale / 2 + self:getGrabbedBlock().h 
 			and not self.grab or self.resize.W then
 			love.mouse.setCursor(cursorWE)
 			if love.mouse.isDown(1) then
 				self.resize.W = true
-				local dx = cursor.x - self:getBlock(self.grabbedBlock).grabbedX
-				self:getBlock(self.grabbedBlock).grabbedX = cursor.x
-				self:getBlock(self.grabbedBlock).grabbedY = cursor.y
-				self:getBlock(self.grabbedBlock).w = self:getBlock(self.grabbedBlock).w - dx
-				self:getBlock(self.grabbedBlock).x = math.min(math.max(0, self:getBlock(self.grabbedBlock).x + dx), self.w - self:getBlock(self.grabbedBlock).w)
-				if self:getBlock(self.grabbedBlock).type == "Spawn" then
-					self:getSpawn(self.grabbedBlock).x = math.min(math.max(0, self:getSpawn(self.grabbedBlock).x + dx), self.w - self:getBlock(self.grabbedBlock).w)
-				elseif self:getBlock(self.grabbedBlock).type == "Portal" or self:getBlock(self.grabbedBlock).type == "Checkpoint" then
-					self:getTarget(self.grabbedBlock).x = math.min(math.max(0, self:getTarget(self.grabbedBlock).x + dx), self.w - self:getBlock(self.grabbedBlock).w)
-				end
+				local dx = cursor.x - self:getGrabbedBlock().grabbedX
+				self:getGrabbedBlock().grabbedX = cursor.x
+				self:getGrabbedBlock().grabbedY = cursor.y
+                self:setBlockProperty(self.grabbedBlock, "w", self:getGrabbedBlock().w - dx)
+                self:setBlockProperty(self.grabbedBlock, "x", math.min(math.max(0, self:getGrabbedBlock().x + dx), self.w - self:getGrabbedBlock().w))
 			else 
 				self.resize.W = false
 			end
-		elseif  cursor.x > self:getBlock(self.grabbedBlock).x + self:getBlock(self.grabbedBlock).w and
-				cursor.x < self:getBlock(self.grabbedBlock).x + self:getBlock(self.grabbedBlock).w + self:getBlock(self.grabbedBlock).border / self.scale + self:getBlock(self.grabbedBlock).borderW / self.scale / 2 and
-				cursor.y > self:getBlock(self.grabbedBlock).y - self:getBlock(self.grabbedBlock).border / self.scale - self:getBlock(self.grabbedBlock).borderW / self.scale / 2 and
-				cursor.y < self:getBlock(self.grabbedBlock).y + self:getBlock(self.grabbedBlock).border / self.scale + self:getBlock(self.grabbedBlock).borderW / self.scale / 2 + self:getBlock(self.grabbedBlock).h 
+		elseif  cursor.x > self:getGrabbedBlock().x + self:getGrabbedBlock().w and
+				cursor.x < self:getGrabbedBlock().x + self:getGrabbedBlock().w + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / self.scale / 2 and
+				cursor.y > self:getGrabbedBlock().y - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
+				cursor.y < self:getGrabbedBlock().y + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / self.scale / 2 + self:getGrabbedBlock().h 
 				and not self.grab or self.resize.E then
 			love.mouse.setCursor(cursorWE)
 			if love.mouse.isDown(1) then
 				self.resize.E = true
-				local dx = cursor.x - self:getBlock(self.grabbedBlock).grabbedX
-				self:getBlock(self.grabbedBlock).grabbedX = cursor.x
-				self:getBlock(self.grabbedBlock).grabbedY = cursor.y
-				self:getBlock(self.grabbedBlock).w = math.min(math.max(0, self:getBlock(self.grabbedBlock).w + dx), self.w - self:getBlock(self.grabbedBlock).x)
+				local dx = cursor.x - self:getGrabbedBlock().grabbedX
+				self:getGrabbedBlock().grabbedX = cursor.x
+				self:getGrabbedBlock().grabbedY = cursor.y
+                self:setBlockProperty(self.grabbedBlock, "w", math.min(math.max(0, self:getGrabbedBlock().w + dx), self.w - self:getGrabbedBlock().x))
 			else 
 				self.resize.E = false
 			end
-		elseif  cursor.x > self:getBlock(self.grabbedBlock).x - self:getBlock(self.grabbedBlock).border / self.scale - self:getBlock(self.grabbedBlock).borderW / self.scale / 2 and
-				cursor.x < self:getBlock(self.grabbedBlock).x + self:getBlock(self.grabbedBlock).w + self:getBlock(self.grabbedBlock).border / self.scale + self:getBlock(self.grabbedBlock).borderW / self.scale / 2 and
-				cursor.y > self:getBlock(self.grabbedBlock).y - self:getBlock(self.grabbedBlock).border / self.scale - self:getBlock(self.grabbedBlock).borderW / self.scale / 2 and
-				cursor.y < self:getBlock(self.grabbedBlock).y
+		elseif  cursor.x > self:getGrabbedBlock().x - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
+				cursor.x < self:getGrabbedBlock().x + self:getGrabbedBlock().w + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / self.scale / 2 and
+				cursor.y > self:getGrabbedBlock().y - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
+				cursor.y < self:getGrabbedBlock().y
 				and not self.grab or self.resize.N then
 			love.mouse.setCursor(cursorNS)
 			if love.mouse.isDown(1) then
 				self.resize.N = true
-				local dy = cursor.y - self:getBlock(self.grabbedBlock).grabbedY
-				self:getBlock(self.grabbedBlock).grabbedX = cursor.x
-				self:getBlock(self.grabbedBlock).grabbedY = cursor.y
-				self:getBlock(self.grabbedBlock).h = self:getBlock(self.grabbedBlock).h - dy
-				self:getBlock(self.grabbedBlock).y = math.min(math.max(0, self:getBlock(self.grabbedBlock).y + dy), self.h - self:getBlock(self.grabbedBlock).h)
-				if self:getBlock(self.grabbedBlock).type == "Spawn" then
-					self:getSpawn(self.grabbedBlock).y = math.min(math.max(0, self:getSpawn(self.grabbedBlock).y + dy), self.h - self:getBlock(self.grabbedBlock).h)
-				elseif self:getBlock(self.grabbedBlock).type == "Portal" or self:getBlock(self.grabbedBlock).type == "Checkpoint" then
-					self:getTarget(self.grabbedBlock).y = math.min(math.max(0, self:getTarget(self.grabbedBlock).y + dy), self.h - self:getBlock(self.grabbedBlock).h)
-				end
+				local dy = cursor.y - self:getGrabbedBlock().grabbedY
+				self:getGrabbedBlock().grabbedX = cursor.x
+				self:getGrabbedBlock().grabbedY = cursor.y
+                self:setBlockProperty(self.grabbedBlock, "h", self:getGrabbedBlock().h - dy)
+                self:setBlockProperty(self.grabbedBlock, "y",  math.min(math.max(0, self:getGrabbedBlock().y + dy), self.h - self:getGrabbedBlock().h))
 			else 
 				self.resize.N = false
 			end
-		elseif  cursor.x > self:getBlock(self.grabbedBlock).x - self:getBlock(self.grabbedBlock).border / self.scale - self:getBlock(self.grabbedBlock).borderW / self.scale / 2 and
-				cursor.x < self:getBlock(self.grabbedBlock).x + self:getBlock(self.grabbedBlock).w + self:getBlock(self.grabbedBlock).border / self.scale + self:getBlock(self.grabbedBlock).borderW / self.scale / 2 and
-				cursor.y > self:getBlock(self.grabbedBlock).y + self:getBlock(self.grabbedBlock).h and
-				cursor.y < self:getBlock(self.grabbedBlock).y + self:getBlock(self.grabbedBlock).h + self:getBlock(self.grabbedBlock).border / self.scale + self:getBlock(self.grabbedBlock).borderW / self.scale / 2
+		elseif  cursor.x > self:getGrabbedBlock().x - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
+				cursor.x < self:getGrabbedBlock().x + self:getGrabbedBlock().w + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / self.scale / 2 and
+				cursor.y > self:getGrabbedBlock().y + self:getGrabbedBlock().h and
+				cursor.y < self:getGrabbedBlock().y + self:getGrabbedBlock().h + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / self.scale / 2
 				and not self.grab or self.resize.S then
 			love.mouse.setCursor(cursorNS)
 			if love.mouse.isDown(1) then
 				self.resize.S = true
-				local dy = cursor.y - self:getBlock(self.grabbedBlock).grabbedY
-				self:getBlock(self.grabbedBlock).grabbedX = cursor.x
-				self:getBlock(self.grabbedBlock).grabbedY = cursor.y
-				self:getBlock(self.grabbedBlock).h = math.min(math.max(0, self:getBlock(self.grabbedBlock).h + dy), self.h - self:getBlock(self.grabbedBlock).y)
+				local dy = cursor.y - self:getGrabbedBlock().grabbedY
+				self:getGrabbedBlock().grabbedX = cursor.x
+				self:getGrabbedBlock().grabbedY = cursor.y
+                self:setBlockProperty(self.grabbedBlock, "h", math.min(math.max(0, self:getGrabbedBlock().h + dy), self.h - self:getGrabbedBlock().y))
 			else 
 				self.resize.S = false
 			end
@@ -994,60 +998,53 @@ function levelbox:update()
 		if not self.resize.W and not self.resize.E and not self.resize.S and not self.resize.N then 
 			if love.mouse.isDown(1) then
 				self:setGrab(true)
-				local dx = cursor.x - self:getBlock(self.grabbedBlock).grabbedX
-				local dy = cursor.y - self:getBlock(self.grabbedBlock).grabbedY
-				self:getBlock(self.grabbedBlock).x = math.min(math.max(0, self:getBlock(self.grabbedBlock).x + dx), self.w - self:getBlock(self.grabbedBlock).w)
-				self:getBlock(self.grabbedBlock).y = math.min(math.max(0, self:getBlock(self.grabbedBlock).y + dy), self.h - self:getBlock(self.grabbedBlock).h)
-				if self:getBlock(self.grabbedBlock).type == "Spawn" then
-					self:getSpawn(self.grabbedBlock).x = math.min(math.max(0, self:getSpawn(self.grabbedBlock).x + dx), self.w - self:getBlock(self.grabbedBlock).w)
-					self:getSpawn(self.grabbedBlock).y = math.min(math.max(0, self:getSpawn(self.grabbedBlock).y + dy), self.h - self:getBlock(self.grabbedBlock).h)
-				elseif self:getBlock(self.grabbedBlock).type == "Portal" or self:getBlock(self.grabbedBlock).type == "Checkpoint" then
-					self:getTarget(self.grabbedBlock).x = math.min(math.max(0, self:getTarget(self.grabbedBlock).x + dx), self.w - self:getBlock(self.grabbedBlock).w)
-					self:getTarget(self.grabbedBlock).y = math.min(math.max(0, self:getTarget(self.grabbedBlock).y + dy), self.h - self:getBlock(self.grabbedBlock).h)
-				end
+				local dx = cursor.x - self:getGrabbedBlock().grabbedX
+				local dy = cursor.y - self:getGrabbedBlock().grabbedY
+                self:setBlockProperty(self.grabbedBlock, "x", math.min(math.max(0, self:getGrabbedBlock().x + dx), self.w - self:getGrabbedBlock().w))
+                self:setBlockProperty(self.grabbedBlock, "y", math.min(math.max(0, self:getGrabbedBlock().y + dy), self.h - self:getGrabbedBlock().h))
 				local stuck = {x = false, y = false}
 				local stuckWith = {w = 10 * self.step.w, h = 10 * self.step.h}
 				for kblock, block in pairs(self:getActiveMap().blocks) do
 					if kblock ~= self.grabbedBlock then
-						if  between(-stuckWith.w, block.x - (self:getBlock(self.grabbedBlock).x + self:getBlock(self.grabbedBlock).w), stuckWith.w) and
-							(block.y < self:getBlock(self.grabbedBlock).y + self:getBlock(self.grabbedBlock).h and self:getBlock(self.grabbedBlock).y < block.y + block.h)
+						if  between(-stuckWith.w, block.x - (self:getGrabbedBlock().x + self:getGrabbedBlock().w), stuckWith.w) and
+							(block.y < self:getGrabbedBlock().y + self:getGrabbedBlock().h and self:getGrabbedBlock().y < block.y + block.h)
 							then
-							self:getBlock(self.grabbedBlock).x = block.x - self:getBlock(self.grabbedBlock).w
+							self:getGrabbedBlock().x = block.x - self:getGrabbedBlock().w
 							stuck.x = true
-						elseif between(-stuckWith.w, self:getBlock(self.grabbedBlock).x - (block.x + block.w), stuckWith.w) and
-							(block.y < self:getBlock(self.grabbedBlock).y + self:getBlock(self.grabbedBlock).h and self:getBlock(self.grabbedBlock).y < block.y + block.h)
+						elseif between(-stuckWith.w, self:getGrabbedBlock().x - (block.x + block.w), stuckWith.w) and
+							(block.y < self:getGrabbedBlock().y + self:getGrabbedBlock().h and self:getGrabbedBlock().y < block.y + block.h)
 							then
-							self:getBlock(self.grabbedBlock).x = block.x + block.w
+							self:getGrabbedBlock().x = block.x + block.w
 							stuck.x = true
-						elseif between(-stuckWith.h, block.y - (self:getBlock(self.grabbedBlock).y + self:getBlock(self.grabbedBlock).h), stuckWith.h) and
-							(block.x < self:getBlock(self.grabbedBlock).x + self:getBlock(self.grabbedBlock).w and self:getBlock(self.grabbedBlock).x < block.x + block.w)
+						elseif between(-stuckWith.h, block.y - (self:getGrabbedBlock().y + self:getGrabbedBlock().h), stuckWith.h) and
+							(block.x < self:getGrabbedBlock().x + self:getGrabbedBlock().w and self:getGrabbedBlock().x < block.x + block.w)
 							then
-							self:getBlock(self.grabbedBlock).y = block.y - self:getBlock(self.grabbedBlock).h
+							self:getGrabbedBlock().y = block.y - self:getGrabbedBlock().h
 							stuck.y = true
-						elseif between(-stuckWith.h, self:getBlock(self.grabbedBlock).y - (block.y + block.h), stuckWith.h) and
-							(block.x < self:getBlock(self.grabbedBlock).x + self:getBlock(self.grabbedBlock).w and self:getBlock(self.grabbedBlock).x < block.x + block.w)
+						elseif between(-stuckWith.h, self:getGrabbedBlock().y - (block.y + block.h), stuckWith.h) and
+							(block.x < self:getGrabbedBlock().x + self:getGrabbedBlock().w and self:getGrabbedBlock().x < block.x + block.w)
 							then
-							self:getBlock(self.grabbedBlock).y = block.y + block.h
+							self:getGrabbedBlock().y = block.y + block.h
 							stuck.y = true
 						end
 						--if stuck.x or stuck.y then break end
 					end
 				end
 				if not stuck.x then
-					self:getBlock(self.grabbedBlock).grabbedX = cursor.x
+					self:getGrabbedBlock().grabbedX = cursor.x
 				end
 				if not stuck.y then
-					self:getBlock(self.grabbedBlock).grabbedY = cursor.y
+					self:getGrabbedBlock().grabbedY = cursor.y
 				end
 			else
 				self:setGrab(false)
 			end
 		end
 		if not love.mouse.isDown(1) then
-			self:getSelectedBlock().x = customRound(self:getSelectedBlock().x, self.w / layout.w)
-			self:getSelectedBlock().y = customRound(self:getSelectedBlock().y, self.h / layout.h)
-			self:getSelectedBlock().w = customRound(self:getSelectedBlock().w, self.w / layout.w)
-			self:getSelectedBlock().h = customRound(self:getSelectedBlock().h, self.h / layout.h)
+            self:setBlockProperty(self.grabbedBlock, "x", customRound(self:getSelectedBlock().x, self.w / layout.w))
+            self:setBlockProperty(self.grabbedBlock, "y", customRound(self:getSelectedBlock().y, self.h / layout.h))
+            self:setBlockProperty(self.grabbedBlock, "w", customRound(self:getSelectedBlock().w, self.w / layout.w))
+            self:setBlockProperty(self.grabbedBlock, "h", customRound(self:getSelectedBlock().h, self.h / layout.h))
 			self:getSelectedBlock().grabbedX = customRound(self:getSelectedBlock().grabbedX, self.w / layout.w)
 			self:getSelectedBlock().grabbedY = customRound(self:getSelectedBlock().grabbedY, self.h / layout.h)
 		end
