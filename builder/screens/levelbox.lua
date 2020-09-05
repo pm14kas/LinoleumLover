@@ -224,10 +224,10 @@ levelbox = {
 
 function levelbox:load()
 	if not self.game.linksCount then self.game.linksCount = #self.links end
-	if not self.game.activeMap then self.game.activeMap = "map0" end
 	if not self.game.screenScale then self.game.screenScale = {w = 1280 / layout.w, h = 720 / layout.h} end
 	self.step = {w = self.w / layout.w, h = self.h / layout.h}
 	for kmap, map in pairs(self.game.maps) do
+        if not self.game.activeMap then self.game.activeMap = kmap end
 		for kblock, block in pairs(map.blocks) do
 			if not block.z then block.z = 1 end
 			-----------------type conversion-----------------------
