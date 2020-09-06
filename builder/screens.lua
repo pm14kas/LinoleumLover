@@ -28,6 +28,14 @@ function screen:new(name, params)
 	return self.s[name]
 end
 
+function screen:load(name)
+    self:get(name):load()
+end
+
+function screen:getAll()
+    return pairs(self.s)
+end
+
 function screen:show(name)
 	if name == nil then error("oops") end
 	love.graphics.setScissor(self:get(name).X, self:get(name).Y, self:get(name).w, self:get(name).h)
