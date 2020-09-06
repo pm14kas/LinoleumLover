@@ -225,6 +225,13 @@ levelbox = {
     }
 }
 
+function levelbox:getStep()
+    return {
+        w = self.step.w * self.step.mult,
+        h = self.step.h * self.step.mult,
+    }
+end
+
 function levelbox:load()
     if not self.game.linksCount then
         self.game.linksCount = #self.links
@@ -232,7 +239,7 @@ function levelbox:load()
     if not self.game.screenScale then
         self.game.screenScale = { w = 1280 / layout.w, h = 720 / layout.h }
     end
-    self.step = { w = self.w / layout.w, h = self.h / layout.h }
+    self.step = { w = self.w / layout.w, h = self.h / layout.h, mult = 1, max = 99 }
     for kmap, map in pairs(self.game.maps) do
         if not self.game.activeMap then
             self.game.activeMap = kmap
@@ -324,12 +331,12 @@ function levelbox:load()
                 block.innerType = 1
             end
             -----------------/other-----------------------
-            block.x = customRound(block.x / self.game.screenScale.w * w / layout.w, self.step.w)
-            block.y = customRound(block.y / self.game.screenScale.h * h / layout.h, self.step.h)
-            block.w = customRound(block.w / self.game.screenScale.w * w / layout.w, self.step.w)
-            block.h = customRound(block.h / self.game.screenScale.h * h / layout.h, self.step.h)
-            block.grabbedX = customRound(block.grabbedX, self.step.w)
-            block.grabbedY = customRound(block.grabbedY, self.step.h)
+            block.x = customRound(block.x / self.game.screenScale.w * w / layout.w, self:getStep().w)
+            block.y = customRound(block.y / self.game.screenScale.h * h / layout.h, self:getStep().h)
+            block.w = customRound(block.w / self.game.screenScale.w * w / layout.w, self:getStep().w)
+            block.h = customRound(block.h / self.game.screenScale.h * h / layout.h, self:getStep().h)
+            block.grabbedX = customRound(block.grabbedX, self:getStep().w)
+            block.grabbedY = customRound(block.grabbedY, self:getStep().h)
         end
         self.game.screenScale = { w = w / layout.w, h = h / layout.h }
         if not map.z then
@@ -503,7 +510,8 @@ function levelbox:setMapView(flag)
         self.grabbedMap = nil
         self.selectedMap = nil
     end
-    self.step = { w = self.w / layout.w, h = self.h / layout.h }
+    self.step.w = self.w / layout.w
+    self.step.h = self.h / layout.h
     self.mapView.set = flag
     itemView:triggerMapView(flag)
     contextMenu:setActiveScreen()
@@ -740,15 +748,15 @@ function levelbox:draw()
             for i = 0, math.max(layout.w, layout.h) do
                 love.graphics.line(
                         0,
-                        i * self.step.h,
+                        i * self:getStep().h,
                         self.w,
-                        i * self.step.h
+                        i * self:getStep().h
                 )--horizontal
 
                 love.graphics.line(
-                        i * self.step.w,
+                        i * self:getStep().w,
                         0,
-                        i * self.step.w,
+                        i * self:getStep().w,
                         self.h
                 )--vertical
             end
@@ -1136,12 +1144,12 @@ function levelbox:update()
             end
         end
         if not love.mouse.isDown(1) then
-            self:setBlockProperty(self.grabbedBlock, "x", customRound(self:getSelectedBlock().x, self.step.w))
-            self:setBlockProperty(self.grabbedBlock, "y", customRound(self:getSelectedBlock().y, self.step.h))
-            self:setBlockProperty(self.grabbedBlock, "w", customRound(self:getSelectedBlock().w, self.step.w))
-            self:setBlockProperty(self.grabbedBlock, "h", customRound(self:getSelectedBlock().h, self.step.h))
-            self:getSelectedBlock().grabbedX = customRound(self:getSelectedBlock().grabbedX, self.step.w)
-            self:getSelectedBlock().grabbedY = customRound(self:getSelectedBlock().grabbedY, self.step.w)
+            self:setBlockProperty(self.grabbedBlock, "x", customRound(self:getSelectedBlock().x, self:getStep().w))
+            self:setBlockProperty(self.grabbedBlock, "y", customRound(self:getSelectedBlock().y, self:getStep().h))
+            self:setBlockProperty(self.grabbedBlock, "w", customRound(self:getSelectedBlock().w, self:getStep().w))
+            self:setBlockProperty(self.grabbedBlock, "h", customRound(self:getSelectedBlock().h, self:getStep().h))
+            self:getSelectedBlock().grabbedX = customRound(self:getSelectedBlock().grabbedX, self:getStep().w)
+            self:getSelectedBlock().grabbedY = customRound(self:getSelectedBlock().grabbedY, self:getStep().w)
         end
     elseif self.grabbedMap then
         if cursor.x > self.game.maps[self.grabbedMap].x - self.game.maps[self.grabbedMap].border / self.scale - self.game.maps[self.grabbedMap].borderW / self.scale / 2 and

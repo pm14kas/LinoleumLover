@@ -66,7 +66,10 @@ function love.load()
 		end
 	}
 	love.graphics.setBackgroundColor(204 / 255, 153 / 255, 72 / 255)
-	levelbox:load()
+    levelbox:load()
+    for name, s in screen:getAll() do
+        if s.load then s:load() end
+    end
 end
 function love.draw()
 	cursor.x, cursor.y = love.mouse.getPosition()
