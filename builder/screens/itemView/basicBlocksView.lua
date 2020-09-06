@@ -43,11 +43,25 @@ itemView.screens["basicBlocks"].types = {
 			levelbox:newBlock("AI")
 		end
 	},--AI,
-	{
-		imageFilename = "images/icons/icon_item.png",
-		sign = "Item",
-		new = function()
-			levelbox:newBlock("Item")
-		end
-	}--item
+    {
+        imageFilename = "images/icons/icon_item.png",
+        sign = "Item",
+        new = function()
+            levelbox:newBlock("Item")
+        end
+    },--item,
+    {
+        imageFilename = "images/icons/icon_button.png",
+        sign = "Button",
+        new = function()
+            levelbox:newBlock("Button")
+        end
+    },--button,
+    {
+        imageFilename = "images/icons/icon_door.png",
+        sign = "Door",
+        new = function()
+            levelbox:newBlock("Door")
+        end
+    },--button
 }

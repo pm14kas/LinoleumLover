@@ -15,7 +15,9 @@ contextMenu.screenNames = {
 	"forItem",
 	"forPortal",
 	"forSpawn",
-	"forText"
+	"forText",
+	"forButton",
+	"forDoor"
 }
 
 contextMenu.screens = {}

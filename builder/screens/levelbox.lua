@@ -12,10 +12,10 @@ function screen.s.levelbox:show()
     love.graphics.scale(levelbox.scale)
     cursor.x = (cursor.x - levelbox.offsetX) / levelbox.scale
     cursor.y = (cursor.y - levelbox.offsetY) / levelbox.scale
-
+    
     levelbox:update()
     levelbox:draw()
-
+    
     cursor.y = (cursor.y * levelbox.scale) + levelbox.offsetY
     cursor.x = (cursor.x * levelbox.scale) + levelbox.offsetX
     love.graphics.scale(1 / levelbox.scale)
@@ -54,37 +54,37 @@ levelbox = {
     linkingTarget = nil,
     links = file_exists("linksForBuilder.linoleum") and json.decode(read_file("linksForBuilder.linoleum")) or {},
     game = file_exists("mapForBuilder.linoleum") and json.decode(read_file("mapForBuilder.linoleum")) or
-            {
-                maps = {
-                    ["map0"] = {
-                        x = 0,
-                        y = 0,
-                        scale = 1,
-                        offset = { x = 0, y = 0 },
-                        sizeX = 1,
-                        sizeY = 1,
-                        w = 30,
-                        h = 30,
-                        border = 10,
-                        borderW = 5,
-                        color = { 1, 0, 0 },
-                        grabbedX = 25,
-                        grabbedY = 50,
-                        value = "m0",
-                        type = "map",
-                        blocks = {},
-                        spawns = {},
-                        targets = {},
-                        blocksCount = 0,
-                        backgroundColor = { 1, 1, 1 }
-                    },
+        {
+            maps = {
+                ["map0"] = {
+                    x = 0,
+                    y = 0,
+                    scale = 1,
+                    offset = { x = 0, y = 0 },
+                    sizeX = 1,
+                    sizeY = 1,
+                    w = 30,
+                    h = 30,
+                    border = 10,
+                    borderW = 5,
+                    color = { 1, 0, 0 },
+                    grabbedX = 25,
+                    grabbedY = 50,
+                    value = "m0",
+                    type = "map",
+                    blocks = {},
+                    spawns = {},
+                    targets = {},
+                    blocksCount = 0,
+                    backgroundColor = { 1, 1, 1 }
                 },
-                activeSpawn = "",
-                mapsCount = 0,
-                linksCount = 0,
-                activeMap = "map0",
-                screenScale = { w = w / layout.w, h = h / layout.h }
             },
+            activeSpawn = "",
+            mapsCount = 0,
+            linksCount = 0,
+            activeMap = "map0",
+            screenScale = { w = w / layout.w, h = h / layout.h }
+        },
     mapView = {
         set = false,
         scale = 1,
@@ -201,8 +201,6 @@ levelbox = {
                 block.h = 50
                 block.entityType = contextMenu.screens["forItem"].categories[1].types[1].sign
                 block.saveTo = "items"
-                block.category = 1
-                block.innerType = 1
             end,
             save = function(name, arrayToSave, map)
                 local block = levelbox:getBlock(name, map)
@@ -221,9 +219,50 @@ levelbox = {
                 local block = levelbox:getBlock(name, map)
                 arrayToSave.maps[map][block.saveTo][name].value = block.value
             end,
+        },
+        Button = {
+            new = function(name, map)
+                local block = levelbox:getBlock(name, map)
+                block.h = 50
+                block.w = 50
+                block.saveTo = "buttons"
+                block.color = { 1, 1, 1 }
+                block.links = {}
+            end,
+            save = function(name, arrayToSave, map)
+                local block = levelbox:getBlock(name, map)
+                arrayToSave.maps[map][block.saveTo][name].links = block.links
+            end,
+        },
+        Door = {
+            new = function(name, map)
+                local block = levelbox:getBlock(name, map)
+                block.saveTo = "doors"
+            end,
+            save = function(name, arrayToSave, map)
+            end,
         }
     }
 }
+
+function levelbox:loadHelpers()
+    local dirs = {
+        "levelbox",
+        "levelbox/updatable",
+        "levelbox/levelView",
+        "levelbox/levelView/blocks",
+        "levelbox/mapView",
+        "levelbox/mapView/maps",
+    }
+    for i = 1, #dirs, 1 do
+        local files = love.filesystem.getDirectoryItems(dirs[i])
+        for k, file in ipairs(files) do
+            if love.filesystem.getInfo(dirs[i] .. "/" .. file).type == "file" then
+                require(dirs[i] .. "/" .. file:sub(1, -5))
+            end
+        end
+    end
+end
 
 function levelbox:getStep()
     return {
@@ -233,6 +272,8 @@ function levelbox:getStep()
 end
 
 function levelbox:load()
+    self:loadHelpers()
+    
     if not self.game.linksCount then
         self.game.linksCount = #self.links
     end
@@ -247,6 +288,12 @@ function levelbox:load()
         for kblock, block in pairs(map.blocks) do
             if not block.z then
                 block.z = 1
+            end
+            if not block.name then
+                block.name = kblock
+            end
+            if not block.updatableType then
+                block.updatableType = "block"
             end
             -----------------type conversion-----------------------
             if block.type == "block" then
@@ -354,8 +401,14 @@ function levelbox:load()
         if not map.offset then
             map.offset = { x = 0, y = 0 }
         end
+        if not map.name then
+            map.name = kmap
+        end
+        if not map.updatableType then
+            map.updatableType = "map"
+        end
     end
-
+    
     for klink, link in pairs(levelbox.links) do
         local exists = false
         for kmap, map in pairs(levelbox.game.maps) do
@@ -388,29 +441,6 @@ function levelbox:setGrab(flag)
     self.grab = flag
 end
 
-function levelbox:getBlock(block, map)
-    map = map or self.game.activeMap
-    return self:getMap(map).blocks[block]
-end
-
-function levelbox:getSelectedBlock()
-    return self:getBlock(self.selectedBlock)
-end
-
-function levelbox:getSelectedMap()
-    return self:getMap(self.selectedMap)
-end
-
-function levelbox:selectBlock(block)
-    if self.selectedBlock and button:exists("new" .. self:getSelectedBlock().entityType) then
-        button:get("new" .. self:getSelectedBlock().entityType).color = button:get("new" .. self:getSelectedBlock().entityType).colorUnclicked
-    end
-    self.selectedBlock = block
-    if block and button:exists("new" .. self:getSelectedBlock().entityType) then
-        button:get("new" .. self:getSelectedBlock().entityType).color = button:get("new" .. self:getSelectedBlock().entityType).colorClicked
-    end
-end
-
 function levelbox:getSpawn(block, map)
     local spawn = block.spawn or block
     map = map or block.map or self.game.activeMap
@@ -421,10 +451,6 @@ function levelbox:getTarget(block, map)
     local target = block.target or block
     map = map or block.map or self.game.activeMap
     return self:getMap(map).targets[target]
-end
-
-function levelbox:getMap(map)
-    return self.game.maps[map]
 end
 
 function levelbox:makeActiveSpawn()
@@ -502,7 +528,7 @@ function levelbox:setMapView(flag)
             self.scaleMin = 1 / math.max(self:getActiveMap().sizeX, self:getActiveMap().sizeY)
             self.w = screen:get("levelbox").w * self:getActiveMap().sizeX
             self.h = screen:get("levelbox").h * self:getActiveMap().sizeY
-
+            
             self.scale = self:getActiveMap().scale
             self.offsetX = self:getActiveMap().offset.x
             self.offsetY = self:getActiveMap().offset.y
@@ -557,302 +583,79 @@ end
 function levelbox:draw()
     love.graphics.setColor(1, 1, 1)
     love.graphics.rectangle("line", 0, 0, self.w, self.h)
-    local valueScale = { mapView = (50 / graphikFont:getHeight() / 10), levelView = (50 / graphikFont:getHeight() / 3) }
     if self.getMapView() then
         for k, map in self:orderBy("z", self.game.maps) do
-            love.graphics.setColor(map.backgroundColor)
-            love.graphics.rectangle("fill", map.x, map.y, map.w, map.h)
-            if k == self.selectedMap then
-                love.graphics.setLineWidth(map.borderW / self.scale)
-                love.graphics.rectangle("line", map.x - map.border / self.scale, map.y - map.border / self.scale, map.w + map.border / self.scale * 2, map.h + map.border / self.scale * 2)
-                love.graphics.setLineWidth(1)
-
-                love.graphics.setColor(1 - map.backgroundColor[1], 1 - map.backgroundColor[2], 1 - map.backgroundColor[3])
-                love.graphics.setFont(graphikFont)
-                love.graphics.printf(
-                        "z = " .. map.z,
-                        map.x,
-                        map.y,
-                        map.w / valueScale.mapView,
-                        "left",
-                        0,
-                        valueScale.mapView,
-                        valueScale.mapView
-                )
-            end
-            love.graphics.setColor(1, 1, 1)
-            love.graphics.setFont(graphikFont)
-            love.graphics.printf(
-                    map.value .. "(" .. map.sizeX .. "x" .. map.sizeY .. ")",
-                    map.x,
-                    map.y - 5,
-                    map.w / valueScale.mapView,
-                    "center",
-                    0,
-                    valueScale.mapView,
-                    valueScale.mapView
-            )
-            love.graphics.translate(
-                    map.x,
-                    map.y
-            )
-            love.graphics.scale(
-                    map.w / self.w / map.sizeX,
-                    map.h / self.h / map.sizeY
-            )
-            for kspawn, spawn in pairs(self.game.maps[k].spawns) do
-                love.graphics.setColor(spawn.c)
-                love.graphics.rectangle("fill", spawn.x, spawn.y, spawn.w, spawn.h)
-            end
-            for ktarget, target in pairs(self.game.maps[k].targets) do
-                love.graphics.setColor(target.c)
-                love.graphics.rectangle("fill", target.x, target.y, target.w, target.h)
-            end
-            love.graphics.scale(
-                    self.w / map.w * map.sizeX,
-                    self.h / map.h * map.sizeY
-            )
-            love.graphics.translate(
-                    -map.x,
-                    -map.y
-            )
+            self:drawMap(k)
         end
-
+        
         love.graphics.setColor(0, 0, 0)
         if self.linkingSpawn then
             love.graphics.line(
-                    self:getSpawn(self.linkingSpawn).x * self:getMap(self.linkingSpawn.map).w / self.w / self:getMap(self.linkingSpawn.map).sizeX + self:getMap(self.linkingSpawn.map).x,
-                    self:getSpawn(self.linkingSpawn).y * self:getMap(self.linkingSpawn.map).h / self.h / self:getMap(self.linkingSpawn.map).sizeY + self:getMap(self.linkingSpawn.map).y,
-                    cursor.x,
-                    cursor.y
+                self:getSpawn(self.linkingSpawn).x * self:getMap(self.linkingSpawn.map).w / self.w / self:getMap(self.linkingSpawn.map).sizeX + self:getMap(self.linkingSpawn.map).x,
+                self:getSpawn(self.linkingSpawn).y * self:getMap(self.linkingSpawn.map).h / self.h / self:getMap(self.linkingSpawn.map).sizeY + self:getMap(self.linkingSpawn.map).y,
+                cursor.x,
+                cursor.y
             )
         elseif self.linkingTarget then
             love.graphics.line(
-                    self:getTarget(self.linkingTarget).x * self:getMap(self.linkingTarget.map).w / self.w / self:getMap(self.linkingTarget.map).sizeX + self:getMap(self.linkingTarget.map).x,
-                    self:getTarget(self.linkingTarget).y * self:getMap(self.linkingTarget.map).h / self.h / self:getMap(self.linkingTarget.map).sizeY + self:getMap(self.linkingTarget.map).y,
-                    cursor.x,
-                    cursor.y
+                self:getTarget(self.linkingTarget).x * self:getMap(self.linkingTarget.map).w / self.w / self:getMap(self.linkingTarget.map).sizeX + self:getMap(self.linkingTarget.map).x,
+                self:getTarget(self.linkingTarget).y * self:getMap(self.linkingTarget.map).h / self.h / self:getMap(self.linkingTarget.map).sizeY + self:getMap(self.linkingTarget.map).y,
+                cursor.x,
+                cursor.y
             )
         end
-
+        
         for k, link in pairs(self.links) do
             love.graphics.line(
-                    self:getSpawn(link.spawn).x * self:getMap(link.spawn.map).w / self.w / self:getMap(link.spawn.map).sizeX + self:getMap(link.spawn.map).x,
-                    self:getSpawn(link.spawn).y * self:getMap(link.spawn.map).h / self.h / self:getMap(link.spawn.map).sizeY + self:getMap(link.spawn.map).y,
-                    self:getTarget(link.target).x * self:getMap(link.target.map).w / self.w / self:getMap(link.target.map).sizeX + self:getMap(link.target.map).x,
-                    self:getTarget(link.target).y * self:getMap(link.target.map).h / self.h / self:getMap(link.target.map).sizeY + self:getMap(link.target.map).y
+                self:getSpawn(link.spawn).x * self:getMap(link.spawn.map).w / self.w / self:getMap(link.spawn.map).sizeX + self:getMap(link.spawn.map).x,
+                self:getSpawn(link.spawn).y * self:getMap(link.spawn.map).h / self.h / self:getMap(link.spawn.map).sizeY + self:getMap(link.spawn.map).y,
+                self:getTarget(link.target).x * self:getMap(link.target.map).w / self.w / self:getMap(link.target.map).sizeX + self:getMap(link.target.map).x,
+                self:getTarget(link.target).y * self:getMap(link.target.map).h / self.h / self:getMap(link.target.map).sizeY + self:getMap(link.target.map).y
             )
         end
     else
         love.graphics.setColor(self:getActiveMap().backgroundColor)
         love.graphics.rectangle("fill", 0, 0, self.w, self.h)
         for kblock, block in self:orderBy("z", self:getActiveMap().blocks) do
-            love.graphics.setColor(block.color)
-            if block.type == "Text" then
-                love.graphics.setFont(graphikFont)
-                love.graphics.printf(
-                        block.value,
-                        block.x,
-                        block.y,
-                        math.max(block.w, love.graphics.getFont():getWidth(block.value)),
-                        "left",
-                        0,
-                        block.w / love.graphics.getFont():getWidth(block.value),
-                        block.h / love.graphics.getFont():getHeight()
-                )
-                if kblock == self.selectedBlock then
-                    love.graphics.setLineWidth(block.borderW / self.scale)
-                    love.graphics.rectangle("line", block.x - block.border / self.scale, block.y - block.border / self.scale, block.w + block.border / self.scale * 2, block.h + block.border / self.scale * 2)
-                    love.graphics.setLineWidth(1)
-                end
-            else
-                if block.type == "Item" then
-                    love.graphics.draw(
-                            contextMenu.screens["forItem"].categories[block.category].types[block.innerType].picture,
-                            block.x,
-                            block.y,
-                            0,
-                            block.w / contextMenu.screens["forItem"].categories[block.category].types[block.innerType].picture:getWidth(),
-                            block.h / contextMenu.screens["forItem"].categories[block.category].types[block.innerType].picture:getHeight()
-                    )
-                else
-                    -- love.graphics.setFont(graphikFont)
-                    -- love.graphics.printf(
-                    -- 	"(" .. layout.getX(block.x + block.w) .. "x" .. layout.getY(block.y) .. ")",
-                    -- 	block.x,
-                    -- 	block.y + block.h + 5,
-                    -- 	block.w / valueScale.levelView * 5,
-                    -- 	"center",
-                    -- 	0,
-                    -- 	valueScale.levelView / 5
-                    -- )
-                    love.graphics.rectangle("fill", block.x, block.y, block.w, block.h)
-
-                    love.graphics.setColor(0, 0, 0)
-                    love.graphics.setLineWidth(3 * self.step.w)
-                    love.graphics.rectangle("line", block.x + 3 / 2 * self.step.w, block.y + 3 / 2 * self.step.h, block.w - 3 * self.step.w, block.h - 3 * self.step.h) --x, y += offset + linewidth / 2; w, h -= 2 * offset + linewidth
-
-                    love.graphics.setColor(1, 1, 1)
-                    love.graphics.setLineWidth(1 * self.step.w)
-                    love.graphics.rectangle("line", block.x + (1 + 1 / 2) * self.step.w, block.y + (1 + 1 / 2) * self.step.h, block.w - 3 * self.step.w, block.h - 3 * self.step.h)
-
-                    love.graphics.setColor(1, 1, 1)
-                    love.graphics.setFont(graphikFont)
-                    love.graphics.printf(
-                            block.value,
-                            block.x,
-                            block.y,
-                            block.w / valueScale.levelView,
-                            "center",
-                            0,
-                            valueScale.levelView,
-                            valueScale.levelView
-                    )
-                end
-                if kblock == self.selectedBlock then
-                    love.graphics.setColor(block.color)
-                    love.graphics.setLineWidth(block.borderW / self.scale)
-                    love.graphics.rectangle("line", block.x - block.border / self.scale, block.y - block.border / self.scale, block.w + block.border / self.scale * 2, block.h + block.border / self.scale * 2)
-                    love.graphics.setLineWidth(self.step.w)
-
-                    love.graphics.setColor(1 - block.color[1], 1 - block.color[2], 1 - block.color[3])
-                    love.graphics.setFont(graphikFont)
-                    love.graphics.printf(
-                            "z = " .. block.z,
-                            block.x,
-                            block.y,
-                            block.w / valueScale.levelView,
-                            "left",
-                            0,
-                            valueScale.levelView,
-                            valueScale.levelView
-                    )
-                end
-                if kblock == self.game.activeSpawn then
-                    love.graphics.setColor(1, 1, 1)
-                    love.graphics.setLineWidth(block.borderW)
-                    love.graphics.rectangle("line", block.x - self.step.w, block.y - self.step.h, block.w + 2 * self.step.w, block.h + 2 * self.step.h)
-                    love.graphics.setLineWidth(self.step.w)
-                end
-                if block.entityType == "Breakable" then
-                    love.graphics.setColor(1 - block.color[1], 1 - block.color[2], 1 - block.color[3])
-                    love.graphics.draw(cracksPic, block.x, block.y, 0, block.w / cracksPic:getWidth(), block.h / cracksPic:getHeight())
-                end
-            end
+            self:drawBlock(kblock)
         end
         love.graphics.setLineWidth(0.01)
         if self.h * self.scale / layout.h > 6.5 then
             love.graphics.setColor(1, 1, 1)
             for i = 0, math.max(layout.w * self:getActiveMap().sizeX, layout.h * self:getActiveMap().sizeY) do
                 love.graphics.line(
-                        0,
-                        i * self:getStep().h,
-                        layout.w * self:getActiveMap().sizeX,
-                        i * self:getStep().h
+                    0,
+                    i * self:getStep().h,
+                    layout.w * self:getActiveMap().sizeX,
+                    i * self:getStep().h
                 )--horizontal
-
+                
                 love.graphics.line(
-                        i * self:getStep().w,
-                        0,
-                        i * self:getStep().w,
-                        layout.h * self:getActiveMap().sizeY
+                    i * self:getStep().w,
+                    0,
+                    i * self:getStep().w,
+                    layout.h * self:getActiveMap().sizeY
                 )--vertical
             end
         end
         love.graphics.setColor(0, 0, 0)
         for i = 1, math.max(self:getActiveMap().sizeX, self:getActiveMap().sizeY) do
             love.graphics.line(
-                    0,
-                    i * self.h / self:getActiveMap().sizeY,
-                    self.w,
-                    i * self.h / self:getActiveMap().sizeY
+                0,
+                i * self.h / self:getActiveMap().sizeY,
+                self.w,
+                i * self.h / self:getActiveMap().sizeY
             )--horizontal
-
+            
             love.graphics.line(
-                    i * self.w / self:getActiveMap().sizeX,
-                    0,
-                    i * self.w / self:getActiveMap().sizeX,
-                    self.h
+                i * self.w / self:getActiveMap().sizeX,
+                0,
+                i * self.w / self:getActiveMap().sizeX,
+                self.h
             )--vertical
         end
     end
     love.graphics.setLineWidth(1)
-end
-
-function levelbox:getActiveMap()
-    return self.game.maps[self.game.activeMap]
-end
-
-function levelbox:newBlock(type, map)
-    if not inArray(type, arrayKeys(self.blockTypes)) then
-        error("Type " .. type .. " doesn't exist!")
-    end
-    map = map or self.game.activeMap
-    if map and
-            between(0, cursor.x, screen:get("levelbox").w) and
-            between(0, cursor.y, screen:get("levelbox").h) then
-        local name = map .. "_" .. type .. self:getMap(map).blocksCount + 1
-        self:getMap(map).blocks[name] = {
-            x = (cursor.x - self.offsetX) / self.scale,
-            y = (cursor.y - self.offsetY) / self.scale,
-            z = 1,
-            w = 50,
-            h = 100,
-            border = 10,
-            borderW = 5,
-            color = { colorPick.currentColor.r, colorPick.currentColor.g, colorPick.currentColor.b },
-            grabbedX = 25,
-            grabbedY = 50,
-            value = "",
-            type = type,
-            entityType = ""
-        }
-        self.blockTypes[type].new(name, map)
-        self:getMap(map).blocksCount = self:getMap(map).blocksCount + 1
-        self.selectedBlock = name
-        contextMenu:setActiveScreen("for" .. type)
-    end
-end
-
-function levelbox:setType(category, innerType, block)
-    block = block or self:getSelectedBlock()
-    if block.entityType and button:exists("new" .. block.entityType) then
-        button:get("new" .. block.entityType).color = button:get("new" .. block.entityType).colorUnclicked
-    end
-    block.category = category
-    block.innerType = innerType
-    block.entityType = contextMenu.screens["for" .. block.type].categories[category].types[innerType].sign
-    button:get("new" .. block.entityType).color = button:get("new" .. block.entityType).colorClicked
-end
-
-function levelbox:newMap(sizeX, sizeY)
-    if self:getMapView() then
-        local name = "map" .. self.game.mapsCount + 1
-        self.game.maps[name] = {
-            x = (cursor.x - self.offsetX) / self.scale,
-            y = (cursor.y - self.offsetY) / self.scale,
-            z = 1,
-            w = 30 * sizeX,
-            h = 30 * sizeY,
-            sizeX = sizeX,
-            sizeY = sizeY,
-            border = 10,
-            borderW = 5,
-            grabbedX = 25,
-            grabbedY = 50,
-            value = "m" .. self.game.mapsCount + 1,
-            type = "Map",
-            blocks = {},
-            spawns = {},
-            targets = {},
-            offset = {x = 0, y = 0},
-            scale = 1,
-            backgroundColor = { 1, 1, 1 },
-            blocksCount = 0
-        }
-        self.game.mapsCount = self.game.mapsCount + 1
-        self.selectedMap = name
-    end
 end
 
 function levelbox:orderBy(key, array, order)
@@ -890,32 +693,6 @@ function levelbox:orderBy(key, array, order)
         end
     end
     return iter
-end
-
-function levelbox:deleteblock(map)
-    map = map or self.game.activeMap
-    if self.selectedBlock then
-        if self:getBlock(self.selectedBlock, map).type == "Spawn" then
-            self:deletelink(self:getSpawn(self.selectedBlock).link)
-            self:getMap(map).spawns[self.selectedBlock] = nil
-        elseif self:getBlock(self.selectedBlock, map).type == "Portal" or self:getBlock(self.selectedBlock, map).type == "Checkpoint" then
-            self:deletelink(self:getTarget(self.selectedBlock).link)
-            self:getMap(map).targets[self.selectedBlock] = nil
-        end
-        self:getMap(map).blocks[self.selectedBlock] = nil
-        self.selectedBlock = nil
-        self.grabbedBlock = nil
-        contextMenu:setActiveScreen()
-    elseif self.selectedMap then
-        for k, link in pairs(self.links) do
-            if link.spawn.map == self.selectedMap or link.target.map == self.selectedMap then
-                levelbox:deletelink(k)
-            end
-        end
-        self.game.maps[self.selectedMap] = nil
-        self.selectedMap = nil
-        self.grabbedMap = nil
-    end
 end
 
 function levelbox:save()
@@ -973,60 +750,6 @@ function levelbox:save()
     io.close(savefile)
 end
 
-function levelbox:getGrabbedBlock()
-    return self:getBlock(self.grabbedBlock)
-end
-
-function levelbox:setBlockProperty(name, prop, val)
-    local block = self:getBlock(name)
-    block[prop] = val
-    if block.type == "Spawn" then
-        self:getSpawn(name)[prop] = val
-    elseif self:getGrabbedBlock().type == "Portal" or self:getGrabbedBlock().type == "Checkpoint" then
-        self:getTarget(name)[prop] = val
-    end
-end
-
-function levelbox:getBlockBorderWidth(name)
-    return (self:getBlock(name).border + self:getBlock(name).borderW / 2) / self.scale
-end
-
-function levelbox:blockFieldResizeE(name)
-    return {
-        x = self:getBlock(name).x + self:getBlock(name).w,
-        y = self:getBlock(name).y - self:getBlockBorderWidth(name),
-        w = self:getBlockBorderWidth(name),
-        h = self:getBlock(name).h
-    }
-end
-
-function levelbox:blockFieldResizeW(name)
-    return {
-        x = self:getGrabbedBlock().x - self:getBlockBorderWidth(name),
-        y = self:getBlock(name).y - self:getBlockBorderWidth(name),
-        w = self:getBlockBorderWidth(name),
-        h = self:getBlock(name).h
-    }
-end
-
-function levelbox:blockFieldResizeS(name)
-    return {
-        x = self:getGrabbedBlock().x - self:getBlockBorderWidth(name),
-        y = self:getBlock(name).y + self:getBlock(name).h,
-        w = self:getGrabbedBlock().w,
-        h = self:getBlockBorderWidth(name)
-    }
-end
-
-function levelbox:blockFieldResizeN(name)
-    return {
-        x = self:getGrabbedBlock().x - self:getBlockBorderWidth(name),
-        y = self:getBlock(name).y - self:getBlockBorderWidth(name),
-        w = self:getGrabbedBlock().w,
-        h = self:getBlockBorderWidth(name)
-    }
-end
-
 function levelbox:update()
     --love.mouse.setCursor(cursorSt)
     if love.keyboard.isDown("space") then
@@ -1035,220 +758,22 @@ function levelbox:update()
         self.moving = true
     end
     if self.grabbedBlock then
-        if cursor.inside(self:blockFieldResizeE(self.grabbedBlock)) and not self.grab or self.resize.E then
-            love.mouse.setCursor(cursorWE)
-            if love.mouse.isDown(1) then
-                self.resize.E = true
-                local dx = cursor.x - self:getGrabbedBlock().grabbedX
-                self:getGrabbedBlock().grabbedX = cursor.x
-                self:getGrabbedBlock().grabbedY = cursor.y
-                self:setBlockProperty(self.grabbedBlock, "w", math.min(math.max(0, self:getGrabbedBlock().w + dx), self.w - self:getGrabbedBlock().x))
-            else
-                self.resize.E = false
-            end
-        elseif cursor.inside(self:blockFieldResizeW(self.grabbedBlock)) and not self.grab or self.resize.W then
-            love.mouse.setCursor(cursorWE)
-            if love.mouse.isDown(1) then
-                self.resize.W = true
-                local dx = cursor.x - self:getGrabbedBlock().grabbedX
-                self:getGrabbedBlock().grabbedX = cursor.x
-                self:getGrabbedBlock().grabbedY = cursor.y
-                if self:getGrabbedBlock().x > 0 then
-                    self:setBlockProperty(self.grabbedBlock, "w", math.min(math.max(0, self:getGrabbedBlock().w - dx), self.w - self:getGrabbedBlock().x))
-                end
-                if self:getGrabbedBlock().w > 0 then
-                    self:setBlockProperty(self.grabbedBlock, "x", math.min(math.max(0, self:getGrabbedBlock().x + dx), self.w - self:getGrabbedBlock().w))
-                end
-            else
-                self.resize.W = false
-            end
-        elseif cursor.inside(self:blockFieldResizeS(self.grabbedBlock)) and not self.grab or self.resize.S then
-            love.mouse.setCursor(cursorNS)
-            if love.mouse.isDown(1) then
-                self.resize.S = true
-                local dy = cursor.y - self:getGrabbedBlock().grabbedY
-                self:getGrabbedBlock().grabbedX = cursor.x
-                self:getGrabbedBlock().grabbedY = cursor.y
-                self:setBlockProperty(self.grabbedBlock, "h", math.min(math.max(0, self:getGrabbedBlock().h + dy), self.h - self:getGrabbedBlock().y))
-            else
-                self.resize.S = false
-            end
-        elseif cursor.inside(self:blockFieldResizeN(self.grabbedBlock)) and not self.grab or self.resize.N then
-            love.mouse.setCursor(cursorNS)
-            if love.mouse.isDown(1) then
-                self.resize.N = true
-                local dy = cursor.y - self:getGrabbedBlock().grabbedY
-                self:getGrabbedBlock().grabbedX = cursor.x
-                self:getGrabbedBlock().grabbedY = cursor.y
-                if self:getGrabbedBlock().y > 0 then
-                    self:setBlockProperty(self.grabbedBlock, "h", math.min(math.max(0, self:getGrabbedBlock().h - dy), self.h - self:getGrabbedBlock().y))
-                end
-                if self:getGrabbedBlock().h > 0 then
-                    self:setBlockProperty(self.grabbedBlock, "y", math.min(math.max(0, self:getGrabbedBlock().y + dy), self.h - self:getGrabbedBlock().h))
-                end
-            else
-                self.resize.N = false
-            end
-        else
-            if not love.mouse.isDown(1) then
-                self.resize.W = false
-                self.resize.E = false
-                self.resize.S = false
-                self.resize.N = false
-                love.mouse.setCursor(cursorSt)
-            end
-        end
-        if not self.resize.W and not self.resize.E and not self.resize.S and not self.resize.N then
-            if love.mouse.isDown(1) then
-                self:setGrab(true)
-                local dx = cursor.x - self:getGrabbedBlock().grabbedX
-                local dy = cursor.y - self:getGrabbedBlock().grabbedY
-                self:setBlockProperty(self.grabbedBlock, "x", math.min(math.max(0, self:getGrabbedBlock().x + dx), self.w - self:getGrabbedBlock().w))
-                self:setBlockProperty(self.grabbedBlock, "y", math.min(math.max(0, self:getGrabbedBlock().y + dy), self.h - self:getGrabbedBlock().h))
-                local stuck = { x = false, y = false }
-                local stuckWith = { w = 10 * self.step.w, h = 10 * self.step.h }
-                for kblock, block in pairs(self:getActiveMap().blocks) do
-                    if kblock ~= self.grabbedBlock then
-                        if between(-stuckWith.w, block.x - (self:getGrabbedBlock().x + self:getGrabbedBlock().w), stuckWith.w) and
-                                (block.y < self:getGrabbedBlock().y + self:getGrabbedBlock().h and self:getGrabbedBlock().y < block.y + block.h)
-                        then
-                            self:getGrabbedBlock().x = block.x - self:getGrabbedBlock().w
-                            stuck.x = true
-                        elseif between(-stuckWith.w, self:getGrabbedBlock().x - (block.x + block.w), stuckWith.w) and
-                                (block.y < self:getGrabbedBlock().y + self:getGrabbedBlock().h and self:getGrabbedBlock().y < block.y + block.h)
-                        then
-                            self:getGrabbedBlock().x = block.x + block.w
-                            stuck.x = true
-                        elseif between(-stuckWith.h, block.y - (self:getGrabbedBlock().y + self:getGrabbedBlock().h), stuckWith.h) and
-                                (block.x < self:getGrabbedBlock().x + self:getGrabbedBlock().w and self:getGrabbedBlock().x < block.x + block.w)
-                        then
-                            self:getGrabbedBlock().y = block.y - self:getGrabbedBlock().h
-                            stuck.y = true
-                        elseif between(-stuckWith.h, self:getGrabbedBlock().y - (block.y + block.h), stuckWith.h) and
-                                (block.x < self:getGrabbedBlock().x + self:getGrabbedBlock().w and self:getGrabbedBlock().x < block.x + block.w)
-                        then
-                            self:getGrabbedBlock().y = block.y + block.h
-                            stuck.y = true
-                        end
-                        --if stuck.x or stuck.y then break end
-                    end
-                end
-                if not stuck.x then
-                    self:getGrabbedBlock().grabbedX = cursor.x
-                end
-                if not stuck.y then
-                    self:getGrabbedBlock().grabbedY = cursor.y
-                end
-            else
-                self:setGrab(false)
-            end
-        end
-        if not love.mouse.isDown(1) then
-            self:setBlockProperty(self.grabbedBlock, "x", customRound(self:getSelectedBlock().x, self:getStep().w))
-            self:setBlockProperty(self.grabbedBlock, "y", customRound(self:getSelectedBlock().y, self:getStep().h))
-            self:setBlockProperty(self.grabbedBlock, "w", customRound(self:getSelectedBlock().w, self:getStep().w))
-            self:setBlockProperty(self.grabbedBlock, "h", customRound(self:getSelectedBlock().h, self:getStep().h))
-            self:getSelectedBlock().grabbedX = customRound(self:getSelectedBlock().grabbedX, self:getStep().w)
-            self:getSelectedBlock().grabbedY = customRound(self:getSelectedBlock().grabbedY, self:getStep().w)
-        end
+        self:updateUpdatable(self:getGrabbedBlock())
     elseif self.grabbedMap then
-        if cursor.x > self.game.maps[self.grabbedMap].x - self.game.maps[self.grabbedMap].border / self.scale - self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
-                cursor.x < self.game.maps[self.grabbedMap].x and
-                cursor.y > self.game.maps[self.grabbedMap].y - self.game.maps[self.grabbedMap].border / self.scale - self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
-                cursor.y < self.game.maps[self.grabbedMap].y + self.game.maps[self.grabbedMap].border / self.scale + self.game.maps[self.grabbedMap].borderW / self.scale / 2 + self.game.maps[self.grabbedMap].h
-                and not self.grab or self.resize.W then
-            love.mouse.setCursor(cursorWE)
-            if love.mouse.isDown(1) then
-                self.resize.W = true
-                local dx = cursor.x - self.game.maps[self.grabbedMap].grabbedX
-                self.game.maps[self.grabbedMap].grabbedX = cursor.x
-                self.game.maps[self.grabbedMap].grabbedY = cursor.y
-                self.game.maps[self.grabbedMap].x = math.min(math.max(0, self.game.maps[self.grabbedMap].x + dx), self.w - self.game.maps[self.grabbedMap].w)
-                self.game.maps[self.grabbedMap].w = math.min(math.max(0, self.game.maps[self.grabbedMap].w - dx), self.w - self.game.maps[self.grabbedMap].x)
-            else
-                self.resize.W = false
-            end
-        elseif cursor.x > self.game.maps[self.grabbedMap].x + self.game.maps[self.grabbedMap].w and
-                cursor.x < self.game.maps[self.grabbedMap].x + self.game.maps[self.grabbedMap].w + self.game.maps[self.grabbedMap].border / self.scale + self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
-                cursor.y > self.game.maps[self.grabbedMap].y - self.game.maps[self.grabbedMap].border / self.scale - self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
-                cursor.y < self.game.maps[self.grabbedMap].y + self.game.maps[self.grabbedMap].border / self.scale + self.game.maps[self.grabbedMap].borderW / self.scale / 2 + self.game.maps[self.grabbedMap].h
-                and not self.grab or self.resize.E then
-            love.mouse.setCursor(cursorWE)
-            if love.mouse.isDown(1) then
-                self.resize.E = true
-                local dx = cursor.x - self.game.maps[self.grabbedMap].grabbedX
-                self.game.maps[self.grabbedMap].grabbedX = cursor.x
-                self.game.maps[self.grabbedMap].grabbedY = cursor.y
-                self.game.maps[self.grabbedMap].w = math.min(math.max(0, self.game.maps[self.grabbedMap].w + dx), self.w - self.game.maps[self.grabbedMap].x)
-            else
-                self.resize.E = false
-            end
-        elseif cursor.x > self.game.maps[self.grabbedMap].x - self.game.maps[self.grabbedMap].border / self.scale - self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
-                cursor.x < self.game.maps[self.grabbedMap].x + self.game.maps[self.grabbedMap].w + self.game.maps[self.grabbedMap].border / self.scale + self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
-                cursor.y > self.game.maps[self.grabbedMap].y - self.game.maps[self.grabbedMap].border / self.scale - self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
-                cursor.y < self.game.maps[self.grabbedMap].y
-                and not self.grab or self.resize.N then
-            love.mouse.setCursor(cursorNS)
-            if love.mouse.isDown(1) then
-                self.resize.N = true
-                local dy = cursor.y - self.game.maps[self.grabbedMap].grabbedY
-                self.game.maps[self.grabbedMap].grabbedX = cursor.x
-                self.game.maps[self.grabbedMap].grabbedY = cursor.y
-                self.game.maps[self.grabbedMap].y = math.min(math.max(0, self.game.maps[self.grabbedMap].y + dy), self.h - self.game.maps[self.grabbedMap].h)
-                self.game.maps[self.grabbedMap].h = math.min(math.max(0, self.game.maps[self.grabbedMap].h - dy), self.h - self.game.maps[self.grabbedMap].y)
-            else
-                self.resize.N = false
-            end
-        elseif cursor.x > self.game.maps[self.grabbedMap].x - self.game.maps[self.grabbedMap].border / self.scale - self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
-                cursor.x < self.game.maps[self.grabbedMap].x + self.game.maps[self.grabbedMap].w + self.game.maps[self.grabbedMap].border / self.scale + self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
-                cursor.y > self.game.maps[self.grabbedMap].y + self.game.maps[self.grabbedMap].h and
-                cursor.y < self.game.maps[self.grabbedMap].y + self.game.maps[self.grabbedMap].h + self.game.maps[self.grabbedMap].border / self.scale + self.game.maps[self.grabbedMap].borderW / self.scale / 2
-                and not self.grab or self.resize.S then
-            love.mouse.setCursor(cursorNS)
-            if love.mouse.isDown(1) then
-                self.resize.S = true
-                local dy = cursor.y - self.game.maps[self.grabbedMap].grabbedY
-                self.game.maps[self.grabbedMap].grabbedX = cursor.x
-                self.game.maps[self.grabbedMap].grabbedY = cursor.y
-                self.game.maps[self.grabbedMap].h = math.min(math.max(0, self.game.maps[self.grabbedMap].h + dy), self.h - self.game.maps[self.grabbedMap].y)
-            else
-                self.resize.S = false
-            end
-        else
-            if not love.mouse.isDown(1) then
-                self.resize.W = false
-                self.resize.E = false
-                self.resize.S = false
-                self.resize.N = false
-                love.mouse.setCursor(cursorSt)
-            end
-        end
-        if not self.resize.W and not self.resize.E and not self.resize.S and not self.resize.N then
-            if love.mouse.isDown(1) then
-                self:setGrab(true)
-                local dx = cursor.x - self.game.maps[self.grabbedMap].grabbedX
-                local dy = cursor.y - self.game.maps[self.grabbedMap].grabbedY
-                self.game.maps[self.grabbedMap].grabbedX = cursor.x
-                self.game.maps[self.grabbedMap].grabbedY = cursor.y
-                self.game.maps[self.grabbedMap].x = math.min(math.max(0, self.game.maps[self.grabbedMap].x + dx), self.w - self.game.maps[self.grabbedMap].w)
-                self.game.maps[self.grabbedMap].y = math.min(math.max(0, self.game.maps[self.grabbedMap].y + dy), self.h - self.game.maps[self.grabbedMap].h)
-            else
-                self:setGrab(false)
-            end
-        end
+        self:updateUpdatable(self:getGrabbedMap())
     else
         if love.mouse.isDown(1) then
             if self.moving then
                 cursor.y = cursor.y * self.scale + self.offsetY
                 cursor.x = cursor.x * self.scale + self.offsetX
-
+                
                 local dx = cursor.x - self.grabbedX
                 local dy = cursor.y - self.grabbedY
                 self.offsetX = math.min(math.max(-(self.w * self.scale - self.w * self.scaleMin), self.offsetX + dx), 0)
                 self.offsetY = math.min(math.max(-(self.h * self.scale - self.h * self.scaleMin), self.offsetY + dy), 0)
                 self.grabbedX = cursor.x
                 self.grabbedY = cursor.y
-
+                
                 cursor.x = cursor.x - self.offsetX / self.scale
                 cursor.y = cursor.y - self.offsetY / self.scale
             end
