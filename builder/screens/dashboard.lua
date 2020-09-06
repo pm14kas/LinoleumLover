@@ -196,7 +196,8 @@ function dashboard:load()
                 X = button:get("gridPlus").X - button:get("gridPlus").width / 2,
                 Y = button:get("gridPlus").Y + button:get("gridPlus").height / 2,
                 width = buttonFont:getHeight() * 1.5,
-                value = levelbox.step.mult
+                value = levelbox.step.mult,
+                active = false
             }
     )
     button:add(
