@@ -740,15 +740,15 @@ function levelbox:draw()
             for i = 0, math.max(layout.w, layout.h) do
                 love.graphics.line(
                         0,
-                        i * self.h / layout.h,
+                        i * self.step.h,
                         self.w,
-                        i * self.h / layout.h
+                        i * self.step.h
                 )--horizontal
 
                 love.graphics.line(
-                        i * self.w / layout.w,
+                        i * self.step.w,
                         0,
-                        i * self.w / layout.w,
+                        i * self.step.w,
                         self.h
                 )--vertical
             end
@@ -1136,12 +1136,12 @@ function levelbox:update()
             end
         end
         if not love.mouse.isDown(1) then
-            self:setBlockProperty(self.grabbedBlock, "x", customRound(self:getSelectedBlock().x, self.w / layout.w))
-            self:setBlockProperty(self.grabbedBlock, "y", customRound(self:getSelectedBlock().y, self.h / layout.h))
-            self:setBlockProperty(self.grabbedBlock, "w", customRound(self:getSelectedBlock().w, self.w / layout.w))
-            self:setBlockProperty(self.grabbedBlock, "h", customRound(self:getSelectedBlock().h, self.h / layout.h))
-            self:getSelectedBlock().grabbedX = customRound(self:getSelectedBlock().grabbedX, self.w / layout.w)
-            self:getSelectedBlock().grabbedY = customRound(self:getSelectedBlock().grabbedY, self.h / layout.h)
+            self:setBlockProperty(self.grabbedBlock, "x", customRound(self:getSelectedBlock().x, self.step.w))
+            self:setBlockProperty(self.grabbedBlock, "y", customRound(self:getSelectedBlock().y, self.step.h))
+            self:setBlockProperty(self.grabbedBlock, "w", customRound(self:getSelectedBlock().w, self.step.w))
+            self:setBlockProperty(self.grabbedBlock, "h", customRound(self:getSelectedBlock().h, self.step.h))
+            self:getSelectedBlock().grabbedX = customRound(self:getSelectedBlock().grabbedX, self.step.w)
+            self:getSelectedBlock().grabbedY = customRound(self:getSelectedBlock().grabbedY, self.step.w)
         end
     elseif self.grabbedMap then
         if cursor.x > self.game.maps[self.grabbedMap].x - self.game.maps[self.grabbedMap].border / self.scale - self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
