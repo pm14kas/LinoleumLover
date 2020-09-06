@@ -12,7 +12,7 @@ level.blockNameList = {
 	itemGun = "Gun",
 	itemDash = "Dash",
 	itemDoubleJump = "Doublejump",
-	itemWallClimb = "Wallclimb"
+	itemWallClimb = "Walljump"
 };
 level.mapDiff = {};
 level.lastPortalPass = -1;
@@ -91,6 +91,9 @@ end
 
 function level:changeLevel(levelId, spawnId)
 	love.graphics.present();
+	
+	camera.offsetX = 0;
+	camera.offsetY = 0;
 
 	if self.activeMap then --and (not self.itemList[self.activeMap])) then
 		self.mapDiff[self.activeMap] = {};

@@ -427,11 +427,13 @@ function player:update(dt)
 	end
 	
 	self:move(dt);
-	
-	if self.body:getY() > sh + 50 then
-		-- feature for speedrunners, will not be patched
-		self:respawn();
-	end
+
+    if level.activeMap and level.data.maps[level.activeMap] then
+        if self.body:getY() > (sh * level.data.maps[level.activeMap].sizeY) + 50 then
+            -- feature for speedrunners, will not be patched
+            self:respawn();
+        end
+    end
  --self.body and v.body and not self.body:isDestroyed() and not v.body:isDestroyed() and
 	for k, v in pairs(level.hazards) do
 		if  self.body:isTouching(v.body) then
