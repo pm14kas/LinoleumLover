@@ -979,6 +979,46 @@ function levelbox:setBlockProperty(name, prop, val)
     end
 end
 
+function levelbox:getBlockBorderWidth(name)
+    return (self:getBlock(name).border + self:getBlock(name).borderW / 2) / self.scale
+end
+
+function levelbox:blockFieldResizeE(name)
+    return {
+        x = self:getBlock(name).x + self:getBlock(name).w,
+        y = self:getBlock(name).y - self:getBlockBorderWidth(name),
+        w = self:getBlockBorderWidth(name),
+        h = self:getBlock(name).h
+    }
+end
+
+function levelbox:blockFieldResizeW(name)
+    return {
+        x = self:getGrabbedBlock().x - self:getBlockBorderWidth(name),
+        y = self:getBlock(name).y - self:getBlockBorderWidth(name),
+        w = self:getBlockBorderWidth(name),
+        h = self:getBlock(name).h
+    }
+end
+
+function levelbox:blockFieldResizeS(name)
+    return {
+        x = self:getGrabbedBlock().x - self:getBlockBorderWidth(name),
+        y = self:getBlock(name).y + self:getBlock(name).h,
+        w = self:getGrabbedBlock().w,
+        h = self:getBlockBorderWidth(name)
+    }
+end
+
+function levelbox:blockFieldResizeN(name)
+    return {
+        x = self:getGrabbedBlock().x - self:getBlockBorderWidth(name),
+        y = self:getBlock(name).y - self:getBlockBorderWidth(name),
+        w = self:getGrabbedBlock().w,
+        h = self:getBlockBorderWidth(name)
+    }
+end
+
 function levelbox:update()
     --love.mouse.setCursor(cursorSt)
     if love.keyboard.isDown("space") then
@@ -987,11 +1027,7 @@ function levelbox:update()
         self.moving = true
     end
     if self.grabbedBlock then
-        if cursor.x > self:getGrabbedBlock().x + self:getGrabbedBlock().w and
-                cursor.x < self:getGrabbedBlock().x + self:getGrabbedBlock().w + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / 2 / self.scale and
-                cursor.y > self:getGrabbedBlock().y - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / 2 / self.scale and
-                cursor.y < self:getGrabbedBlock().y + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / 2 / self.scale + self:getGrabbedBlock().h
-                and not self.grab or self.resize.E then
+        if cursor.inside(self:blockFieldResizeE(self.grabbedBlock)) and not self.grab or self.resize.E then
             love.mouse.setCursor(cursorWE)
             if love.mouse.isDown(1) then
                 self.resize.E = true
@@ -1002,11 +1038,7 @@ function levelbox:update()
             else
                 self.resize.E = false
             end
-        elseif cursor.x > self:getGrabbedBlock().x - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
-                cursor.x < self:getGrabbedBlock().x and
-                cursor.y > self:getGrabbedBlock().y - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
-                cursor.y < self:getGrabbedBlock().y + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / self.scale / 2 + self:getGrabbedBlock().h
-                and not self.grab or self.resize.W then
+        elseif cursor.inside(self:blockFieldResizeW(self.grabbedBlock)) and not self.grab or self.resize.W then
             love.mouse.setCursor(cursorWE)
             if love.mouse.isDown(1) then
                 self.resize.W = true
@@ -1022,11 +1054,7 @@ function levelbox:update()
             else
                 self.resize.W = false
             end
-        elseif cursor.x > self:getGrabbedBlock().x - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
-                cursor.x < self:getGrabbedBlock().x + self:getGrabbedBlock().w + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / self.scale / 2 and
-                cursor.y > self:getGrabbedBlock().y + self:getGrabbedBlock().h and
-                cursor.y < self:getGrabbedBlock().y + self:getGrabbedBlock().h + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / self.scale / 2
-                and not self.grab or self.resize.S then
+        elseif cursor.inside(self:blockFieldResizeS(self.grabbedBlock)) and not self.grab or self.resize.S then
             love.mouse.setCursor(cursorNS)
             if love.mouse.isDown(1) then
                 self.resize.S = true
@@ -1037,11 +1065,7 @@ function levelbox:update()
             else
                 self.resize.S = false
             end
-        elseif cursor.x > self:getGrabbedBlock().x - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
-                cursor.x < self:getGrabbedBlock().x + self:getGrabbedBlock().w + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / self.scale / 2 and
-                cursor.y > self:getGrabbedBlock().y - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
-                cursor.y < self:getGrabbedBlock().y
-                and not self.grab or self.resize.N then
+        elseif cursor.inside(self:blockFieldResizeN(self.grabbedBlock)) and not self.grab or self.resize.N then
             love.mouse.setCursor(cursorNS)
             if love.mouse.isDown(1) then
                 self.resize.N = true
