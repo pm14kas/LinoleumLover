@@ -109,7 +109,7 @@ levelbox = {
 				block.w = 20
 				block.h = 20
 				block.color = {0.1, 0.1, 0.1}
-				levelbox:getMap(map).spawns[name] = 
+				levelbox:getMap(map).spawns[name] =
 				{
                     x = block.x,
                     y = block.y,
@@ -131,9 +131,9 @@ levelbox = {
 				local block = levelbox:getBlock(name, map)
 				block.value = "P"
 				block.color = {1, 1, 1}
-				levelbox:getMap(map).targets[name] = 
+				levelbox:getMap(map).targets[name] =
 				{
-					x = block.x, 
+					x = block.x,
 					y = block.y,
                     w = block.w,
                     h = block.h,
@@ -155,9 +155,9 @@ levelbox = {
 				block.color = {0, 0, 0}
 				block.value = "C"
 				block.saveTo = "checkpoints"
-				levelbox:getMap(map).targets[name] = 
+				levelbox:getMap(map).targets[name] =
 				{
-					x = block.x, 
+					x = block.x,
 					y = block.y,
 					w = 100,
 					h = 200,
@@ -173,8 +173,8 @@ levelbox = {
 			end
 		},
 		Hazard = {
-			new = function(name, map)	
-				local block = levelbox:getBlock(name, map)		
+			new = function(name, map)
+				local block = levelbox:getBlock(name, map)
 				block.color = {1, 0, 0}
 				block.value = "H"
 				block.saveTo = "hazards"
@@ -247,44 +247,44 @@ function levelbox:load()
 			if block.type == "item" then block.type = "Item" end
 			-----------------/type conversion-----------------------
 			-----------------other-----------------------
-			if block.type == "Block" then 
+			if block.type == "Block" then
 				block.saveTo = "blocks"
 				if not block.entityType then
 					block.entityType = "Solid"
 				end
 			end
-			if block.type == "Spawn" then 
-				block.saveTo = "spawns" 
+			if block.type == "Spawn" then
+				block.saveTo = "spawns"
 				if not block.entityType then
 					block.entityType = ""
 				end
 			end
-			if block.type == "Hazard" then 
-				block.saveTo = "hazards" 
+			if block.type == "Hazard" then
+				block.saveTo = "hazards"
 				if not block.entityType then
 					block.entityType = ""
 				end
 			end
-			if block.type == "Portal" then 
+			if block.type == "Portal" then
 				block.value = "P"
-				block.saveTo = "portals" 
+				block.saveTo = "portals"
 				if not block.entityType then
 					block.entityType = ""
 				end
 			end
-			if block.type == "Checkpoint" then 
-				block.saveTo = "checkpoints" 
+			if block.type == "Checkpoint" then
+				block.saveTo = "checkpoints"
 				if not block.entityType then
 					block.entityType = ""
 				end
 			end
-			if block.type == "Text" then 
-				block.saveTo = "decorations" 
+			if block.type == "Text" then
+				block.saveTo = "decorations"
 				if not block.entityType then
 					block.entityType = ""
 				end
 			end
-			if block.type == "AI" then 
+			if block.type == "AI" then
 				block.saveTo = "ai"
 				if not block.entityType then
 					block.entityType = "Enemy"
@@ -318,9 +318,9 @@ function levelbox:load()
 		local exists = false
 		for kmap, map in pairs(levelbox.game.maps) do
 			for kspawn, spawn in pairs(map.spawns) do
-				if link.spawn.spawn == kspawn then 
-					if exists then 
-						levelbox:deletelink(klink) 
+				if link.spawn.spawn == kspawn then
+					if exists then
+						levelbox:deletelink(klink)
 					else
 						exists = true
 						levelbox:getSpawn(kspawn, kmap).link = klink
@@ -527,34 +527,34 @@ function levelbox:draw()
 				love.graphics.setColor(1 - map.backgroundColor[1], 1 - map.backgroundColor[2], 1 - map.backgroundColor[3])
 				love.graphics.setFont(graphikFont)
 				love.graphics.printf(
-					"z = "..map.z, 
-					map.x, 
+					"z = "..map.z,
+					map.x,
 					map.y,
 					map.w / valueScale.mapView,
-					"left", 
-					0, 
-					valueScale.mapView, 
+					"left",
+					0,
+					valueScale.mapView,
 					valueScale.mapView
 				)
 			end
 			love.graphics.setColor(1, 1, 1)
 			love.graphics.setFont(graphikFont)
 			love.graphics.printf(
-				map.value .. "(" .. map.sizeX .. "x" .. map.sizeY .. ")", 
-				map.x, 
+				map.value .. "(" .. map.sizeX .. "x" .. map.sizeY .. ")",
+				map.x,
 				map.y - 5,
 				map.w / valueScale.mapView,
-				"center", 
-				0, 
-				valueScale.mapView, 
+				"center",
+				0,
+				valueScale.mapView,
 				valueScale.mapView
 			)
 			love.graphics.translate(
-				map.x, 
+				map.x,
 				map.y
 			)
 			love.graphics.scale(
-				map.w / self.w / map.sizeX, 
+				map.w / self.w / map.sizeX,
 				map.h / self.h / map.sizeY
 			)
 			for kspawn, spawn in pairs(self.game.maps[k].spawns) do
@@ -566,11 +566,11 @@ function levelbox:draw()
 				love.graphics.rectangle("fill", target.x, target.y, target.w, target.h)
 			end
 			love.graphics.scale(
-				self.w / map.w * map.sizeX, 
+				self.w / map.w * map.sizeX,
 				self.h / map.h * map.sizeY
 			)
 			love.graphics.translate(
-				-map.x, 
+				-map.x,
 				-map.y
 			)
 		end
@@ -587,7 +587,7 @@ function levelbox:draw()
 			love.graphics.line(
 				self:getTarget(self.linkingTarget).x * self:getMap(self.linkingTarget.map).w / self.w / self:getMap(self.linkingTarget.map).sizeX + self:getMap(self.linkingTarget.map).x,
 				self:getTarget(self.linkingTarget).y * self:getMap(self.linkingTarget.map).h / self.h / self:getMap(self.linkingTarget.map).sizeY + self:getMap(self.linkingTarget.map).y,
-				cursor.x, 
+				cursor.x,
 				cursor.y
 			)
 		end
@@ -608,13 +608,13 @@ function levelbox:draw()
 			if block.type == "Text" then
 				love.graphics.setFont(graphikFont)
 				love.graphics.printf(
-					block.value, 
-					block.x, 
+					block.value,
+					block.x,
 					block.y,
-					math.max(block.w, love.graphics.getFont():getWidth(block.value)), 
-					"left", 
-					0, 
-					block.w / love.graphics.getFont():getWidth(block.value), 
+					math.max(block.w, love.graphics.getFont():getWidth(block.value)),
+					"left",
+					0,
+					block.w / love.graphics.getFont():getWidth(block.value),
 					block.h / love.graphics.getFont():getHeight()
 				)
 				if kblock == self.selectedBlock then
@@ -635,12 +635,12 @@ function levelbox:draw()
 				else
 					-- love.graphics.setFont(graphikFont)
 					-- love.graphics.printf(
-					-- 	"(" .. layout.getX(block.x + block.w) .. "x" .. layout.getY(block.y) .. ")", 
-					-- 	block.x, 
+					-- 	"(" .. layout.getX(block.x + block.w) .. "x" .. layout.getY(block.y) .. ")",
+					-- 	block.x,
 					-- 	block.y + block.h + 5,
 					-- 	block.w / valueScale.levelView * 5,
-					-- 	"center", 
-					-- 	0, 
+					-- 	"center",
+					-- 	0,
 					-- 	valueScale.levelView / 5
 					-- )
 					love.graphics.rectangle("fill", block.x, block.y, block.w, block.h)
@@ -656,13 +656,13 @@ function levelbox:draw()
 					love.graphics.setColor(1, 1, 1)
 					love.graphics.setFont(graphikFont)
 					love.graphics.printf(
-						block.value, 
-						block.x, 
+						block.value,
+						block.x,
 						block.y,
 						block.w / valueScale.levelView,
-						"center", 
-						0, 
-						valueScale.levelView, 
+						"center",
+						0,
+						valueScale.levelView,
 						valueScale.levelView
 					)
 				end
@@ -675,13 +675,13 @@ function levelbox:draw()
 					love.graphics.setColor(1 - block.color[1], 1 - block.color[2], 1 - block.color[3])
 					love.graphics.setFont(graphikFont)
 					love.graphics.printf(
-						"z = "..block.z, 
-						block.x, 
+						"z = "..block.z,
+						block.x,
 						block.y,
 						block.w / valueScale.levelView,
-						"left", 
-						0, 
-						valueScale.levelView, 
+						"left",
+						0,
+						valueScale.levelView,
 						valueScale.levelView
 					)
 				end
@@ -702,16 +702,16 @@ function levelbox:draw()
 			love.graphics.setColor(1,1,1)
 			for i = 0, math.max(layout.w, layout.h) do
 				love.graphics.line(
-					0, 
-					i * self.h / layout.h, 
-					self.w, 
+					0,
+					i * self.h / layout.h,
+					self.w,
 					i * self.h / layout.h
 				)--horizontal
 
 				love.graphics.line(
-					i * self.w / layout.w, 
-					0, 
-					i * self.w / layout.w, 
+					i * self.w / layout.w,
+					0,
+					i * self.w / layout.w,
 					self.h
 				)--vertical
 			end
@@ -719,16 +719,16 @@ function levelbox:draw()
 		love.graphics.setColor(0,0,0)
 		for i = 1, math.max(self:getActiveMap().sizeX, self:getActiveMap().sizeY) do
 			love.graphics.line(
-				0, 
-				i * self.h / self:getActiveMap().sizeY, 
-				self.w, 
+				0,
+				i * self.h / self:getActiveMap().sizeY,
+				self.w,
 				i * self.h / self:getActiveMap().sizeY
 			)--horizontal
 
 			love.graphics.line(
-				i * self.w / self:getActiveMap().sizeX, 
-				0, 
-				i * self.w / self:getActiveMap().sizeX, 
+				i * self.w / self:getActiveMap().sizeX,
+				0,
+				i * self.w / self:getActiveMap().sizeX,
 				self.h
 			)--vertical
 		end
@@ -746,15 +746,15 @@ function levelbox:newBlock(type, map)
 	end
 	map = map or self.game.activeMap
 	if map and
-		between(0, cursor.x, screen:get("levelbox").w) and 
+		between(0, cursor.x, screen:get("levelbox").w) and
 		between(0, cursor.y, screen:get("levelbox").h) then
 		local name = map .. "_" .. type .. self:getMap(map).blocksCount+1
-		self:getMap(map).blocks[name] = 
+		self:getMap(map).blocks[name] =
 		{
 			x = (cursor.x - self.offsetX) / self.scale,
 			y = (cursor.y - self.offsetY) / self.scale,
 			z = 1,
-			w = 50, 
+			w = 50,
 			h = 100,
 			border = 10,
 			borderW = 5,
@@ -786,7 +786,7 @@ end
 function levelbox:newMap(sizeX, sizeY)
 	if self:getMapView() then
 		local name = "map" .. self.game.mapsCount+1
-		self.game.maps[name] = 
+		self.game.maps[name] =
 		{
             x = (cursor.x - self.offsetX) / self.scale,
             y = (cursor.y - self.offsetY) / self.scale,
@@ -941,32 +941,16 @@ end
 
 function levelbox:update()
 	--love.mouse.setCursor(cursorSt)
-	if love.keyboard.isDown("space") then 
+	if love.keyboard.isDown("space") then
 		self.grabbedBlock = nil
 		self.grabbedMap = nil
 		self.moving = true
 	end
 	if self.grabbedBlock then
-		if  cursor.x > self:getGrabbedBlock().x - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
-			cursor.x < self:getGrabbedBlock().x and
-			cursor.y > self:getGrabbedBlock().y - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
-			cursor.y < self:getGrabbedBlock().y + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / self.scale / 2 + self:getGrabbedBlock().h 
-			and not self.grab or self.resize.W then
-			love.mouse.setCursor(cursorWE)
-			if love.mouse.isDown(1) then
-				self.resize.W = true
-				local dx = cursor.x - self:getGrabbedBlock().grabbedX
-				self:getGrabbedBlock().grabbedX = cursor.x
-				self:getGrabbedBlock().grabbedY = cursor.y
-                self:setBlockProperty(self.grabbedBlock, "w", self:getGrabbedBlock().w - dx)
-                self:setBlockProperty(self.grabbedBlock, "x", math.min(math.max(0, self:getGrabbedBlock().x + dx), self.w - self:getGrabbedBlock().w))
-			else 
-				self.resize.W = false
-			end
-		elseif  cursor.x > self:getGrabbedBlock().x + self:getGrabbedBlock().w and
-				cursor.x < self:getGrabbedBlock().x + self:getGrabbedBlock().w + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / self.scale / 2 and
-				cursor.y > self:getGrabbedBlock().y - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
-				cursor.y < self:getGrabbedBlock().y + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / self.scale / 2 + self:getGrabbedBlock().h 
+		if  cursor.x > self:getGrabbedBlock().x + self:getGrabbedBlock().w and
+				cursor.x < self:getGrabbedBlock().x + self:getGrabbedBlock().w + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / 2 / self.scale and
+				cursor.y > self:getGrabbedBlock().y - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / 2 / self.scale and
+				cursor.y < self:getGrabbedBlock().y + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / 2 / self.scale + self:getGrabbedBlock().h
 				and not self.grab or self.resize.E then
 			love.mouse.setCursor(cursorWE)
 			if love.mouse.isDown(1) then
@@ -975,25 +959,29 @@ function levelbox:update()
 				self:getGrabbedBlock().grabbedX = cursor.x
 				self:getGrabbedBlock().grabbedY = cursor.y
                 self:setBlockProperty(self.grabbedBlock, "w", math.min(math.max(0, self:getGrabbedBlock().w + dx), self.w - self:getGrabbedBlock().x))
-			else 
+			else
 				self.resize.E = false
 			end
-		elseif  cursor.x > self:getGrabbedBlock().x - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
-				cursor.x < self:getGrabbedBlock().x + self:getGrabbedBlock().w + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / self.scale / 2 and
-				cursor.y > self:getGrabbedBlock().y - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
-				cursor.y < self:getGrabbedBlock().y
-				and not self.grab or self.resize.N then
-			love.mouse.setCursor(cursorNS)
-			if love.mouse.isDown(1) then
-				self.resize.N = true
-				local dy = cursor.y - self:getGrabbedBlock().grabbedY
-				self:getGrabbedBlock().grabbedX = cursor.x
-				self:getGrabbedBlock().grabbedY = cursor.y
-                self:setBlockProperty(self.grabbedBlock, "h", self:getGrabbedBlock().h - dy)
-                self:setBlockProperty(self.grabbedBlock, "y",  math.min(math.max(0, self:getGrabbedBlock().y + dy), self.h - self:getGrabbedBlock().h))
-			else 
-				self.resize.N = false
-			end
+        elseif  cursor.x > self:getGrabbedBlock().x - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
+                    cursor.x < self:getGrabbedBlock().x and
+                    cursor.y > self:getGrabbedBlock().y - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
+                    cursor.y < self:getGrabbedBlock().y + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / self.scale / 2 + self:getGrabbedBlock().h
+                    and not self.grab or self.resize.W then
+                love.mouse.setCursor(cursorWE)
+                if love.mouse.isDown(1) then
+                    self.resize.W = true
+                    local dx = cursor.x - self:getGrabbedBlock().grabbedX
+                    self:getGrabbedBlock().grabbedX = cursor.x
+                    self:getGrabbedBlock().grabbedY = cursor.y
+                    if self:getGrabbedBlock().x > 0 then
+                        self:setBlockProperty(self.grabbedBlock, "w", math.min(math.max(0, self:getGrabbedBlock().w - dx), self.w - self:getGrabbedBlock().x))
+                    end
+                    if self:getGrabbedBlock().w > 0 then
+                        self:setBlockProperty(self.grabbedBlock, "x", math.min(math.max(0, self:getGrabbedBlock().x + dx), self.w - self:getGrabbedBlock().w))
+                    end
+                else
+                    self.resize.W = false
+                end
 		elseif  cursor.x > self:getGrabbedBlock().x - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
 				cursor.x < self:getGrabbedBlock().x + self:getGrabbedBlock().w + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / self.scale / 2 and
 				cursor.y > self:getGrabbedBlock().y + self:getGrabbedBlock().h and
@@ -1006,9 +994,29 @@ function levelbox:update()
 				self:getGrabbedBlock().grabbedX = cursor.x
 				self:getGrabbedBlock().grabbedY = cursor.y
                 self:setBlockProperty(self.grabbedBlock, "h", math.min(math.max(0, self:getGrabbedBlock().h + dy), self.h - self:getGrabbedBlock().y))
-			else 
+			else
 				self.resize.S = false
 			end
+        elseif  cursor.x > self:getGrabbedBlock().x - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
+                cursor.x < self:getGrabbedBlock().x + self:getGrabbedBlock().w + self:getGrabbedBlock().border / self.scale + self:getGrabbedBlock().borderW / self.scale / 2 and
+                cursor.y > self:getGrabbedBlock().y - self:getGrabbedBlock().border / self.scale - self:getGrabbedBlock().borderW / self.scale / 2 and
+                cursor.y < self:getGrabbedBlock().y
+                and not self.grab or self.resize.N then
+            love.mouse.setCursor(cursorNS)
+            if love.mouse.isDown(1) then
+                self.resize.N = true
+                local dy = cursor.y - self:getGrabbedBlock().grabbedY
+                self:getGrabbedBlock().grabbedX = cursor.x
+                self:getGrabbedBlock().grabbedY = cursor.y
+                if self:getGrabbedBlock().y > 0 then
+                    self:setBlockProperty(self.grabbedBlock, "h", math.min(math.max(0, self:getGrabbedBlock().h - dy), self.h - self:getGrabbedBlock().y))
+                end
+                if self:getGrabbedBlock().h > 0 then
+                    self:setBlockProperty(self.grabbedBlock, "y", math.min(math.max(0, self:getGrabbedBlock().y + dy), self.h - self:getGrabbedBlock().h))
+                end
+            else
+                self.resize.N = false
+            end
 		else
 			if not love.mouse.isDown(1) then
 				self.resize.W = false
@@ -1018,7 +1026,7 @@ function levelbox:update()
 				love.mouse.setCursor(cursorSt)
 			end
 		end
-		if not self.resize.W and not self.resize.E and not self.resize.S and not self.resize.N then 
+		if not self.resize.W and not self.resize.E and not self.resize.S and not self.resize.N then
 			if love.mouse.isDown(1) then
 				self:setGrab(true)
 				local dx = cursor.x - self:getGrabbedBlock().grabbedX
@@ -1075,7 +1083,7 @@ function levelbox:update()
 		if  cursor.x > self.game.maps[self.grabbedMap].x - self.game.maps[self.grabbedMap].border / self.scale - self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
 			cursor.x < self.game.maps[self.grabbedMap].x and
 			cursor.y > self.game.maps[self.grabbedMap].y - self.game.maps[self.grabbedMap].border / self.scale - self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
-			cursor.y < self.game.maps[self.grabbedMap].y + self.game.maps[self.grabbedMap].border / self.scale + self.game.maps[self.grabbedMap].borderW / self.scale / 2 + self.game.maps[self.grabbedMap].h 
+			cursor.y < self.game.maps[self.grabbedMap].y + self.game.maps[self.grabbedMap].border / self.scale + self.game.maps[self.grabbedMap].borderW / self.scale / 2 + self.game.maps[self.grabbedMap].h
 			and not self.grab or self.resize.W then
 			love.mouse.setCursor(cursorWE)
 			if love.mouse.isDown(1) then
@@ -1085,13 +1093,13 @@ function levelbox:update()
 				self.game.maps[self.grabbedMap].grabbedY = cursor.y
 				self.game.maps[self.grabbedMap].x = math.min(math.max(0, self.game.maps[self.grabbedMap].x + dx), self.w - self.game.maps[self.grabbedMap].w)
 				self.game.maps[self.grabbedMap].w = math.min(math.max(0, self.game.maps[self.grabbedMap].w - dx), self.w - self.game.maps[self.grabbedMap].x)
-			else 
+			else
 				self.resize.W = false
 			end
 		elseif  cursor.x > self.game.maps[self.grabbedMap].x + self.game.maps[self.grabbedMap].w and
 				cursor.x < self.game.maps[self.grabbedMap].x + self.game.maps[self.grabbedMap].w + self.game.maps[self.grabbedMap].border / self.scale + self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
 				cursor.y > self.game.maps[self.grabbedMap].y - self.game.maps[self.grabbedMap].border / self.scale - self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
-				cursor.y < self.game.maps[self.grabbedMap].y + self.game.maps[self.grabbedMap].border / self.scale + self.game.maps[self.grabbedMap].borderW / self.scale / 2 + self.game.maps[self.grabbedMap].h 
+				cursor.y < self.game.maps[self.grabbedMap].y + self.game.maps[self.grabbedMap].border / self.scale + self.game.maps[self.grabbedMap].borderW / self.scale / 2 + self.game.maps[self.grabbedMap].h
 				and not self.grab or self.resize.E then
 			love.mouse.setCursor(cursorWE)
 			if love.mouse.isDown(1) then
@@ -1100,13 +1108,13 @@ function levelbox:update()
 				self.game.maps[self.grabbedMap].grabbedX = cursor.x
 				self.game.maps[self.grabbedMap].grabbedY = cursor.y
 				self.game.maps[self.grabbedMap].w = math.min(math.max(0, self.game.maps[self.grabbedMap].w + dx), self.w - self.game.maps[self.grabbedMap].x)
-			else 
+			else
 				self.resize.E = false
 			end
 		elseif  cursor.x > self.game.maps[self.grabbedMap].x - self.game.maps[self.grabbedMap].border / self.scale - self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
 				cursor.x < self.game.maps[self.grabbedMap].x + self.game.maps[self.grabbedMap].w + self.game.maps[self.grabbedMap].border / self.scale + self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
 				cursor.y > self.game.maps[self.grabbedMap].y - self.game.maps[self.grabbedMap].border / self.scale - self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
-				cursor.y < self.game.maps[self.grabbedMap].y 
+				cursor.y < self.game.maps[self.grabbedMap].y
 				and not self.grab or self.resize.N then
 			love.mouse.setCursor(cursorNS)
 			if love.mouse.isDown(1) then
@@ -1116,7 +1124,7 @@ function levelbox:update()
 				self.game.maps[self.grabbedMap].grabbedY = cursor.y
 				self.game.maps[self.grabbedMap].y = math.min(math.max(0, self.game.maps[self.grabbedMap].y + dy), self.h - self.game.maps[self.grabbedMap].h)
 				self.game.maps[self.grabbedMap].h = math.min(math.max(0, self.game.maps[self.grabbedMap].h - dy), self.h - self.game.maps[self.grabbedMap].y)
-			else 
+			else
 				self.resize.N = false
 			end
 		elseif  cursor.x > self.game.maps[self.grabbedMap].x - self.game.maps[self.grabbedMap].border / self.scale - self.game.maps[self.grabbedMap].borderW / self.scale / 2 and
@@ -1131,7 +1139,7 @@ function levelbox:update()
 				self.game.maps[self.grabbedMap].grabbedX = cursor.x
 				self.game.maps[self.grabbedMap].grabbedY = cursor.y
 				self.game.maps[self.grabbedMap].h = math.min(math.max(0, self.game.maps[self.grabbedMap].h + dy), self.h - self.game.maps[self.grabbedMap].y)
-			else 
+			else
 				self.resize.S = false
 			end
 		else
@@ -1143,7 +1151,7 @@ function levelbox:update()
 				love.mouse.setCursor(cursorSt)
 			end
 		end
-		if not self.resize.W and not self.resize.E and not self.resize.S and not self.resize.N then 
+		if not self.resize.W and not self.resize.E and not self.resize.S and not self.resize.N then
 			if love.mouse.isDown(1) then
 				self:setGrab(true)
 				local dx = cursor.x - self.game.maps[self.grabbedMap].grabbedX
