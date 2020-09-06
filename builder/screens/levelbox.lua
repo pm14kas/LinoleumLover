@@ -847,6 +847,8 @@ function levelbox:newMap(sizeX, sizeY)
             blocks = {},
             spawns = {},
             targets = {},
+            offset = {x = 0, y = 0},
+            scale = 1,
             backgroundColor = { 1, 1, 1 },
             blocksCount = 0
         }
