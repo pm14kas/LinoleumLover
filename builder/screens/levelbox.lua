@@ -510,8 +510,6 @@ function levelbox:setMapView(flag)
         self.grabbedMap = nil
         self.selectedMap = nil
     end
-    self.step.w = self.w / layout.w
-    self.step.h = self.h / layout.h
     self.mapView.set = flag
     itemView:triggerMapView(flag)
     contextMenu:setActiveScreen()
@@ -745,11 +743,11 @@ function levelbox:draw()
         love.graphics.setLineWidth(0.01)
         if self.h * self.scale / layout.h > 6.5 then
             love.graphics.setColor(1, 1, 1)
-            for i = 0, math.max(layout.w, layout.h) do
+            for i = 0, math.max(layout.w * self:getActiveMap().sizeX, layout.h * self:getActiveMap().sizeY) do
                 love.graphics.line(
                         0,
                         i * self:getStep().h,
-                        self.w,
+                        layout.w * self:getActiveMap().sizeX,
                         i * self:getStep().h
                 )--horizontal
 
@@ -757,7 +755,7 @@ function levelbox:draw()
                         i * self:getStep().w,
                         0,
                         i * self:getStep().w,
-                        self.h
+                        layout.h * self:getActiveMap().sizeY
                 )--vertical
             end
         end
