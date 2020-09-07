@@ -3,3 +3,5 @@
 *.love
 *Builder.linoleum
 *Cyphered.linoleum
+
+game/environment.lua

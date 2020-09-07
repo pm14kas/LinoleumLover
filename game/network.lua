@@ -4,6 +4,8 @@ local server = nil;
 local isServer = false;
 local isMultiplayerActive = false;
 
+local traversal = host:connect(ENVIRONMENT_TRAVERSAL_IP .. ":" .. ENVIRONMENT_TRAVERSAL_IP);
+
 if isServer then
     host = enet.host_create("*:27015", 1);
 else

@@ -1,3 +1,5 @@
+require("environment")
+
 love.window.setMode(0, 0, {
 	--fullscreen = true,
 	--msaa = 2,
