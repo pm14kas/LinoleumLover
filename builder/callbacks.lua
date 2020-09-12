@@ -43,7 +43,7 @@ function love.mousepressed(clickX, clickY, buttonClick, istouch)
 			click.y = click.y / levelbox.scale
 			if levelbox:getMapView() then
 				local mapClicked = false
-				for k, map in levelbox:orderBy("z", levelbox.game.maps) do
+				for k, map in levelbox:orderBy("z", levelbox.state.maps) do
 					if	click.x > map.x - map.border / levelbox.scale - map.borderW / levelbox.scale / 2 and
 						click.x < map.x + map.w + map.border / levelbox.scale + map.borderW / levelbox.scale / 2 and
 						click.y > map.y - map.border / levelbox.scale - map.borderW / levelbox.scale / 2 and
@@ -108,15 +108,15 @@ function love.mousepressed(clickX, clickY, buttonClick, istouch)
 							end
 						else
 							mapClicked = true
-							levelbox.selectedMap = k
+                            levelbox:selectMap(k)
 							levelbox.grabbedMap = k
-							levelbox.game.maps[k].grabbedX = click.x
-							levelbox.game.maps[k].grabbedY = click.y
+							levelbox:getMap(k).grabbedX = click.x
+							levelbox:getMap(k).grabbedY = click.y
 						end
 					end
 				end
 				if not mapClicked or love.keyboard.isDown("space") then
-					levelbox.selectedMap = nil
+                    levelbox:selectMap()
 					levelbox:setLinkmode(false)
 					levelbox:setUnLinkmode(false)
 					levelbox.moving = true
@@ -235,7 +235,7 @@ keyboard = {
 	backspace = {
 		hold = true,
 		onpress = function()
-			if levelbox.selectedBlock then
+			if levelbox.state.selectedBlock then
 				if levelbox:getSelectedBlock().type == "Text" then
 					local byteoffset = utf8.offset(levelbox:getSelectedBlock().value, -1)
 		
@@ -249,7 +249,6 @@ keyboard = {
 	undo = {
 		hold = false,
 		onpress = function()
-			debug = debug .. "kek"
 		end
 	},
 }
@@ -264,7 +263,7 @@ function love.keypressed(keypressed, scancode, isrepeat)
 end
 
 function love.textinput(text)
-	if levelbox.selectedBlock then
+	if levelbox.state.selectedBlock then
 		if levelbox:getSelectedBlock().type == "Text" then
 			levelbox:getSelectedBlock().value = levelbox:getSelectedBlock().value .. text
 		end

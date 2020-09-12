@@ -79,14 +79,14 @@ button:add("pickColor",
 		value = "Apply",
 		onclick = function()
 			if not levelbox:getMapView() then
-				if levelbox.selectedBlock then
+				if levelbox.state.selectedBlock then
 					levelbox:getSelectedBlock().color = {colorPick.currentColor.r, colorPick.currentColor.g, colorPick.currentColor.b}
 				else
 					levelbox:getActiveMap().backgroundColor = {colorPick.currentColor.r, colorPick.currentColor.g, colorPick.currentColor.b}
 				end
 			else
-				if levelbox.selectedMap then
-					levelbox:getMap(levelbox.selectedMap).backgroundColor = {colorPick.currentColor.r, colorPick.currentColor.g, colorPick.currentColor.b}
+				if levelbox.state.selectedMap then
+					levelbox:getMap(levelbox.state.selectedMap).backgroundColor = {colorPick.currentColor.r, colorPick.currentColor.g, colorPick.currentColor.b}
 				end
 			end
 		end
@@ -104,7 +104,7 @@ button:add("pipetka",
 		backgroundImage = pipetkaPic,
 		onclick = function()
 			if not levelbox:getMapView() then
-				if levelbox.selectedBlock then
+				if levelbox.state.selectedBlock then
 					colorPick.currentColor = {r = levelbox:getSelectedBlock().color[1], g = levelbox:getSelectedBlock().color[2], b = levelbox:getSelectedBlock().color[3]}
 					colorPick.rectR.x = levelbox:getSelectedBlock().color[1] * 255 * colorPick.cell.w
 					colorPick.rectG.x = levelbox:getSelectedBlock().color[2] * 255 * colorPick.cell.w
@@ -116,7 +116,7 @@ button:add("pipetka",
 					colorPick.rectB.x = levelbox:getActiveMap().backgroundColor[3] * 255 * colorPick.cell.w
 				end
             else
-                if levelbox.selectedMap then
+                if levelbox.state.selectedMap then
                     colorPick.currentColor = {r = levelbox:getSelectedMap().backgroundColor[1], g = levelbox:getSelectedMap().backgroundColor[2], b = levelbox:getSelectedMap().backgroundColor[3]}
                     colorPick.rectR.x = levelbox:getSelectedMap().backgroundColor[1] * 255 * colorPick.cell.w
                     colorPick.rectG.x = levelbox:getSelectedMap().backgroundColor[2] * 255 * colorPick.cell.w

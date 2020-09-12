@@ -33,7 +33,7 @@ function dashboard:load()
                 value = "Map View",
                 onclick = function()
                     if levelbox:getMapView() then
-                        if levelbox.selectedMap then
+                        if levelbox.state.selectedMap then
                             levelbox:setMapView(false)
                             button:get("mapViewTrigger").value = "Map View"
                         end
@@ -77,10 +77,10 @@ function dashboard:load()
                 width = buttonFont:getHeight() * 1.5,
                 value = "l",
                 onclick = function()
-                    if levelbox.selectedBlock then
-                        levelbox:getBlock(levelbox.selectedBlock).x = levelbox:getBlock(levelbox.selectedBlock).x - (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * levelbox:getStep().w
-                    elseif levelbox.selectedMap then
-                        levelbox:getMap(levelbox.selectedMap).x = levelbox:getMap(levelbox.selectedMap).x - (love.keyboard.isDown("lshift", "rshift") and 10 or 1)
+                    if levelbox.state.selectedBlock then
+                        levelbox:getBlock(levelbox.state.selectedBlock).x = levelbox:getBlock(levelbox.state.selectedBlock).x - (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * levelbox:getStep().w
+                    elseif levelbox.state.selectedMap then
+                        levelbox:getMap(levelbox.state.selectedMap).x = levelbox:getMap(levelbox.state.selectedMap).x - (love.keyboard.isDown("lshift", "rshift") and 10 or 1)
                     end
                 end
             }
@@ -94,10 +94,10 @@ function dashboard:load()
                 width = buttonFont:getHeight() * 1.5,
                 value = "u",
                 onclick = function()
-                    if levelbox.selectedBlock then
-                        levelbox:getBlock(levelbox.selectedBlock).y = levelbox:getBlock(levelbox.selectedBlock).y - (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * levelbox:getStep().h
-                    elseif levelbox.selectedMap then
-                        levelbox:getMap(levelbox.selectedMap).y = levelbox:getMap(levelbox.selectedMap).y - (love.keyboard.isDown("lshift", "rshift") and 10 or 1)
+                    if levelbox.state.selectedBlock then
+                        levelbox:getBlock(levelbox.state.selectedBlock).y = levelbox:getBlock(levelbox.state.selectedBlock).y - (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * levelbox:getStep().h
+                    elseif levelbox.state.selectedMap then
+                        levelbox:getMap(levelbox.state.selectedMap).y = levelbox:getMap(levelbox.state.selectedMap).y - (love.keyboard.isDown("lshift", "rshift") and 10 or 1)
                     end
                 end
             }
@@ -111,10 +111,10 @@ function dashboard:load()
                 width = buttonFont:getHeight() * 1.5,
                 value = "r",
                 onclick = function()
-                    if levelbox.selectedBlock then
-                        levelbox:getBlock(levelbox.selectedBlock).x = levelbox:getBlock(levelbox.selectedBlock).x + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * levelbox:getStep().w
-                    elseif levelbox.selectedMap then
-                        levelbox:getMap(levelbox.selectedMap).x = levelbox:getMap(levelbox.selectedMap).x + (love.keyboard.isDown("lshift", "rshift") and 10 or 1)
+                    if levelbox.state.selectedBlock then
+                        levelbox:getBlock(levelbox.state.selectedBlock).x = levelbox:getBlock(levelbox.state.selectedBlock).x + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * levelbox:getStep().w
+                    elseif levelbox.state.selectedMap then
+                        levelbox:getMap(levelbox.state.selectedMap).x = levelbox:getMap(levelbox.state.selectedMap).x + (love.keyboard.isDown("lshift", "rshift") and 10 or 1)
                     end
                 end
             }
@@ -128,10 +128,10 @@ function dashboard:load()
                 width = buttonFont:getHeight() * 1.5,
                 value = "d",
                 onclick = function()
-                    if levelbox.selectedBlock then
-                        levelbox:getBlock(levelbox.selectedBlock).y = levelbox:getBlock(levelbox.selectedBlock).y + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * levelbox:getStep().h
-                    elseif levelbox.selectedMap then
-                        levelbox:getMap(levelbox.selectedMap).y = levelbox:getMap(levelbox.selectedMap).y + (love.keyboard.isDown("lshift", "rshift") and 10 or 1)
+                    if levelbox.state.selectedBlock then
+                        levelbox:getBlock(levelbox.state.selectedBlock).y = levelbox:getBlock(levelbox.state.selectedBlock).y + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * levelbox:getStep().h
+                    elseif levelbox.state.selectedMap then
+                        levelbox:getMap(levelbox.state.selectedMap).y = levelbox:getMap(levelbox.state.selectedMap).y + (love.keyboard.isDown("lshift", "rshift") and 10 or 1)
                     end
                 end
             }
@@ -145,10 +145,10 @@ function dashboard:load()
                 width = buttonFont:getHeight() * 1.5,
                 value = "z+",
                 onclick = function()
-                    if levelbox.selectedBlock then
-                        levelbox:getBlock(levelbox.selectedBlock).z = levelbox:getBlock(levelbox.selectedBlock).z + 1
-                    elseif levelbox.selectedMap then
-                        levelbox:getMap(levelbox.selectedMap).z = levelbox:getMap(levelbox.selectedMap).z + 1
+                    if levelbox.state.selectedBlock then
+                        levelbox:getBlock(levelbox.state.selectedBlock).z = levelbox:getBlock(levelbox.state.selectedBlock).z + 1
+                    elseif levelbox.state.selectedMap then
+                        levelbox:getMap(levelbox.state.selectedMap).z = levelbox:getMap(levelbox.state.selectedMap).z + 1
                     end
                 end
             }
@@ -162,10 +162,10 @@ function dashboard:load()
                 width = buttonFont:getHeight() * 1.5,
                 value = "z-",
                 onclick = function()
-                    if levelbox.selectedBlock then
-                        levelbox:getBlock(levelbox.selectedBlock).z = levelbox:getBlock(levelbox.selectedBlock).z - 1
-                    elseif levelbox.selectedMap then
-                        levelbox:getMap(levelbox.selectedMap).z = levelbox:getMap(levelbox.selectedMap).z - 1
+                    if levelbox.state.selectedBlock then
+                        levelbox:getBlock(levelbox.state.selectedBlock).z = levelbox:getBlock(levelbox.state.selectedBlock).z - 1
+                    elseif levelbox.state.selectedMap then
+                        levelbox:getMap(levelbox.state.selectedMap).z = levelbox:getMap(levelbox.state.selectedMap).z - 1
                     end
                 end
             }
@@ -230,12 +230,12 @@ function dashboard:load()
                 shadowX = 0,
                 shadowY = 0,
                 onclick = function()
-                    if levelbox.selectedBlock then
-                        levelbox:getBlock(levelbox.selectedBlock).x = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).x - levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.selectedBlock).w)
-                        levelbox:getBlock(levelbox.selectedBlock).w = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).w + levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.selectedBlock).x)
-                    elseif levelbox.selectedMap then
-                        levelbox:getMap(levelbox.selectedMap).x = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).x - (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.selectedMap).w)
-                        levelbox:getMap(levelbox.selectedMap).w = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).w + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.selectedMap).x)
+                    if levelbox.state.selectedBlock then
+                        levelbox:getBlock(levelbox.state.selectedBlock).x = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).x - levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.state.selectedBlock).w)
+                        levelbox:getBlock(levelbox.state.selectedBlock).w = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).w + levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.state.selectedBlock).x)
+                    elseif levelbox.state.selectedMap then
+                        levelbox:getMap(levelbox.state.selectedMap).x = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).x - (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.state.selectedMap).w)
+                        levelbox:getMap(levelbox.state.selectedMap).w = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).w + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.state.selectedMap).x)
                     end
                 end,
                 picture = function()
@@ -263,16 +263,16 @@ function dashboard:load()
                 shadowX = 0,
                 shadowY = 0,
                 onclick = function()
-                    if levelbox.selectedBlock then
-                        levelbox:getBlock(levelbox.selectedBlock).x = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).x - levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.selectedBlock).w)
-                        levelbox:getBlock(levelbox.selectedBlock).w = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).w + levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.selectedBlock).x)
-                        levelbox:getBlock(levelbox.selectedBlock).y = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).y - levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.selectedBlock).h)
-                        levelbox:getBlock(levelbox.selectedBlock).h = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).h + levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.selectedBlock).y)
-                    elseif levelbox.selectedMap then
-                        levelbox:getMap(levelbox.selectedMap).x = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).x - (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.selectedMap).w)
-                        levelbox:getMap(levelbox.selectedMap).w = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).w + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.selectedMap).x)
-                        levelbox:getMap(levelbox.selectedMap).y = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).y - (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.selectedMap).h)
-                        levelbox:getMap(levelbox.selectedMap).h = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).h + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.selectedMap).y)
+                    if levelbox.state.selectedBlock then
+                        levelbox:getBlock(levelbox.state.selectedBlock).x = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).x - levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.state.selectedBlock).w)
+                        levelbox:getBlock(levelbox.state.selectedBlock).w = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).w + levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.state.selectedBlock).x)
+                        levelbox:getBlock(levelbox.state.selectedBlock).y = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).y - levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.state.selectedBlock).h)
+                        levelbox:getBlock(levelbox.state.selectedBlock).h = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).h + levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.state.selectedBlock).y)
+                    elseif levelbox.state.selectedMap then
+                        levelbox:getMap(levelbox.state.selectedMap).x = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).x - (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.state.selectedMap).w)
+                        levelbox:getMap(levelbox.state.selectedMap).w = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).w + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.state.selectedMap).x)
+                        levelbox:getMap(levelbox.state.selectedMap).y = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).y - (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.state.selectedMap).h)
+                        levelbox:getMap(levelbox.state.selectedMap).h = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).h + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.state.selectedMap).y)
                     end
                 end,
                 picture = function()
@@ -300,12 +300,12 @@ function dashboard:load()
                 shadowX = 0,
                 shadowY = 0,
                 onclick = function()
-                    if levelbox.selectedBlock then
-                        levelbox:getBlock(levelbox.selectedBlock).y = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).y - levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.selectedBlock).h)
-                        levelbox:getBlock(levelbox.selectedBlock).h = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).h + levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.selectedBlock).y)
-                    elseif levelbox.selectedMap then
-                        levelbox:getMap(levelbox.selectedMap).y = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).y - (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.selectedMap).h)
-                        levelbox:getMap(levelbox.selectedMap).h = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).h + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.selectedMap).y)
+                    if levelbox.state.selectedBlock then
+                        levelbox:getBlock(levelbox.state.selectedBlock).y = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).y - levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.state.selectedBlock).h)
+                        levelbox:getBlock(levelbox.state.selectedBlock).h = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).h + levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.state.selectedBlock).y)
+                    elseif levelbox.state.selectedMap then
+                        levelbox:getMap(levelbox.state.selectedMap).y = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).y - (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.state.selectedMap).h)
+                        levelbox:getMap(levelbox.state.selectedMap).h = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).h + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.state.selectedMap).y)
                     end
                 end,
                 picture = function()
@@ -333,14 +333,14 @@ function dashboard:load()
                 shadowX = 0,
                 shadowY = 0,
                 onclick = function()
-                    if levelbox.selectedBlock then
-                        levelbox:getBlock(levelbox.selectedBlock).w = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).w + levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.selectedBlock).x)
-                        levelbox:getBlock(levelbox.selectedBlock).y = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).y - levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.selectedBlock).h)
-                        levelbox:getBlock(levelbox.selectedBlock).h = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).h + levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.selectedBlock).y)
-                    elseif levelbox.selectedMap then
-                        levelbox:getMap(levelbox.selectedMap).w = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).w + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.selectedMap).x)
-                        levelbox:getMap(levelbox.selectedMap).y = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).y - (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.selectedMap).h)
-                        levelbox:getMap(levelbox.selectedMap).h = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).h + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.selectedMap).y)
+                    if levelbox.state.selectedBlock then
+                        levelbox:getBlock(levelbox.state.selectedBlock).w = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).w + levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.state.selectedBlock).x)
+                        levelbox:getBlock(levelbox.state.selectedBlock).y = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).y - levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.state.selectedBlock).h)
+                        levelbox:getBlock(levelbox.state.selectedBlock).h = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).h + levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.state.selectedBlock).y)
+                    elseif levelbox.state.selectedMap then
+                        levelbox:getMap(levelbox.state.selectedMap).w = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).w + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.state.selectedMap).x)
+                        levelbox:getMap(levelbox.state.selectedMap).y = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).y - (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.state.selectedMap).h)
+                        levelbox:getMap(levelbox.state.selectedMap).h = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).h + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.state.selectedMap).y)
                     end
                 end,
                 picture = function()
@@ -368,10 +368,10 @@ function dashboard:load()
                 shadowX = 0,
                 shadowY = 0,
                 onclick = function()
-                    if levelbox.selectedBlock then
-                        levelbox:getBlock(levelbox.selectedBlock).w = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).w + levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.selectedBlock).x)
-                    elseif levelbox.selectedMap then
-                        levelbox:getMap(levelbox.selectedMap).w = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).w + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.selectedMap).x)
+                    if levelbox.state.selectedBlock then
+                        levelbox:getBlock(levelbox.state.selectedBlock).w = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).w + levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.state.selectedBlock).x)
+                    elseif levelbox.state.selectedMap then
+                        levelbox:getMap(levelbox.state.selectedMap).w = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).w + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.state.selectedMap).x)
                     end
                 end,
                 picture = function()
@@ -399,12 +399,12 @@ function dashboard:load()
                 shadowX = 0,
                 shadowY = 0,
                 onclick = function()
-                    if levelbox.selectedBlock then
-                        levelbox:getBlock(levelbox.selectedBlock).w = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).w + levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.selectedBlock).x)
-                        levelbox:getBlock(levelbox.selectedBlock).h = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).h + levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.selectedBlock).y)
-                    elseif levelbox.selectedMap then
-                        levelbox:getMap(levelbox.selectedMap).w = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).w + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.selectedMap).x)
-                        levelbox:getMap(levelbox.selectedMap).h = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).h + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.selectedMap).y)
+                    if levelbox.state.selectedBlock then
+                        levelbox:getBlock(levelbox.state.selectedBlock).w = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).w + levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.state.selectedBlock).x)
+                        levelbox:getBlock(levelbox.state.selectedBlock).h = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).h + levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.state.selectedBlock).y)
+                    elseif levelbox.state.selectedMap then
+                        levelbox:getMap(levelbox.state.selectedMap).w = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).w + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.state.selectedMap).x)
+                        levelbox:getMap(levelbox.state.selectedMap).h = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).h + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.state.selectedMap).y)
                     end
                 end,
                 picture = function()
@@ -432,10 +432,10 @@ function dashboard:load()
                 shadowX = 0,
                 shadowY = 0,
                 onclick = function()
-                    if levelbox.selectedBlock then
-                        levelbox:getBlock(levelbox.selectedBlock).h = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).h + levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.selectedBlock).y)
-                    elseif levelbox.selectedMap then
-                        levelbox:getMap(levelbox.selectedMap).h = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).h + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.selectedMap).y)
+                    if levelbox.state.selectedBlock then
+                        levelbox:getBlock(levelbox.state.selectedBlock).h = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).h + levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.state.selectedBlock).y)
+                    elseif levelbox.state.selectedMap then
+                        levelbox:getMap(levelbox.state.selectedMap).h = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).h + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.state.selectedMap).y)
                     end
                 end,
                 picture = function()
@@ -463,14 +463,14 @@ function dashboard:load()
                 shadowX = 0,
                 shadowY = 0,
                 onclick = function()
-                    if levelbox.selectedBlock then
-                        levelbox:getBlock(levelbox.selectedBlock).x = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).x - levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.selectedBlock).w)
-                        levelbox:getBlock(levelbox.selectedBlock).w = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).w + levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.selectedBlock).x)
-                        levelbox:getBlock(levelbox.selectedBlock).h = math.min(math.max(0, levelbox:getBlock(levelbox.selectedBlock).h + levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.selectedBlock).y)
-                    elseif levelbox.selectedMap then
-                        levelbox:getMap(levelbox.selectedMap).x = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).x - (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.selectedMap).w)
-                        levelbox:getMap(levelbox.selectedMap).w = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).w + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.selectedMap).x)
-                        levelbox:getMap(levelbox.selectedMap).h = math.min(math.max(0, levelbox:getMap(levelbox.selectedMap).h + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.selectedMap).y)
+                    if levelbox.state.selectedBlock then
+                        levelbox:getBlock(levelbox.state.selectedBlock).x = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).x - levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.state.selectedBlock).w)
+                        levelbox:getBlock(levelbox.state.selectedBlock).w = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).w + levelbox:getStep().w * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getBlock(levelbox.state.selectedBlock).x)
+                        levelbox:getBlock(levelbox.state.selectedBlock).h = math.min(math.max(0, levelbox:getBlock(levelbox.state.selectedBlock).h + levelbox:getStep().h * (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getBlock(levelbox.state.selectedBlock).y)
+                    elseif levelbox.state.selectedMap then
+                        levelbox:getMap(levelbox.state.selectedMap).x = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).x - (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.state.selectedMap).w)
+                        levelbox:getMap(levelbox.state.selectedMap).w = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).w + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.w - levelbox:getMap(levelbox.state.selectedMap).x)
+                        levelbox:getMap(levelbox.state.selectedMap).h = math.min(math.max(0, levelbox:getMap(levelbox.state.selectedMap).h + (love.keyboard.isDown("lshift", "rshift") and 10 or 1) * (love.keyboard.isDown("lctrl", "rctrl") and -1 or 1)), levelbox.h - levelbox:getMap(levelbox.state.selectedMap).y)
                     end
                 end,
                 picture = function()
@@ -498,14 +498,14 @@ function dashboard:load()
                 shadowX = 0,
                 shadowY = 0,
                 onclick = function()
-                    if levelbox.selectedBlock then
-                        local t = levelbox:getBlock(levelbox.selectedBlock).w
-                        levelbox:getBlock(levelbox.selectedBlock).w = levelbox:getBlock(levelbox.selectedBlock).h
-                        levelbox:getBlock(levelbox.selectedBlock).h = t
-                    elseif levelbox.selectedMap then
-                        local t = levelbox:getMap(levelbox.selectedMap).w
-                        levelbox:getMap(levelbox.selectedMap).w = levelbox:getMap(levelbox.selectedMap).h
-                        levelbox:getMap(levelbox.selectedMap).h = t
+                    if levelbox.state.selectedBlock then
+                        local t = levelbox:getBlock(levelbox.state.selectedBlock).w
+                        levelbox:getBlock(levelbox.state.selectedBlock).w = levelbox:getBlock(levelbox.state.selectedBlock).h
+                        levelbox:getBlock(levelbox.state.selectedBlock).h = t
+                    elseif levelbox.state.selectedMap then
+                        local t = levelbox:getMap(levelbox.state.selectedMap).w
+                        levelbox:getMap(levelbox.state.selectedMap).w = levelbox:getMap(levelbox.state.selectedMap).h
+                        levelbox:getMap(levelbox.state.selectedMap).h = t
                     end
                 end,
                 backgroundImage = rotatePic

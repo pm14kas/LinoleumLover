@@ -1,9 +1,9 @@
 function levelbox:getSelectedMap()
-    return self:getMap(self.selectedMap)
+    return self:getMap(self.state.selectedMap)
 end
 
 function levelbox:getMap(map)
-    return self.game.maps[map]
+    return self.state.maps[map]
 end
 
 function levelbox:drawMap(name)
@@ -11,7 +11,7 @@ function levelbox:drawMap(name)
     local valueScale = 50 / graphikFont:getHeight() / 10
     love.graphics.setColor(map.backgroundColor)
     love.graphics.rectangle("fill", map.x, map.y, map.w, map.h)
-    if name == self.selectedMap then
+    if name == self.state.selectedMap then
         love.graphics.setLineWidth(map.borderW / self.scale)
         love.graphics.rectangle("line", map.x - map.border / self.scale, map.y - map.border / self.scale,
                                 map.w + map.border / self.scale * 2, map.h + map.border / self.scale * 2)
@@ -50,11 +50,11 @@ function levelbox:drawMap(name)
         map.w / self.w / map.sizeX,
         map.h / self.h / map.sizeY
     )
-    for kspawn, spawn in pairs(self.game.maps[name].spawns) do
+    for kspawn, spawn in pairs(self.state.maps[name].spawns) do
         love.graphics.setColor(spawn.c)
         love.graphics.rectangle("fill", spawn.x, spawn.y, spawn.w, spawn.h)
     end
-    for ktarget, target in pairs(self.game.maps[name].targets) do
+    for ktarget, target in pairs(self.state.maps[name].targets) do
         love.graphics.setColor(target.c)
         love.graphics.rectangle("fill", target.x, target.y, target.w, target.h)
     end
@@ -69,13 +69,13 @@ function levelbox:drawMap(name)
 end
 
 function levelbox:getActiveMap()
-    return self.game.maps[self.game.activeMap]
+    return self.state.maps[self.state.activeMap]
 end
 
 function levelbox:newMap(sizeX, sizeY)
     if self:getMapView() then
-        local name = "map" .. self.game.mapsCount + 1
-        self.game.maps[name] = {
+        local name = "map" .. self.state.mapsCount + 1
+        self.state.maps[name] = {
             x = (cursor.x - self.offsetX) / self.scale,
             y = (cursor.y - self.offsetY) / self.scale,
             z = 1,
@@ -87,7 +87,7 @@ function levelbox:newMap(sizeX, sizeY)
             borderW = 5,
             grabbedX = 25,
             grabbedY = 50,
-            value = "m" .. self.game.mapsCount + 1,
+            value = "m" .. self.state.mapsCount + 1,
             type = "Map",
             maps = {},
             spawns = {},
@@ -99,12 +99,22 @@ function levelbox:newMap(sizeX, sizeY)
             name = name,
             updatableType = "map"
         }
-        self.game.mapsCount = self.game.mapsCount + 1
-        self.selectedMap = name
+        self.state.mapsCount = self.state.mapsCount + 1
+        self.state.selectedMap = name
         self.grabbedMap = name
     end
 end
 
 function levelbox:getGrabbedMap()
     return self:getMap(self.grabbedMap)
+end
+
+function levelbox:selectMap(map)
+    if self.state.selectedMap then
+        self:getSelectedMap():unselect()
+    end
+    self.state.selectedMap = map
+    if map then
+        self:getMap(map):select()
+    end
 end

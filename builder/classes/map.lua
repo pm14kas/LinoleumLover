@@ -1,6 +1,14 @@
-require("updatable")
+require("classes.updatable")
 
-map = updatable:new()
+map = updatable:new({
+    x = 0,
+    y = 0,
+    z = 1,
+    sizeX = 1,
+    sizeY = 1,
+    scale = 1,
+    offset = { x = 0, y = 0 },
+})
 
 function map:draw()
     local valueScale = 50 / graphikFont:getHeight() / 10
@@ -61,4 +69,20 @@ function map:draw()
         -self.x,
         -self.y
     )
+end
+
+function map:delete()
+    for k, link in pairs(levelbox.links) do
+        if link.spawn.map == self.name or link.target.map == self.name then
+            levelbox:deletelink(k)
+        end
+    end
+    self:unselect()
+    levelbox.grabbedMap = nil
+    levelbox.state.maps[self.name] = nil
+end
+
+function map:unselect()
+    updatable.unselect(self)
+    levelbox.state.selectedMap = nil
 end

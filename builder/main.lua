@@ -25,9 +25,6 @@ cursorWE = love.mouse.getSystemCursor("sizewe")
 cursorNS = love.mouse.getSystemCursor("sizens")
 cursorSt = love.mouse.getSystemCursor("arrow")
 
-debugRenew = ""
-debug = ""
-
 layout = {
 	w = 1366, 
 	h = 768
@@ -43,7 +40,8 @@ end
 require "screens"
 require "button"
 local dirs = {
-	"screens"
+	"screens",
+	"classes",
 }
 for i=1, #dirs, 1 do
 	local files = love.filesystem.getDirectoryItems(dirs[i])
@@ -73,13 +71,11 @@ function love.load()
 end
 function love.draw()
 	cursor.x, cursor.y = love.mouse.getPosition()
-	debugRenew = levelbox.scale
 	for name, params in screen:orderBy("z") do
 		if screen:get(name).draw then screen:show(name) end
 	end
 	love.graphics.setFont(smallFont)
 	love.graphics.setColor(1, 1, 1)
-	love.graphics.print(love.timer.getFPS() .. "\n" .. debugRenew .. "\n" .. debug, 0, 0)
 end
 function love.update(dt)
 	--levelbox:update(dt)

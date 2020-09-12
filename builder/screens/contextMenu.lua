@@ -81,7 +81,7 @@ for kscreen, screenContext in pairs(contextMenu.screens) do
 			for i, block in ipairs(category.types) do
 				if not block.trigger then
 					block.trigger = function()
-						levelbox:setType(icat, i)
+                        levelbox:getSelectedBlock():setType(icat, i)
 					end
 				end
 				block.picture = love.graphics.newImage(block.imageFilename)

@@ -1,4 +1,3 @@
-
 function levelbox:loadHelpers()
     local dirs = {
         "levelbox",
@@ -53,6 +52,31 @@ function levelbox:loadGame()
         }
 end
 
+function levelbox:loadMaps()
+    for kmap, loadMap in pairs(self.game.maps) do
+        local newMap = map:new(loadMap)
+        if not newMap.name then newMap.name = kmap end
+        self.state.maps[kmap] = newMap
+        if not self.state.activeMap then
+            self.state.activeMap = kmap
+        end
+        for kblock, loadBlock in pairs(loadMap.blocks) do
+            self:loadBlock(kmap, kblock, loadBlock)
+        end
+    end
+end
+
+function levelbox:loadBlock(mapIndex, blockIndex, loadBlock)
+    local newBlock = block:new(loadBlock)
+    newBlock:convertType()
+    newBlock:setDefaults()
+    if not newBlock.name then newBlock.name = blockIndex end
+    if not newBlock.map then newBlock.map = mapIndex end
+    
+    newBlock:align()
+    self.state.maps[mapIndex].blocks[blockIndex] = newBlock
+end
+
 function levelbox:loadBasic()
     self.x = screen:get("levelbox").X
     self.y = screen:get("levelbox").Y
@@ -69,9 +93,7 @@ function levelbox:loadBasic()
     self.scaleStep = 0.1
     self.scaleMult = 5
     self.grabbedBlock = nil
-    self.selectedBlock = nil
     self.grabbedMap = nil
-    self.selectedMap = nil
     self.resize = {
         W = false,
         E = false,
@@ -88,8 +110,50 @@ function levelbox:loadBasic()
         scale = 1,
         offset = { x = 0, y = 0 },
     }
+    self.step = {
+        w = self.w / layout.w,
+        h = self.h / layout.h,
+        mult = 1,
+        max = 99
+    }
+end
+
+function levelbox:loadState()
+    self.state = {
+        maps = {},
+        activeSpawn = "",
+        mapsCount = 0,
+        linksCount = 0,
+        activeMap = "map0",
+        screenScale = { w = w / layout.w, h = h / layout.h }
+    }
+    
+    if not self.game.linksCount then
+        self.game.linksCount = #self.links
+    end
+    self.state.linksCount = self.game.linksCount
+    self.state.activeMap = self.game.activeMap
+    self.state.selectedBlock = self.game.selectedBlock
+    self.state.selectedMap = self.game.selectedMap
 end
 
 function levelbox:loadLinks()
     self.links = file_exists("linksForBuilder.linoleum") and json.decode(read_file("linksForBuilder.linoleum")) or {}
+    
+    for klink, link in pairs(self.links) do
+        local exists = false
+        for kmap, map in pairs(self.state.maps) do
+            for kspawn, spawn in pairs(map.spawns) do
+                if link.spawn.spawn == kspawn then
+                    if exists then
+                        levelbox:deletelink(klink)
+                    else
+                        exists = true
+                        levelbox:getSpawn(kspawn, kmap).link = klink
+                        levelbox:getTarget(link.target).link = klink
+                    end
+                end
+            end
+        end
+    end
 end

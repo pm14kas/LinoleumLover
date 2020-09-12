@@ -1,12 +1,12 @@
-updatable = {
-    type = "block"
-}
+updatable = {}
+
+require("classes.updatable.update")
 
 function updatable:new(data)
     data = data or {}
     setmetatable(data, self)
     self.__index = self
-    return o
+    return data
 end
 
 function updatable:get()
@@ -53,6 +53,21 @@ function updatable:fieldResizeN()
     }
 end
 
+function updatable:select()
+    self.selected = true
+end
+
+function updatable:unselect()
+    self.selected = false
+end
+
 function updatable:setProperty(prop, val)
     self[prop] = val
+end
+
+function updatable:move(dx, dy)
+    self:setProperty("x", math.min(math.max(0, self.x + dx), levelbox.w - self.w))
+    self:setProperty("y", math.min(math.max(0, self.y + dy), levelbox.h - self.h))
+    self.grabbedX = cursor.x
+    self.grabbedY = cursor.y
 end
