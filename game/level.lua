@@ -8,6 +8,9 @@ level.blockNameList = {
 	blockBreakable = "Breakable",
 	hazard = "Hazard",
 	checkpoint = "Checkpoint",
+    button = "Button",
+    door = "Door",
+    -- item section
 	item = "Item",
 	itemGun = "Gun",
 	itemDash = "Dash",
@@ -40,6 +43,8 @@ function level:new()
 			checkpoints = {},
 			ai = {},
 			items = {},
+            buttons = {},
+            doors = {},
 			blocksCount = 0
 		}
 	};
@@ -51,6 +56,8 @@ function level:new()
 	self.checkpoints = {};
 	self.ai = {};
 	self.items = {};
+    self.buttons = {};
+    self.doors = {};
 	self.activeSpawn = self.data.activeSpawn;
 	self:clearBlocks();
 end
@@ -389,6 +396,8 @@ function level:clearBlocks()
 	self.checkpoints = {};
 	self.items = {};
 	self.spawns = {};
+    self.doors = {};
+    self.buttons = {};
 end
 
 function level:parseBlockName(blockName)
