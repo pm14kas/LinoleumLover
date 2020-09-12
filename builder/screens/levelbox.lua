@@ -23,73 +23,6 @@ function screen.s.levelbox:show()
 end
 
 levelbox = {
-    x = screen:get("levelbox").X,
-    y = screen:get("levelbox").Y,
-    offsetX = screen:get("levelbox").X,
-    offsetY = screen:get("levelbox").Y,
-    w = screen:get("levelbox").w,
-    h = screen:get("levelbox").h,
-    moving = false,
-    grabbedX = 25,
-    grabbedY = 50,
-    scale = 1,
-    scaleMin = 1,
-    scaleMax = 100,
-    scaleStep = 0.1,
-    scaleMult = 5,
-    grabbedBlock = nil,
-    selectedBlock = nil,
-    grabbedMap = nil,
-    selectedMap = nil,
-    resize = {
-        W = false,
-        E = false,
-        S = false,
-        N = false
-    },
-    grab = false,
-    linkMode = false,
-    UnlinkMode = false,
-    linkingSpawn = nil,
-    linkingTarget = nil,
-    links = file_exists("linksForBuilder.linoleum") and json.decode(read_file("linksForBuilder.linoleum")) or {},
-    game = file_exists("mapForBuilder.linoleum") and json.decode(read_file("mapForBuilder.linoleum")) or
-        {
-            maps = {
-                ["map0"] = {
-                    x = 0,
-                    y = 0,
-                    scale = 1,
-                    offset = { x = 0, y = 0 },
-                    sizeX = 1,
-                    sizeY = 1,
-                    w = 30,
-                    h = 30,
-                    border = 10,
-                    borderW = 5,
-                    color = { 1, 0, 0 },
-                    grabbedX = 25,
-                    grabbedY = 50,
-                    value = "m0",
-                    type = "map",
-                    blocks = {},
-                    spawns = {},
-                    targets = {},
-                    blocksCount = 0,
-                    backgroundColor = { 1, 1, 1 }
-                },
-            },
-            activeSpawn = "",
-            mapsCount = 0,
-            linksCount = 0,
-            activeMap = "map0",
-            screenScale = { w = w / layout.w, h = h / layout.h }
-        },
-    mapView = {
-        set = false,
-        scale = 1,
-        offset = { x = 0, y = 0 }
-    },
     blockTypes = {
         Block = {
             new = function(name, map)
@@ -245,24 +178,6 @@ levelbox = {
     }
 }
 
-function levelbox:loadHelpers()
-    local dirs = {
-        "levelbox",
-        "levelbox/updatable",
-        "levelbox/levelView",
-        "levelbox/levelView/blocks",
-        "levelbox/mapView",
-        "levelbox/mapView/maps",
-    }
-    for i = 1, #dirs, 1 do
-        local files = love.filesystem.getDirectoryItems(dirs[i])
-        for k, file in ipairs(files) do
-            if love.filesystem.getInfo(dirs[i] .. "/" .. file).type == "file" then
-                require(dirs[i] .. "/" .. file:sub(1, -5))
-            end
-        end
-    end
-end
 
 function levelbox:getStep()
     return {
@@ -272,20 +187,36 @@ function levelbox:getStep()
 end
 
 function levelbox:load()
+    self:loadBasic()
+    self:loadGame()
+    self:loadLinks()
     self:loadHelpers()
+    
+    self.state = {
+        maps = {},
+        activeSpawn = "",
+        mapsCount = 0,
+        linksCount = 0,
+        activeMap = "map0",
+        screenScale = { w = w / layout.w, h = h / layout.h }
+    }
     
     if not self.game.linksCount then
         self.game.linksCount = #self.links
     end
+    self.state.linksCount = self.game.linksCount
     if not self.game.screenScale then
         self.game.screenScale = { w = 1280 / layout.w, h = 720 / layout.h }
     end
+    self.state.screenScale = self.game.screenScale
     self.step = { w = self.w / layout.w, h = self.h / layout.h, mult = 1, max = 99 }
     for kmap, map in pairs(self.game.maps) do
+        self.state.maps[kmap] = map:new(map)
         if not self.game.activeMap then
             self.game.activeMap = kmap
         end
         for kblock, block in pairs(map.blocks) do
+            self.state.maps[kmap] = map:new(map)
             if not block.z then
                 block.z = 1
             end
@@ -408,6 +339,7 @@ function levelbox:load()
             map.updatableType = "map"
         end
     end
+    self.state.activeMap = self.game.activeMap
     
     for klink, link in pairs(levelbox.links) do
         local exists = false
