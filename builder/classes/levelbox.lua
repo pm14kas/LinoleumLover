@@ -198,13 +198,13 @@ function levelbox:setGrab(flag)
 end
 
 function levelbox:getSpawn(block, map)
-    local spawn = block.name or block
+    local spawn = block.name or block.spawn or block
     map = map or block.map or self.state.activeMap
     return self:getMap(map).spawns[spawn]
 end
 
 function levelbox:getTarget(block, map)
-    local target = block.target or block
+    local target = block.name or block.target or block
     map = map or block.map or self.state.activeMap
     return self:getMap(map).targets[target]
 end
@@ -362,6 +362,7 @@ function levelbox:draw()
         end
         
         for k, link in pairs(self.links) do
+            print(self:getSpawn(link.spawn))
             love.graphics.line(
                 self:getSpawn(link.spawn).x * self:getMap(link.spawn.map).w / self.w / self:getMap(link.spawn.map).sizeX + self:getMap(link.spawn.map).x,
                 self:getSpawn(link.spawn).y * self:getMap(link.spawn.map).h / self.h / self:getMap(link.spawn.map).sizeY + self:getMap(link.spawn.map).y,
