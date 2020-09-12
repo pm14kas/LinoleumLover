@@ -7,13 +7,13 @@ block = updatable:new({
 function block:setProperty(prop, val)
     updatable.setProperty(self, prop, val)
     if self.type == "Spawn" then
-        local spawn = levelbox:getSpawn(self.name)
+        local spawn = levelbox:getSpawn(self)
         if not spawn then
             spawn = levelbox.blockTypes.Spawn.new(self.name, self.map)
         end
         spawn[prop] = val
     elseif self.type == "Portal" or self.type == "Checkpoint" then
-        local target = levelbox:getTarget(self.name)
+        local target = levelbox:getTarget(self)
         if not target then
             target = levelbox.blockTypes.Portal.new(self.name, self.map)
         end

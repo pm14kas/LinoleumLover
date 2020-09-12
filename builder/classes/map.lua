@@ -8,6 +8,8 @@ map = updatable:new({
     sizeY = 1,
     scale = 1,
     offset = { x = 0, y = 0 },
+    spawns = {},
+    targets = {}
 })
 
 function map:draw()
