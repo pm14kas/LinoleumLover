@@ -8,12 +8,59 @@ local bandwidthLimiter = 0
 -- 0.35 is purely empirical
 local multiplayerTimeoutMultiplier = 0.35;
 
+local traversalAddress = '127.0.0.1:1337';
+
+if isMultiplayerActive then
+    local traversalHost = enet.host_create();
+    local traversalServer = traversalHost:connect(ENVIRONMENT_TRAVERSAL_IP .. ":27015");
+
+    local event = traversalHost:service(10000);
+    if event then
+        if event.type == "connect" then
+            local traversalData = {
+                messageType = 'register',
+                type = tern(isServer, 'host', 'client'),
+                secret = ENVIRONMENT_TRAVERSAL_SECRET_PHRASE,
+            };
+            traversalServer:send(json.encode(traversalData));
+
+            event = traversalHost:service(5000);
+            if event and event.type == 'receive' then
+                data = json.decode(event.data);
+                if data.result then
+                    if not isServer then
+                        traversalData = {
+                            messageType = 'getHost',
+                            secret = ENVIRONMENT_TRAVERSAL_SECRET_PHRASE,
+                        };
+                        traversalServer:send(json.encode(traversalData));
+
+                        event = traversalHost:service(30000);
+                        if event and event.type == 'receive' then
+                            data = json.decode(event.data);
+                            if data.result then
+                                traversalAddress = data.address;
+                            end
+                        end
+                    end
+                else
+                    isMultiplayerActive = false;
+                end
+            end
+        else
+            isMultiplayerActive = false;
+        end
+    else
+        isMultiplayerActive = false;
+    end
+end
+
 if isMultiplayerActive then
     if isServer then
         host = enet.host_create("*:27015", 1);
     else
         host = enet.host_create()
-        server = host:connect(ENVIRONMENT_TRAVERSAL_IP .. ":27015")
+        server = host:connect(traversalAddress)
     end
 end
 
