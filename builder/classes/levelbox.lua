@@ -362,7 +362,6 @@ function levelbox:draw()
         end
         
         for k, link in pairs(self.links) do
-            print(self:getSpawn(link.spawn))
             love.graphics.line(
                 self:getSpawn(link.spawn).x * self:getMap(link.spawn.map).w / self.w / self:getMap(link.spawn.map).sizeX + self:getMap(link.spawn.map).x,
                 self:getSpawn(link.spawn).y * self:getMap(link.spawn.map).h / self.h / self:getMap(link.spawn.map).sizeY + self:getMap(link.spawn.map).y,
