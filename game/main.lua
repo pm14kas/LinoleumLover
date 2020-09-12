@@ -10,7 +10,7 @@ static = {
 };
 
 mistralFont = love.graphics.newFont("fonts/mistral.ttf", 1000)
-graphikFont = love.graphics.newFont("fonts/GraphikRegular.ttf", 1000);
+graphikFont = love.graphics.newFont("fonts/GraphikRegular.ttf", 100);
 love.graphics.setFont(graphikFont);
 
 love.window.setTitle("Linoleum");
