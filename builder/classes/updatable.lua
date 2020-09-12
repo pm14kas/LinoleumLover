@@ -68,6 +68,4 @@ end
 function updatable:move(dx, dy)
     self:setProperty("x", math.min(math.max(0, self.x + dx), levelbox.w - self.w))
     self:setProperty("y", math.min(math.max(0, self.y + dy), levelbox.h - self.h))
-    self.grabbedX = cursor.x
-    self.grabbedY = cursor.y
 end
