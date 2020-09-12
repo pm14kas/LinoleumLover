@@ -59,6 +59,20 @@ function level:new()
     self.buttons = {};
     self.doors = {};
 	self.activeSpawn = self.data.activeSpawn;
+
+    if not self.activeSpawn or self.activeSpawn == '' then
+        for indexMap, valueMap in pairs(self.data.maps) do
+            for indexSpawn, valueSpawn in pairs(valueMap.spawns) do
+                self.activeSpawn = indexSpawn;
+				break;
+            end
+        end
+    end
+
+    if not self.activeSpawn or self.activeSpawn == '' then
+        error('Map doesn\'t contain any spawn points');
+    end
+
 	self:clearBlocks();
 end
 
