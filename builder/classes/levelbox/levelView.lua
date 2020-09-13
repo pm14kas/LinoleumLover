@@ -87,7 +87,11 @@ end
 
 function levelbox:deleteblock()
     if self.state.selectedBlock then
+        local name = self:getSelectedBlock().name
+        local map = self:getSelectedBlock().map
+        local type = self:getSelectedBlock().type
         self:getSelectedBlock():delete()
+        self.blockTypes[type].delete(name, map)
     elseif self.state.selectedMap then
         self:getSelectedMap():delete()
     end

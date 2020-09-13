@@ -206,16 +206,12 @@ function block:setType(category, innerType)
 end
 
 function block:delete()
-    if self.type == "Spawn" then
-        levelbox:deletelink(levelbox:getSpawn(self.name).link)
-        levelbox:getActiveMap().spawns[self.name] = nil
-    elseif self.type == "Portal" or self.type == "Checkpoint" then
-        levelbox:deletelink(levelbox:getTarget(self.name).link)
-        levelbox:getActiveMap().targets[self.name] = nil
-    end
     levelbox.grabbedBlock = nil
     self:unselect()
     contextMenu:setActiveScreen()
+    for key, link in pairs(self.links) do
+        levelbox:getBlock(link.name, link.map).links[self.name .. self.map] = nil
+    end
     levelbox:getActiveMap().blocks[self.name] = nil
 end
 

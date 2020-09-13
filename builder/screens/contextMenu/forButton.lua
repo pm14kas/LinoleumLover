@@ -13,11 +13,19 @@ function contextMenu.screens.forButton:load()
                     sign = door,
                     trigger = function(self)
                         local triggerButton = button:get("newforButton_" .. self.sign)
-                        if inArray(door, levelbox:getSelectedBlock().links) then
-                            table.removeByValue(levelbox:getSelectedBlock().links, door)
+                        if levelbox:getSelectedBlock().links[door .. kmap] then
+                            levelbox:getSelectedBlock().links[door .. kmap] = nil
+                            levelbox:getBlock(door).links[levelbox:getSelectedBlock().name .. levelbox:getSelectedBlock().map] = nil
                             triggerButton.color = triggerButton.colorUnclicked
                         else
-                            table.insert(levelbox:getSelectedBlock().links, door)
+                            levelbox:getSelectedBlock().links[door .. kmap] = {
+                                name = door,
+                                map = kmap
+                            }
+                            levelbox:getBlock(door).links[levelbox:getSelectedBlock().name .. levelbox:getSelectedBlock().map] = {
+                                name = levelbox:getSelectedBlock().name,
+                                map = levelbox:getSelectedBlock().map,
+                            }
                             triggerButton.color = triggerButton.colorClicked
                         end
                     end,
