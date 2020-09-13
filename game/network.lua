@@ -152,7 +152,7 @@ function network:update(dt)
    -- end
 
     local event = host:service(multiplayerTimeoutMultiplier / dt)
-    if event then
+    while event do
         if event.type == "receive" then
             self:parseData(event.data)
             --network:extrapolate();
@@ -166,8 +166,8 @@ function network:update(dt)
         elseif event.type == "disconnect" then
             self:reset();
         end
-    else
-        network:extrapolate();
+
+        event = host:service()
     end
 
     if not isServer then
