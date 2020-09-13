@@ -29,7 +29,8 @@ for i, screenName in ipairs(contextMenu.screenNames) do
 		w = contextMenu.w,
 		h = contextMenu.h,
 		active = false, 
-		draw = false
+		draw = false,
+        loadPriority = contextMenu.loadPriority + 1
 	})
 	contextMenu.screens[screenName].settings = {
 		inRow = 4
@@ -39,6 +40,9 @@ end
 contextMenu.activeScreen = nil
 
 contextMenu.path = "screens/contextMenu"
+for k, file in ipairs(love.filesystem.getDirectoryItems(contextMenu.path)) do
+    require(contextMenu.path .. "/" .. file:sub(1,-5))
+end
 
 function contextMenu:show()
 	love.graphics.setColor(1, 1, 1)
@@ -60,10 +64,6 @@ function contextMenu:setActiveScreen(screenName)
 end
 
 function contextMenu:load()
-    for k, file in ipairs(love.filesystem.getDirectoryItems(contextMenu.path)) do
-        require(contextMenu.path .. "/" .. file:sub(1,-5))
-    end
-    
     for kscreen, screenContext in pairs(contextMenu.screens) do
         if screenContext.categories then
             local buttonWidth = screenContext.w / screenContext.settings.inRow
@@ -84,6 +84,12 @@ function contextMenu:load()
                         block.trigger = function()
                             levelbox:getSelectedBlock():setType(icat, i)
                         end
+                    end
+                    if not block.onhover then
+                        block.onhover = function() end
+                    end
+                    if not block.offhover then
+                        block.offhover = function() end
                     end
                     block.picture = love.graphics.newImage(block.imageFilename)
                     block.cursor = love.mouse.newCursor(block.imageFilename, block.picture:getWidth() / 2, block.picture:getHeight() / 2) -- since all item pictures are 64x64
@@ -122,6 +128,12 @@ function contextMenu:load()
                             end,
                             onclick = function()
                                 block.trigger()
+                            end,
+                            onhover = function()
+                                block.onhover()
+                            end,
+                            offhover = function()
+                                block.offhover()
                             end
                         }
                     )

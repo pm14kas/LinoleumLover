@@ -3,8 +3,9 @@ function levelbox:getBlock(block, map)
     return self:getMap(map).blocks[block]
 end
 
-function levelbox:getSelectedBlock()
-    return self:getBlock(self.state.selectedBlock)
+function levelbox:getSelectedBlock(map)
+    map = map or self.state.activeMap
+    return self:getBlock(self.state.selectedBlock, map)
 end
 
 function levelbox:selectBlock(block)
@@ -16,10 +17,33 @@ function levelbox:selectBlock(block)
     end
     self.state.selectedBlock = block
     if block then
-        self:getBlock(block):select()
+        self:getSelectedBlock():select()
         if button:exists(self:getSelectedBlock():getContextMenuButtonName()) then
             button:get(self:getSelectedBlock():getContextMenuButtonName()).color = button:get(self:getSelectedBlock():getContextMenuButtonName()).colorClicked
         end
+    end
+end
+
+function levelbox:getGrabbedBlock(map)
+    map = map or self.state.activeMap
+    return self:getBlock(self.grabbedBlock, map)
+end
+
+function levelbox:getHighlightedBlock(map)
+    map = map or self.state.activeMap
+    return self:getBlock(self.state.highlightedBlock, map)
+end
+
+function levelbox:highlightBlock(block, map)
+    if map ~= self.state.activeMap then
+        return
+    end
+    if self.state.highlightedBlock then
+        self:getHighlightedBlock(map):unhighlight()
+    end
+    self.state.highlightedBlock = block
+    if block then
+        self:getHighlightedBlock(map):highlight()
     end
 end
 
@@ -55,8 +79,4 @@ function levelbox:deleteblock()
     elseif self.state.selectedMap then
         self:getSelectedMap():delete()
     end
-end
-
-function levelbox:getGrabbedBlock()
-    return self:getBlock(self.grabbedBlock)
 end

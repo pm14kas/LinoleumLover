@@ -99,7 +99,7 @@ function block:draw()
             self.w / love.graphics.getFont():getWidth(self.value),
             self.h / love.graphics.getFont():getHeight()
         )
-        if self.selected then
+        if self.selected or self.highlighted then
             love.graphics.setLineWidth(self.borderW / levelbox.scale)
             love.graphics.rectangle("line", self.x - self.border / levelbox.scale, self.y - self.border / levelbox.scale,
                                     self.w + self.border / levelbox.scale * 2, self.h + self.border / levelbox.scale * 2)
@@ -151,7 +151,7 @@ function block:draw()
                 valueScale
             )
         end
-        if self.selected then
+        if self.selected or self.highlighted then
             love.graphics.setColor(self.color)
             love.graphics.setLineWidth(self.borderW / levelbox.scale)
             love.graphics.rectangle("line", self.x - self.border / levelbox.scale, self.y - self.border / levelbox.scale,

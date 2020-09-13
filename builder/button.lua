@@ -12,6 +12,7 @@ button = {
 		onclick = function() end,
 		onpress = function() end,
 		onhover = function() end,
+		offhover = function() end,
 		font = love.graphics.newFont("fonts/joystix monospace.ttf", fontSize),
 		font1 = love.graphics.newFont("fonts/joystix monospace.ttf", fontSize + 2),
 		fontColor = {255, 255, 255},
@@ -48,8 +49,11 @@ function button:add(name, params)
 	self:get(name).color = params.color or {255, 0, 0}
 	self:get(name).colorUnclicked = params.color or {255, 0, 0}
 	self:get(name).colorClicked = params.colorClicked or {255, 125, 0}
+	self:get(name).colorHovered = params.colorHovered or {255, 125, 0}
 	self:get(name).draw = params.draw == nil and true or params.draw
 	self:get(name).active = params.active == nil and true or params.active
+	self:get(name).onhoverTriggered = false
+	self:get(name).offhoverTriggered = false
 	self:get(name).userData = params.userData or {}
 	table.insert(screen:get(self:get(name).screen).buttons, name)
 end
@@ -66,65 +70,74 @@ function button:draw(name)
 	love.graphics.setColor(0, 0, 0)
 	love.graphics.rectangle(--shadowButton
 		"fill", 
-		button:get(name).X,--+button:get(name).shadowX, 
-		button:get(name).Y + button:get(name).shadowY, 
-		button:get(name).width, 
-		button:get(name).height, 
-		button:get(name).rx, 
-		button:get(name).ry, 
-		button:get(name).segments
+		self:get(name).X,--+self:get(name).shadowX,
+		self:get(name).Y + self:get(name).shadowY,
+		self:get(name).width,
+		self:get(name).height,
+		self:get(name).rx,
+		self:get(name).ry,
+		self:get(name).segments
 	)
 
 
-	love.graphics.setColor(button:get(name).color)
+	love.graphics.setColor(self:get(name).color)
 	love.graphics.rectangle(
 		"fill", 
-		button:get(name).X + button:get(name).incrX, 
-		button:get(name).Y + button:get(name).incrY, 
-		button:get(name).width, 
-		button:get(name).height, 
-		button:get(name).rx, 
-		button:get(name).ry, 
-		button:get(name).segments
+		self:get(name).X + self:get(name).incrX,
+		self:get(name).Y + self:get(name).incrY,
+		self:get(name).width,
+		self:get(name).height,
+		self:get(name).rx,
+		self:get(name).ry,
+		self:get(name).segments
 	)
 
-	if button:get(name).backgroundImage then
+	if self:get(name).backgroundImage then
 		love.graphics.setColor(255, 255, 255)
 		love.graphics.draw(
-			button:get(name).backgroundImage, 
-			button:get(name).X + button:get(name).incrX + (2 * button:get(name).width  - math.sqrt(2) * button:get(name).width ) / 4, 
-			button:get(name).Y + button:get(name).incrY + (2 * button:get(name).height - math.sqrt(2) * button:get(name).height) / 4, 
+			self:get(name).backgroundImage,
+			self:get(name).X + self:get(name).incrX + (2 * self:get(name).width  - math.sqrt(2) * self:get(name).width ) / 4,
+			self:get(name).Y + self:get(name).incrY + (2 * self:get(name).height - math.sqrt(2) * self:get(name).height) / 4,
 			0, 
-			button:get(name).width  / (math.sqrt(2)*button:get(name).backgroundImage:getWidth() ), 
-			button:get(name).height / (math.sqrt(2)*button:get(name).backgroundImage:getHeight())
+			self:get(name).width  / (math.sqrt(2)*self:get(name).backgroundImage:getWidth() ),
+			self:get(name).height / (math.sqrt(2)*self:get(name).backgroundImage:getHeight())
 		)
 	end
 
-	if button:get(name).picture then
-		love.graphics.translate(button:get(name).X, button:get(name).Y)
-		button:get(name).picture()
-		love.graphics.translate(-button:get(name).X, -button:get(name).Y)
+	if self:get(name).picture then
+		love.graphics.translate(self:get(name).X, self:get(name).Y)
+		self:get(name).picture()
+		love.graphics.translate(-self:get(name).X, -self:get(name).Y)
 	end
 	
 	love.graphics.setColor(0, 0, 0)
-	love.graphics.setFont(button:get(name).font)
+	love.graphics.setFont(self:get(name).font)
 	love.graphics.print(--shadowText
-		button:get(name).value, 
-		button:get(name).X + (button:get(name).width  - button:get(name).font:getWidth(button:get(name).value)) * 0.5 + button:get(name).incrX + 1, 
-		button:get(name).Y + (button:get(name).height - button:get(name).font:getHeight()) / 2 + button:get(name).incrY + 1
+		self:get(name).value,
+		self:get(name).X + (self:get(name).width  - self:get(name).font:getWidth(self:get(name).value)) * 0.5 + self:get(name).incrX + 1,
+		self:get(name).Y + (self:get(name).height - self:get(name).font:getHeight()) / 2 + self:get(name).incrY + 1
 	)
 
-	-- if(self:hovered(name)) then
-	-- 	love.graphics.setColor(0, 0, 0)
-	-- 	button:get(name).onhover()
-	-- else
-	-- 	love.graphics.setColor(button:get(name).fontColor)
-	-- end
-	love.graphics.setColor(button:get(name).fontColor)
+	 if self:hovered(name) then
+         love.graphics.setColor(self:get(name).colorHovered)
+         if not self:get(name).onhoverTriggered then
+             self:get(name).onhover()
+             self:get(name).onhoverTriggered = true
+             self:get(name).offhoverTriggered = false
+         end
+	 else
+         if not self:get(name).offhoverTriggered then
+             self:get(name).offhover()
+             self:get(name).offhoverTriggered = true
+             self:get(name).onhoverTriggered = false
+         end
+         love.graphics.setColor(self:get(name).fontColor)
+	 end
+	love.graphics.setColor(self:get(name).fontColor)
 	love.graphics.print(
-		button:get(name).value, 
-		button:get(name).X + (button:get(name).width  - button:get(name).font:getWidth(button:get(name).value)) * 0.5 + button:get(name).incrX, 
-		button:get(name).Y + (button:get(name).height - button:get(name).font:getHeight()) / 2 + button:get(name).incrY
+		self:get(name).value,
+		self:get(name).X + (self:get(name).width  - self:get(name).font:getWidth(self:get(name).value)) * 0.5 + self:get(name).incrX,
+		self:get(name).Y + (self:get(name).height - self:get(name).font:getHeight()) / 2 + self:get(name).incrY
 	)
 end
 

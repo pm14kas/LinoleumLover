@@ -61,6 +61,15 @@ function updatable:unselect()
     self.selected = false
 end
 
+function updatable:highlight()
+    self.highlighted = true
+end
+
+function updatable:unhighlight()
+    self.highlighted = false
+end
+
+
 function updatable:setProperty(prop, val)
     self[prop] = val
 end

@@ -8,6 +8,7 @@ screen = {
 		offsetY = 0,
 		scaleX = 1,
 		scaleY = 1,
+        loadPriority = 1,
 		draw = false,
 		z = 1,
 		active = false,
@@ -77,12 +78,13 @@ function screen:orderBy(key, order)
 		table.insert(values, v[key])
 		table.insert(keys, k)
 	end
+    local temp = ""
 	for i = 1, table.getn(values), 1 do
 		for j = 1, table.getn(values), 1 do
 			if((order == "asc" and values[j] > values[i]) or (order == "desc" and values[j] < values[i])) then
 				temp = values[i]
 				values[i] = values[j]
-				values[j]= temp
+				values[j] = temp
 				temp = keys[i]
 				keys[i] = keys[j]
 				keys[j]= temp

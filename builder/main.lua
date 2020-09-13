@@ -65,7 +65,7 @@ function love.load()
 	}
 	love.graphics.setBackgroundColor(204 / 255, 153 / 255, 72 / 255)
     levelbox:load()
-    for name, s in screen:getAll() do
+    for name, s in screen:orderBy("loadPriority", "desc") do
         if s.load then s:load() end
     end
 end

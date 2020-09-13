@@ -6,7 +6,7 @@ function map:draw()
     local valueScale = 50 / graphikFont:getHeight() / 10
     love.graphics.setColor(self.backgroundColor)
     love.graphics.rectangle("fill", self.x, self.y, self.w, self.h)
-    if self.selected then
+    if self.selected or self.highlighted then
         love.graphics.setLineWidth(self.borderW / levelbox.scale)
         love.graphics.rectangle("line", self.x - self.border / levelbox.scale, self.y - self.border / levelbox.scale,
                                 self.w + self.border / levelbox.scale * 2, self.h + self.border / levelbox.scale * 2)

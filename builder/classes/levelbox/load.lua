@@ -131,6 +131,7 @@ function levelbox:loadState()
     self.state.linksCount = self.game.linksCount
     self.state.mapsCount = self.game.mapsCount
     self.state.activeMap = self.game.activeMap
+    self.state.activeSpawn = self.game.activeSpawn
     self.state.selectedBlock = self.game.selectedBlock
     self.state.selectedMap = self.game.selectedMap
 end
