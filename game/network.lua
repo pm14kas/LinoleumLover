@@ -7,7 +7,7 @@ local isNatTraversalActive = false;
 local bandwidthLimiter = 0
 
 -- 0.35 is purely empirical
-local multiplayerTimeoutMultiplier = 1;
+local multiplayerTimeoutMultiplier = 0.35;
 
 if isMultiplayerActive then
     host = enet.host_create("*:" .. ENVIRONMENT_TRAVERSAL_PORT, 4)
@@ -174,7 +174,7 @@ function network:update(dt)
         server:send(self:buildData())
     end
 
-    for k, v in pairs(level.doors) do
+    --[[for k, v in pairs(level.doors) do
         v.networkState = false;
         v.fixture:setSensor(false);
     end
@@ -190,6 +190,7 @@ function network:update(dt)
             end
         end
     end
+    ]]
 end
 
 

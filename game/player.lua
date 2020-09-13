@@ -486,7 +486,7 @@ function player:update(dt)
 	end
 
 	for buttonIndex, button in pairs(level.buttons) do
-		if self.body:isTouching(button.body) then
+		if self.body:isTouching(button.body) or (network.body and network.body:isTouching(button.body)) then
 			for linkIndex, linkValue in pairs(button.links) do
 				if level.doors[linkValue.name] then
 					level.doors[linkValue.name].state = true
