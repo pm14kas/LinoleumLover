@@ -179,6 +179,18 @@ function level:changeLevel(levelId, spawnId)
 		end
 	end
 
+	for k, block in pairs(self.data.maps[self.activeMap].doors) do
+		self:appendDoor(k, block.x, block.y, block.w, block.h, block.color, block.entityType);
+	end
+
+	for k, block in pairs(self.data.maps[self.activeMap].buttons) do
+		self:appendButton(k, block.x, block.y, block.w, block.h, block.links);
+	end
+
+	for k, block in pairs(self.data.maps[self.activeMap].checkpoints) do
+		self:appendCheckpoint(k, block.x, block.y, block.w, block.h, block.spawn);
+	end
+
 	for k, block in pairs(self.data.maps[self.activeMap].spawns) do
 		if (self.activeSpawn == nil) then
 			self.activeSpawn = k;
@@ -210,7 +222,6 @@ function level:appendBlock(name, x, y, width, height, color, type)
 	block.height = layout.getY(height);
 	block.x = layout.getX(x);
 	block.y = layout.getY(y);
-	-- because misha is gay
 	block.x = block.x + block.width * 0.5;
 	block.y = block.y + block.height * 0.5;
 	block.color = color;
@@ -240,7 +251,6 @@ function level:appendHazard(name, x, y, width, height)
 	block.height = layout.getY(height);
 	block.x = layout.getX(x);
 	block.y = layout.getY(y);
-	-- because misha is gay
 	block.x = block.x + block.width * 0.5;
 	block.y = block.y + block.height * 0.5;
 	--block.type = level.blockNameList.hazard;
@@ -265,7 +275,6 @@ function level:appendPortal(name, x, y, width, height, spawn)
 	block.height = layout.getY(height);
 	block.x = layout.getX(x);
 	block.y = layout.getY(y);
-	-- because misha is gay
 	block.x = block.x + block.width * 0.5;
 	block.y = block.y + block.height * 0.5;
 	block.color = {1,1,1};
@@ -294,7 +303,6 @@ function level:appendSpawn(name, x, y, width, height, spawn)
 	block.height = layout.getY(height);
 	block.x = layout.getX(x);
 	block.y = layout.getY(y);
-	-- because misha is gay
 	block.x = block.x + block.width * 0.5;
 	block.y = block.y + block.height * 0.5;
 	block.color = {1,1,1};
@@ -311,7 +319,6 @@ function level:appendCheckpoint(name, x, y, width, height, spawn)
 	block.height = layout.getY(height);
 	block.x = layout.getX(x);
 	block.y = layout.getY(y);
-	-- because misha is gay
 	block.x = block.x + block.width * 0.5;
 	block.y = block.y + block.height * 0.5;
 	block.spawn = spawn;
@@ -326,6 +333,59 @@ function level:appendCheckpoint(name, x, y, width, height, spawn)
 		block.fixture:setSensor(true);
 	end
 	self.checkpoints[name] = block;
+end
+
+function level:appendButton(name, x, y, width, height, links)
+	if not x then x = 0 end;
+	if not y then y = 0 end;
+	if not width then width = 0 end;
+	if not height then height = 0 end;
+
+	local block = {};
+	block.width = layout.getX(width);
+	block.height = layout.getY(height);
+	block.x = layout.getX(x);
+	block.y = layout.getY(y);
+	block.x = block.x + block.width * 0.5;
+	block.y = block.y + block.height * 0.5;
+	block.links = links;
+	--block.type = level.blockNameList.checkpoint;
+
+	block.body = love.physics.newBody(world, block.x, block.y, "static");
+	block.shape = love.physics.newRectangleShape(block.width, block.height);
+	block.fixture = love.physics.newFixture(block.body, block.shape);
+	block.fixture:setUserData("button");
+	block.fixture:setSensor(true);
+
+	self.buttons[name] = block;
+end
+
+function level:appendDoor(name, x, y, width, height, color, defaultState)
+	if not x then x = 0 end;
+	if not y then y = 0 end;
+	if not width then width = 0 end;
+	if not height then height = 0 end;
+	if not color then color = {1, 1, 1} end;
+
+	local block = {};
+	block.width = layout.getX(width);
+	block.height = layout.getY(height);
+	block.x = layout.getX(x);
+	block.y = layout.getY(y);
+	block.x = block.x + block.width * 0.5;
+	block.y = block.y + block.height * 0.5;
+	block.color = color;
+	block.defaultState = defaultState;
+	block.state = false;
+	block.previousState = false;
+	block.networkState = false;
+
+	block.body = love.physics.newBody(world, block.x, block.y, "static");
+	block.shape = love.physics.newRectangleShape(block.width, block.height);
+	block.fixture = love.physics.newFixture(block.body, block.shape);
+	block.fixture:setFriction(0.99);
+	block.fixture:setUserData(name);
+	self.doors[name] = block;
 end
 
 function level:appendDecoration(name, x, y, width, height, color, type, value)
@@ -401,6 +461,12 @@ function level:clearBlocks()
 		block.body:destroy();
 	end
 	for k, block in pairs(self.items) do
+		block.body:destroy();
+	end
+	for k, block in pairs(self.buttons) do
+		block.body:destroy();
+	end
+	for k, block in pairs(self.doors) do
 		block.body:destroy();
 	end
 	self.blocks = {};
@@ -480,6 +546,20 @@ function level:draw()
 		end
 		love.graphics.setColor({1, math.sin(love.timer.getTime() * 6) * 0.5 + 0.5, 0.1});
 		for k, v in pairs(self.hazards) do
+			love.graphics.polygon("fill", v.body:getWorldPoints(v.shape:getPoints()))
+		end
+
+		for k, v in pairs(self.doors) do
+			if v.state then
+				love.graphics.setColor(v.color[1], v.color[2], v.color[3], 0.1);
+			else
+				love.graphics.setColor(v.color)
+			end
+			love.graphics.polygon("fill", v.body:getWorldPoints(v.shape:getPoints()))
+		end
+
+		for k, v in pairs(self.buttons) do
+			love.graphics.setColor(0, 0, 0, 0.5);
 			love.graphics.polygon("fill", v.body:getWorldPoints(v.shape:getPoints()))
 		end
 

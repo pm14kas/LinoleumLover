@@ -1,7 +1,7 @@
 local enet = require "enet"
 local host = nil;
 local server = nil;
-local isServer = true;
+local isServer = false;
 local isMultiplayerActive = true;
 local isNatTraversalActive = false;
 local bandwidthLimiter = 0
@@ -10,7 +10,7 @@ local bandwidthLimiter = 0
 local multiplayerTimeoutMultiplier = 0.3;
 
 if isMultiplayerActive then
-    host = enet.host_create("*:0", 4)
+    host = enet.host_create("*:27015", 4)
 end
 
 if isMultiplayerActive and isNatTraversalActive then
@@ -79,25 +79,35 @@ else
     server = host:connect(ENVIRONMENT_TRAVERSAL_IP .. ":27015");
 end
 
-network = {
-    x = 0,
-    y = 0,
-    lastState = {
+network = {};
+
+function network:new()
+    self.x = 0;
+    self.y = 0;
+    self.lastState = {
         x = 0,
         y = 0,
-    },
-    width = layout.getX(50),
-    height = layout.getY(100),
-    currentMap = nil,
-    direction = 1,
-    isLeftWallClimb = false,
-    isRightWallClimb = false,
-    isDashing = false,
-    bandwidthLimiter = 0,
-    bulletList = {},
-    bulletWidth = layout.getX(10),
-    bulletHeight = layout.getY(5),
-}
+    };
+    self.width = layout.getX(50);
+    self.height = layout.getY(100);
+    self.currentMap = nil;
+    self.direction = 1;
+    self.isLeftWallClimb = false;
+    self.isRightWallClimb = false;
+    self.isDashing = false;
+    self.bandwidthLimiter = 0;
+    self.bulletList = {};
+    self.bulletWidth = layout.getX(10);
+    self.bulletHeight = layout.getY(5);
+
+    self.body = love.physics.newBody(world, self.x, self.y, "dynamic");
+    self.body:setFixedRotation(true);
+    self.shape = love.physics.newRectangleShape(self.width, self.height);
+    self.fixture = love.physics.newFixture(self.body, self.shape);
+    self.fixture:setUserData("network");
+    self.fixture:setSensor(true);
+end
+
 
 function network:reset()
     self.lastState = {
@@ -107,17 +117,19 @@ function network:reset()
     self.x = 0;
     self.y = 0;
     self.currentMap = nil;
+    self.body:setX(0);
+    self.body:setY(0);
 end
 
 function network:extrapolate()
-    local shiftX = self.x - self.lastState.x;
+    --[[local shiftX = self.x - self.lastState.x;
     local shiftY = self.y - self.lastState.y;
 
     self.lastState.x = self.x;
     self.lastState.y = self.y;
 
     self.x = self.x + shiftX * 0.2;
-    self.y = self.y + shiftY * 0.2;
+    self.y = self.y + shiftY * 0.2;]]
 end
 
 function network:update(dt)
@@ -158,6 +170,23 @@ function network:update(dt)
 
     if not isServer then
         server:send(self:buildData())
+    end
+
+    for k, v in pairs(level.doors) do
+        v.networkState = false;
+        v.fixture:setSensor(false);
+    end
+
+    for buttonIndex, button in pairs(level.buttons) do
+        if self.body:isTouching(button.body) then
+            print('sas');
+            for linkIndex, linkValue in pairs(button.links) do
+                if level.doors[linkValue.name] then
+                    level.doors[linkValue.name].networkState = true
+                    level.doors[linkValue.name].fixture:setSensor(true);
+                end
+            end
+        end
     end
 end
 
@@ -210,6 +239,9 @@ function network:parseData(rawData)
     self.isDashing = data.player.isDashing;
 
     self.bulletList = data.bulletList;
+
+    self.body:setX(self.x);
+    self.body:setY(self.y);
 end
 
 

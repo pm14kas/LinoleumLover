@@ -145,6 +145,7 @@ function love.load()
 	world:setCallbacks(beginContact, endContact, preSolve, postSolve)
 
 	player:new();
+	network:new();
 
 	level:new();
 	level:goToSpawn(level.activeSpawn);

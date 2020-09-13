@@ -469,7 +469,33 @@ function player:update(dt)
 				break;
 			end
 		end
-	end 
+	end
+
+	for k, v in pairs(level.doors) do
+		if not v.networkState then
+			local previousPreviousState = v.previousState
+			v.previousState = v.state
+			v.state = false;
+			v.fixture:setSensor(false);
+
+			if self.body:isTouching(v.body) and previousPreviousState and not v.previousState then
+				level:goToSpawn(level.activeSpawn, true);
+				break;
+			end
+		end
+	end
+
+	for buttonIndex, button in pairs(level.buttons) do
+		if self.body:isTouching(button.body) then
+			for linkIndex, linkValue in pairs(button.links) do
+				if level.doors[linkValue.name] then
+					level.doors[linkValue.name].state = true
+					level.doors[linkValue.name].fixture:setSensor(true);
+				end
+			end
+		end
+	end
+
 	for k, v in pairs(level.checkpoints) do
 		if self.body:isTouching(v.body) then
 			if v.spawn then
