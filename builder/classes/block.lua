@@ -91,7 +91,11 @@ end
 
 function block:draw()
     local valueScale = (50 / graphikFont:getHeight() / 3)
-    love.graphics.setColor(self.color)
+    if self.type == "Hazard" then
+        love.graphics.setColor({1, math.sin(love.timer.getTime() * 6) * 0.5 + 0.5, 0.1});
+    else
+        love.graphics.setColor(self.color)
+    end
     if self.type == "Text" then
         love.graphics.setFont(graphikFont)
         love.graphics.printf(

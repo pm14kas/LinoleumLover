@@ -260,6 +260,8 @@ function player:move(dt)
 		elseif love.timer.getTime() > self.dashTimer + self.dashDuration and love.timer.getTime() < self.dashTimer + self.dashDuration * 1.5 then
 			self.isLeftDash = false;
 			self.body:setLinearVelocity(0, 0);
+		elseif self.isLeftDash and love.timer.getTime() > self.dashTimer + self.dashDuration * 1.5 then
+			self.isLeftDash = false;
 		end
 		
 		if self.isRightDash and love.timer.getTime() < self.dashTimer + self.dashDuration then
@@ -270,6 +272,8 @@ function player:move(dt)
 		elseif love.timer.getTime() > self.dashTimer + self.dashDuration and love.timer.getTime() < self.dashTimer + self.dashDuration * 1.5 then
 			self.isRightDash = false;
 			self.body:setLinearVelocity(0, 0);
+		elseif self.isRightDash and love.timer.getTime() > self.dashTimer + self.dashDuration * 1.5 then
+			self.isRightDash = false;
 		end
 	end
 	
