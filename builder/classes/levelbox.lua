@@ -183,6 +183,8 @@ levelbox = {
                 contextMenu.screens.forButton:reload()
             end,
             save = function(name, arrayToSave, map)
+                local block = levelbox:getBlock(name, map)
+                arrayToSave.maps[map][block.saveTo][name].entityType = block.entityType
             end,
         }
     }
