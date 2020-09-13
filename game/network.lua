@@ -1,20 +1,22 @@
 local enet = require "enet"
 local host = nil;
 local server = nil;
-local isServer = false;
+local isServer = true;
 local isMultiplayerActive = true;
+local isNatTraversalActive = false;
 local bandwidthLimiter = 0
 
 -- 0.35 is purely empirical
-local multiplayerTimeoutMultiplier = 0.35;
-
-local traversalAddress = '127.0.0.1:1337';
+local multiplayerTimeoutMultiplier = 0.3;
 
 if isMultiplayerActive then
-    local traversalHost = enet.host_create();
-    local traversalServer = traversalHost:connect(ENVIRONMENT_TRAVERSAL_IP .. ":27015");
+    host = enet.host_create("*:0", 4)
+end
 
-    local event = traversalHost:service(10000);
+if isMultiplayerActive and isNatTraversalActive then
+    server = host:connect(ENVIRONMENT_TRAVERSAL_IP .. ":27015");
+
+    local event = host:service(5000);
     if event then
         if event.type == "connect" then
             local traversalData = {
@@ -22,9 +24,9 @@ if isMultiplayerActive then
                 type = tern(isServer, 'host', 'client'),
                 secret = ENVIRONMENT_TRAVERSAL_SECRET_PHRASE,
             };
-            traversalServer:send(json.encode(traversalData));
+            server:send(json.encode(traversalData));
 
-            event = traversalHost:service(5000);
+            event = host:service(5000);
             if event and event.type == 'receive' then
                 data = json.decode(event.data);
                 if data.result then
@@ -33,35 +35,48 @@ if isMultiplayerActive then
                             messageType = 'getHost',
                             secret = ENVIRONMENT_TRAVERSAL_SECRET_PHRASE,
                         };
-                        traversalServer:send(json.encode(traversalData));
+                        server:send(json.encode(traversalData));
 
-                        event = traversalHost:service(30000);
+                        event = host:service(10000);
                         if event and event.type == 'receive' then
                             data = json.decode(event.data);
                             if data.result then
-                                traversalAddress = data.address;
+                                event.peer:reset();
+                                print('i am client');
+                                print(event.data);
+                                server = host:connect(data.address);
+                                server:send('test');
+
+                                event = host:service(10000);
+                                if event and event.type == 'receive' then
+                                    print(event.data);
+                                end
+                            end
+                        end
+                    else
+                        event = host:service(30000);
+                        if event and event.type == 'receive' then
+                            data = json.decode(event.data);
+                            if data.result then
+                                event.peer:reset();
+                                print('i am server');
+                                print(event.data);
+                                server = host:connect(data.address);
+                                server:send('test');
+
+                                event = host:service(10000);
+                                if event and event.type == 'receive' then
+                                    print(event.data);
+                                end
                             end
                         end
                     end
-                else
-                    isMultiplayerActive = false;
                 end
             end
-        else
-            isMultiplayerActive = false;
         end
-    else
-        isMultiplayerActive = false;
     end
-end
-
-if isMultiplayerActive then
-    if isServer then
-        host = enet.host_create("*:27015", 1);
-    else
-        host = enet.host_create()
-        server = host:connect(traversalAddress)
-    end
+else
+    server = host:connect(ENVIRONMENT_TRAVERSAL_IP .. ":27015");
 end
 
 network = {
@@ -176,7 +191,11 @@ function network:buildData()
 end
 
 function network:parseData(rawData)
-    local data =  json.decode(rawData);
+    local data = json.decode(rawData);
+
+    if not data.player then
+        return;
+    end
 
     self.lastState.x = self.x;
     self.lastState.y = self.y;
