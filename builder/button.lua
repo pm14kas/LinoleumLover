@@ -59,8 +59,8 @@ function button:add(name, params)
 end
 
 function button:delete(name)
-	table.remove(screen:get(self:get(name).screen).buttons, name)
-	table.remove(self.b, name)
+    table.removeByValue(screen:get(self:get(name).screen).buttons, name)
+    table.removeByKey(self.b, name)
 end
 
 function button:draw(name)

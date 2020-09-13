@@ -20,7 +20,11 @@ function block:setProperty(prop, val)
 end
 
 function block:getContextMenuButtonName()
-    return "new" .. "for" .. self.type .. "_" .. self.entityType
+    return "newfor" .. self.type .. "_" .. self.entityType
+end
+
+function block:getContextMenuLinkName(link)
+    return "newfor" .. self.type .. "_" .. link
 end
 
 function block:convertType()
@@ -49,6 +53,7 @@ function block:setDefaults()
     if not self.entityType then self.entityType = "" end
     if not self.innerType then self.innerType = 1 end
     if not self.category then self.category = 1 end
+    if not self.links then self.links = {} end
     if self.type == "Block" then
         self.saveTo = "blocks"
         if not self.entityType then self.entityType = "Solid" end

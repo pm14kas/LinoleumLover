@@ -140,7 +140,6 @@ levelbox = {
                 block.w = 50
                 block.saveTo = "buttons"
                 block.color = { 1, 1, 1 }
-                block.links = {}
             end,
             save = function(name, arrayToSave, map)
                 local block = levelbox:getBlock(name, map)
@@ -153,6 +152,7 @@ levelbox = {
                 block.entityType = contextMenu.screens["forDoor"].categories[1].types[2].sign
                 block.saveTo = "doors"
                 table.insert(levelbox:getMap(map).doors, name)
+                contextMenu.screens.forButton:reload()
             end,
             save = function(name, arrayToSave, map)
             end,
