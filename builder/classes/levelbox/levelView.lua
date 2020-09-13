@@ -20,7 +20,7 @@ function levelbox:selectBlock(block)
         if button:exists(self:getSelectedBlock():getContextMenuButtonName()) then
             button:get(self:getSelectedBlock():getContextMenuButtonName()).color = button:get(self:getSelectedBlock():getContextMenuButtonName()).colorUnclicked
         end
-        for index, link in ipairs(self:getSelectedBlock().links) do
+        for index, link in pairs(self:getSelectedBlock().links) do
             if button:exists(self:getSelectedBlock():getContextMenuLinkName(link)) then
                 local triggerButton = button:get(self:getSelectedBlock():getContextMenuLinkName(link))
                 triggerButton.color = triggerButton.colorUnclicked
@@ -34,9 +34,9 @@ function levelbox:selectBlock(block)
         if button:exists(self:getSelectedBlock():getContextMenuButtonName()) then
             button:get(self:getSelectedBlock():getContextMenuButtonName()).color = button:get(self:getSelectedBlock():getContextMenuButtonName()).colorClicked
         end
-        for index, link in ipairs(self:getSelectedBlock().links) do
-            if button:exists("newfor" .. self:getSelectedBlock().type .. "_" .. link) then
-                local triggerButton = button:get("newfor" .. self:getSelectedBlock().type .. "_" .. link)
+        for index, link in pairs(self:getSelectedBlock().links) do
+            if button:exists(self:getSelectedBlock():getContextMenuLinkName(link)) then
+                local triggerButton = button:get(self:getSelectedBlock():getContextMenuLinkName(link))
                 triggerButton.color = triggerButton.colorClicked
             end
         end

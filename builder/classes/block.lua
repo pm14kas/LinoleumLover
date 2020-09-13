@@ -24,7 +24,7 @@ function block:getContextMenuButtonName()
 end
 
 function block:getContextMenuLinkName(link)
-    return "newfor" .. self.type .. "_" .. link
+    return "newfor" .. self.type .. "_" .. link.name
 end
 
 function block:convertType()
