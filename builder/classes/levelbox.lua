@@ -502,6 +502,8 @@ function levelbox:save()
             decorations = {},
             ai = {},
             items = {},
+            doors = {},
+            buttons = {},
             backgroundColor = map.backgroundColor,
             x = round(layout.getX(map.x)),
             y = round(layout.getY(map.y)),
@@ -512,7 +514,7 @@ function levelbox:save()
         }
         for kblock, block in pairs(map.blocks) do
             if not save.maps[kmap][block.saveTo] then
-                save.maps[kmap][block.saveTo] = {}
+                error("Add arrays for new types!")
             end
             save.maps[kmap][block.saveTo][kblock] = {}
             save.maps[kmap][block.saveTo][kblock].x = layout.getX(block.x)
