@@ -3,7 +3,7 @@ local host = nil;
 local server = nil;
 local isServer = true;
 local isMultiplayerActive = true;
-local isNatTraversalActive = true;
+local isNatTraversalActive = false;
 local bandwidthLimiter = 0
 
 -- 0.35 is purely empirical
