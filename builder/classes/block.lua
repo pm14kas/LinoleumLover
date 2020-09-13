@@ -210,7 +210,9 @@ function block:delete()
     self:unselect()
     contextMenu:setActiveScreen()
     for key, link in pairs(self.links) do
-        levelbox:getBlock(link.name, link.map).links[self.name .. self.map] = nil
+        if link.name and link.map and levelbox:blockExists(link.name, link.map) then
+            levelbox:getBlock(link.name, link.map).links[self.name .. self.map] = nil
+        end
     end
     levelbox:getActiveMap().blocks[self.name] = nil
 end

@@ -15,14 +15,14 @@ function contextMenu.screens.forButton:load()
                         local triggerButton = button:get("newforButton_" .. self.sign)
                         if levelbox:getSelectedBlock().links[door .. kmap] then
                             levelbox:getSelectedBlock().links[door .. kmap] = nil
-                            levelbox:getBlock(door).links[levelbox:getSelectedBlock().name .. levelbox:getSelectedBlock().map] = nil
+                            levelbox:getBlock(door, kmap).links[levelbox:getSelectedBlock().name .. levelbox:getSelectedBlock().map] = nil
                             triggerButton.color = triggerButton.colorUnclicked
                         else
                             levelbox:getSelectedBlock().links[door .. kmap] = {
                                 name = door,
                                 map = kmap
                             }
-                            levelbox:getBlock(door).links[levelbox:getSelectedBlock().name .. levelbox:getSelectedBlock().map] = {
+                            levelbox:getBlock(door, kmap).links[levelbox:getSelectedBlock().name .. levelbox:getSelectedBlock().map] = {
                                 name = levelbox:getSelectedBlock().name,
                                 map = levelbox:getSelectedBlock().map,
                             }

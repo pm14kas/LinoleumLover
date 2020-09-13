@@ -1,6 +1,13 @@
 function levelbox:getBlock(block, map)
     map = map or self.state.activeMap
+    if not levelbox:blockExists(block, map) then
+        error("block ".. block .. " in map " .. map .. " doesn't exist")
+    end
     return self:getMap(map).blocks[block]
+end
+
+function levelbox:blockExists(name, map)
+    return self:getMap(map).blocks[name]
 end
 
 function levelbox:getSelectedBlock(map)
@@ -74,6 +81,7 @@ function levelbox:newBlock(type, map)
             color = { colorPick.currentColor.r, colorPick.currentColor.g, colorPick.currentColor.b },
             type = type,
             name = name,
+            map = map,
         })
         newBlock:setDefaults()
         self:getMap(map).blocks[name] = newBlock

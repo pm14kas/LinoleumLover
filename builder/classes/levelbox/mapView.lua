@@ -3,11 +3,14 @@ function levelbox:getSelectedMap()
 end
 
 function levelbox:getMap(map)
+    if not levelbox:mapExists(map) then
+        error("map " .. map .. " doesn't exist")
+    end
     return self.state.maps[map]
 end
 
 function levelbox:getActiveMap()
-    return self.state.maps[self.state.activeMap]
+    return levelbox:getMap(self.state.activeMap)
 end
 
 function levelbox:newMap(sizeX, sizeY)
@@ -44,4 +47,8 @@ function levelbox:selectMap(map)
     if map then
         self:getMap(map):select()
     end
+end
+
+function levelbox:mapExists(map)
+    return self.state.maps[map]
 end
