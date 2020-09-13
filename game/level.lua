@@ -478,7 +478,7 @@ function level:draw()
 				end
 			end
 		end
-		love.graphics.setColor({1, math.sin(love.timer.getTime() * 10) * 0.5 + 0.5, 0.1});
+		love.graphics.setColor({1, math.sin(love.timer.getTime() * 6) * 0.5 + 0.5, 0.1});
 		for k, v in pairs(self.hazards) do
 			love.graphics.polygon("fill", v.body:getWorldPoints(v.shape:getPoints()))
 		end
