@@ -1,13 +1,13 @@
 local enet = require "enet"
 local host = nil;
 local server = nil;
-local isServer = false;
+local isServer = true;
 local isMultiplayerActive = true;
 local isNatTraversalActive = false;
 local bandwidthLimiter = 0
 
 -- 0.35 is purely empirical
-local multiplayerTimeoutMultiplier = 0.3;
+local multiplayerTimeoutMultiplier = 1;
 
 if isMultiplayerActive then
     host = enet.host_create("*:27015", 4)
@@ -75,7 +75,7 @@ if isMultiplayerActive and isNatTraversalActive then
             end
         end
     end
-else
+elseif isMultiplayerActive then
     server = host:connect(ENVIRONMENT_TRAVERSAL_IP .. ":27015");
 end
 
@@ -150,7 +150,7 @@ function network:update(dt)
    -- end
 
     local event = host:service(multiplayerTimeoutMultiplier / dt)
-    if event then
+    while event do
         if event.type == "receive" then
             self:parseData(event.data)
             --network:extrapolate();
@@ -164,8 +164,8 @@ function network:update(dt)
         elseif event.type == "disconnect" then
             self:reset();
         end
-    else
-        network:extrapolate();
+
+        event = host:service();
     end
 
     if not isServer then
