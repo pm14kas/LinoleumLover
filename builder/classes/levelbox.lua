@@ -150,7 +150,9 @@ levelbox = {
         Door = {
             new = function(name, map)
                 local block = levelbox:getBlock(name, map)
+                block.entityType = contextMenu.screens["forDoor"].categories[1].types[2].sign
                 block.saveTo = "doors"
+                table.insert(levelbox:getMap(map).doors, name)
             end,
             save = function(name, arrayToSave, map)
             end,
@@ -272,6 +274,7 @@ function levelbox:setMapView(flag)
         self.scaleMin = 1
         self.w = screen:get("levelbox").w
         self.h = screen:get("levelbox").h
+        
         self.scale = self.mapView.scale
         self.offsetX = self.mapView.offset.x
         self.offsetY = self.mapView.offset.y
@@ -284,7 +287,8 @@ function levelbox:setMapView(flag)
             self.scaleMin = 1 / math.max(self:getActiveMap().sizeX, self:getActiveMap().sizeY)
             self.w = screen:get("levelbox").w * self:getActiveMap().sizeX
             self.h = screen:get("levelbox").h * self:getActiveMap().sizeY
-            
+    
+            print(self:getActiveMap().offset.x)
             self.scale = self:getActiveMap().scale
             self.offsetX = self:getActiveMap().offset.x
             self.offsetY = self:getActiveMap().offset.y
@@ -363,7 +367,10 @@ function levelbox:draw()
         
         for k, link in pairs(self.links) do
             love.graphics.line(
-                self:getSpawn(link.spawn).x * self:getMap(link.spawn.map).w / self.w / self:getMap(link.spawn.map).sizeX + self:getMap(link.spawn.map).x,
+                self:getSpawn(link.spawn).x *
+                    self:getMap(link.spawn.map).w / self.w /
+                    self:getMap(link.spawn.map).sizeX +
+                    self:getMap(link.spawn.map).x,
                 self:getSpawn(link.spawn).y * self:getMap(link.spawn.map).h / self.h / self:getMap(link.spawn.map).sizeY + self:getMap(link.spawn.map).y,
                 self:getTarget(link.target).x * self:getMap(link.target.map).w / self.w / self:getMap(link.target.map).sizeX + self:getMap(link.target.map).x,
                 self:getTarget(link.target).y * self:getMap(link.target.map).h / self.h / self:getMap(link.target.map).sizeY + self:getMap(link.target.map).y
@@ -488,7 +495,8 @@ function levelbox:save()
             self.blockTypes[block.type].save(kblock, save, kmap)
         end
     end
-    savefile = io.open("mapForBuilder.linoleum", "w")
+    
+    local savefile = io.open("mapForBuilder.linoleum", "w")
     io.output(savefile)
     io.write(json.encode(self.state))
     io.close(savefile)

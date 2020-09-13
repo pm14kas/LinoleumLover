@@ -1,16 +1,6 @@
 require("classes.updatable")
 
-map = updatable:new({
-    x = 0,
-    y = 0,
-    z = 1,
-    sizeX = 1,
-    sizeY = 1,
-    scale = 1,
-    offset = { x = 0, y = 0 },
-    spawns = {},
-    targets = {}
-})
+map = updatable:new()
 
 function map:draw()
     local valueScale = 50 / graphikFont:getHeight() / 10
@@ -87,4 +77,27 @@ end
 function map:unselect()
     updatable.unselect(self)
     levelbox.state.selectedMap = nil
+end
+
+function map:move(dx, dy)
+    updatable.move(self, dx, dy)
+    self.grabbedX = cursor.x
+    self.grabbedY = cursor.y
+end
+
+function map:setDefaults()
+    if not self.doors then self.doors = {} end
+    if not self.z then self.z = 1 end
+    if not self.scale then self.scale = 1 end
+    if not self.offset then self.offset = {x = 0, y = 0} end
+    if not self.blocksCount then self.blocksCount = 0 end
+    if not self.blocks then self.blocks = {} end
+    if not self.spawns then self.spawns = {} end
+    if not self.targets then self.targets = {} end
+    if not self.doors then self.doors = {} end
+    if not self.border then self.border = 10 end
+    if not self.borderW then self.borderW = 5 end
+    if not self.grabbedX then self.grabbedX = 25 end
+    if not self.grabbedY then self.grabbedY = 50 end
+    if not self.backgroundColor then self.backgroundColor = { 1, 1, 1 } end
 end

@@ -55,6 +55,7 @@ end
 function levelbox:loadMaps()
     for kmap, loadMap in pairs(self.game.maps) do
         local newMap = map:new(loadMap)
+        newMap:setDefaults()
         if not newMap.name then newMap.name = kmap end
         self.state.maps[kmap] = newMap
         if not self.state.activeMap then
@@ -127,11 +128,8 @@ function levelbox:loadState()
         activeMap = "map0",
         screenScale = { w = w / layout.w, h = h / layout.h }
     }
-    
-    if not self.game.linksCount then
-        self.game.linksCount = #self.links
-    end
     self.state.linksCount = self.game.linksCount
+    self.state.mapsCount = self.game.mapsCount
     self.state.activeMap = self.game.activeMap
     self.state.selectedBlock = self.game.selectedBlock
     self.state.selectedMap = self.game.selectedMap

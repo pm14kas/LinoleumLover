@@ -9,16 +9,16 @@ end
 
 function levelbox:selectBlock(block)
     if self.state.selectedBlock then
-        if button:exists("new" .. self:getSelectedBlock().entityType) then
-            button:get("new" .. self:getSelectedBlock().entityType).color = button:get("new" .. self:getSelectedBlock().entityType).colorUnclicked
+        if button:exists(self:getSelectedBlock():getContextMenuButtonName()) then
+            button:get(self:getSelectedBlock():getContextMenuButtonName()).color = button:get(self:getSelectedBlock():getContextMenuButtonName()).colorUnclicked
         end
         self:getSelectedBlock():unselect()
     end
     self.state.selectedBlock = block
     if block then
         self:getBlock(block):select()
-        if button:exists("new" .. self:getSelectedBlock().entityType) then
-            button:get("new" .. self:getSelectedBlock().entityType).color = button:get("new" .. self:getSelectedBlock().entityType).colorClicked
+        if button:exists(self:getSelectedBlock():getContextMenuButtonName()) then
+            button:get(self:getSelectedBlock():getContextMenuButtonName()).color = button:get(self:getSelectedBlock():getContextMenuButtonName()).colorClicked
         end
     end
 end
@@ -32,24 +32,15 @@ function levelbox:newBlock(type, map)
         between(0, cursor.x, screen:get("levelbox").w) and
         between(0, cursor.y, screen:get("levelbox").h) then
         local name = map .. "_" .. type .. self:getMap(map).blocksCount + 1
-        self:getMap(map).blocks[name] = block:new({
+        local newBlock = block:new({
             x = (cursor.x - self.offsetX) / self.scale,
             y = (cursor.y - self.offsetY) / self.scale,
-            z = 1,
-            w = 50,
-            h = 100,
-            border = 10,
-            borderW = 5,
             color = { colorPick.currentColor.r, colorPick.currentColor.g, colorPick.currentColor.b },
-            grabbedX = 25,
-            grabbedY = 50,
-            value = "",
             type = type,
-            entityType = "",
-            innerType = 1,
-            category = 1,
             name = name,
         })
+        newBlock:setDefaults()
+        self:getMap(map).blocks[name] = newBlock
         self.blockTypes[type].new(name, map)
         self:getMap(map).blocksCount = self:getMap(map).blocksCount + 1
         self:selectBlock(name)

@@ -4,17 +4,11 @@ contextMenu.screens["forDoor"].categories = {
 		types = {
             {
                 imageFilename = "images/icons/icon_door.png",
-                sign = "Opened",
-                trigger = function()
-                    levelbox:makeActiveSpawn()
-                end
+                sign = "Opened"
             },
             {
                 imageFilename = "images/icons/icon_door.png",
-                sign = "Closed",
-                trigger = function()
-                    levelbox:makeActiveSpawn()
-                end
+                sign = "Closed"
             },
 		}
 	}

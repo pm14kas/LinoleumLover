@@ -1,8 +1,6 @@
 require("classes.updatable")
 
-block = updatable:new({
-    z = 1
-})
+block = updatable:new()
 
 function block:setProperty(prop, val)
     updatable.setProperty(self, prop, val)
@@ -21,6 +19,10 @@ function block:setProperty(prop, val)
     end
 end
 
+function block:getContextMenuButtonName()
+    return "new" .. "for" .. self.type .. "_" .. self.entityType
+end
+
 function block:convertType()
     if self.type == "block" then self.type = "Block" end
     if self.type == "spawn" then self.type = "Spawn" end
@@ -33,6 +35,20 @@ function block:convertType()
 end
 
 function block:setDefaults()
+    if not self.value then self.value = "" end
+    if not self.category then self.category = 1 end
+    if not self.innerType then self.innerType = 1 end
+    if not self.z then self.z = 1 end
+    if not self.w then self.w = 50 end
+    if not self.h then self.h = 100 end
+    if not self.border then self.border = 10 end
+    if not self.borderW then self.borderW = 5 end
+    if not self.grabbedX then self.grabbedX = 25 end
+    if not self.grabbedY then self.grabbedY = 50 end
+    if not self.value then self.value = "" end
+    if not self.entityType then self.entityType = "" end
+    if not self.innerType then self.innerType = 1 end
+    if not self.category then self.category = 1 end
     if self.type == "Block" then
         self.saveTo = "blocks"
         if not self.entityType then self.entityType = "Solid" end
@@ -66,8 +82,6 @@ function block:setDefaults()
         self.saveTo = "items"
         if not self.entityType then self.entityType = "Money" end
     end
-    if not self.category then self.category = 1 end
-    if not self.innerType then self.innerType = 1 end
 end
 
 function block:draw()
@@ -101,15 +115,15 @@ function block:draw()
                 self.w / contextMenu.screens["forItem"].categories[self.category].types[self.innerType].picture:getWidth(),
                 self.h / contextMenu.screens["forItem"].categories[self.category].types[self.innerType].picture:getHeight()
             )
-        elseif self.type == "Button" then
-            love.graphics.draw(
-                contextMenu.screens["forButton"].categories[self.category].types[self.innerType].picture,
-                self.x,
-                self.y,
-                0,
-                self.w / contextMenu.screens["forButton"].categories[self.category].types[self.innerType].picture:getWidth(),
-                self.h / contextMenu.screens["forButton"].categories[self.category].types[self.innerType].picture:getHeight()
-            )
+        --elseif self.type == "Button" then
+        --    love.graphics.draw(
+        --        contextMenu.screens["forButton"].categories[self.category].types[self.innerType].picture,
+        --        self.x,
+        --        self.y,
+        --        0,
+        --        self.w / contextMenu.screens["forButton"].categories[self.category].types[self.innerType].picture:getWidth(),
+        --        self.h / contextMenu.screens["forButton"].categories[self.category].types[self.innerType].picture:getHeight()
+        --    )
         else
             love.graphics.rectangle("fill", self.x, self.y, self.w, self.h)
             
@@ -173,13 +187,13 @@ function block:draw()
 end
 
 function block:setType(category, innerType)
-    if self.entityType and button:exists("new" .. self.entityType) then
-        button:get("new" .. self.entityType).color = button:get("new" .. self.entityType).colorUnclicked
+    if self.entityType and button:exists(self:getContextMenuButtonName()) then
+        button:get(self:getContextMenuButtonName()).color = button:get(self:getContextMenuButtonName()).colorUnclicked
     end
     self.category = category
     self.innerType = innerType
     self.entityType = contextMenu.screens["for" .. self.type].categories[category].types[innerType].sign
-    button:get("new" .. self.entityType).color = button:get("new" .. self.entityType).colorClicked
+    button:get(self:getContextMenuButtonName()).color = button:get(self:getContextMenuButtonName()).colorClicked
 end
 
 function block:delete()
