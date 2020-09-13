@@ -134,6 +134,7 @@ function levelbox:loadState()
     self.state.activeSpawn = self.game.activeSpawn
     self.state.selectedBlock = self.game.selectedBlock
     self.state.selectedMap = self.game.selectedMap
+    self.state.highlightedBlock = self.game.highlightedBlock
 end
 
 function levelbox:loadLinks()

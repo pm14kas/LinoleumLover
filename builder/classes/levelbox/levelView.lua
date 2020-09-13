@@ -35,7 +35,7 @@ function levelbox:getHighlightedBlock(map)
 end
 
 function levelbox:highlightBlock(block, map)
-    if map ~= self.state.activeMap then
+    if map ~= nil and map ~= self.state.activeMap then
         return
     end
     if self.state.highlightedBlock then

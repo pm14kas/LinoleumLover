@@ -179,6 +179,7 @@ function levelbox:load()
     self:loadMaps()
     self:loadLinks()
     
+    self:highlightBlock()
     self:selectBlock()
     self:selectMap()
     

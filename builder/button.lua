@@ -53,7 +53,7 @@ function button:add(name, params)
 	self:get(name).draw = params.draw == nil and true or params.draw
 	self:get(name).active = params.active == nil and true or params.active
 	self:get(name).onhoverTriggered = false
-	self:get(name).offhoverTriggered = false
+	self:get(name).offhoverTriggered = true
 	self:get(name).userData = params.userData or {}
 	table.insert(screen:get(self:get(name).screen).buttons, name)
 end
