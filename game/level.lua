@@ -550,7 +550,7 @@ function level:draw()
 		end
 
 		for k, v in pairs(self.doors) do
-			if v.state then
+			if v.state or v.networkState then
 				love.graphics.setColor(v.color[1], v.color[2], v.color[3], 0.1);
 			else
 				love.graphics.setColor(v.color)

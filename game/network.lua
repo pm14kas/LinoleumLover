@@ -10,7 +10,7 @@ local bandwidthLimiter = 0
 local multiplayerTimeoutMultiplier = 1;
 
 if isMultiplayerActive then
-    host = enet.host_create("*:27015", 4)
+    host = enet.host_create("*:" .. ENVIRONMENT_TRAVERSAL_PORT, 4)
 end
 
 if isMultiplayerActive and isNatTraversalActive then
@@ -76,7 +76,9 @@ if isMultiplayerActive and isNatTraversalActive then
         end
     end
 elseif isMultiplayerActive then
-    server = host:connect(ENVIRONMENT_TRAVERSAL_IP .. ":27015");
+    if not isServer then
+        server = host:connect(ENVIRONMENT_TRAVERSAL_IP .. ":" .. ENVIRONMENT_TRAVERSAL_PORT);
+    end
 end
 
 network = {};
@@ -150,7 +152,7 @@ function network:update(dt)
    -- end
 
     local event = host:service(multiplayerTimeoutMultiplier / dt)
-    while event do
+    if event then
         if event.type == "receive" then
             self:parseData(event.data)
             --network:extrapolate();
@@ -164,8 +166,8 @@ function network:update(dt)
         elseif event.type == "disconnect" then
             self:reset();
         end
-
-        event = host:service();
+    else
+        network:extrapolate();
     end
 
     if not isServer then
