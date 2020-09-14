@@ -101,6 +101,7 @@ function network:new()
     self.bulletList = {};
     self.bulletWidth = layout.getX(10);
     self.bulletHeight = layout.getY(5);
+    self.isCrouch = false;
 
     self.body = love.physics.newBody(world, self.x, self.y, "dynamic");
     self.body:setFixedRotation(true);
@@ -181,7 +182,6 @@ function network:update(dt)
 
     for buttonIndex, button in pairs(level.buttons) do
         if self.body:isTouching(button.body) then
-            print('sas');
             for linkIndex, linkValue in pairs(button.links) do
                 if level.doors[linkValue.name] then
                     level.doors[linkValue.name].networkState = true
@@ -205,6 +205,7 @@ function network:buildData()
             isRightWallClimb = player.isRightWallClimb,
             isDashing = player.isLeftDash or player.isRightDash,
             currentMap = level.activeMap,
+            isCrouch = player.isCrouch,
         },
         bulletList = {},
     };
@@ -240,6 +241,7 @@ function network:parseData(rawData)
     self.isLeftWallClimb = data.player.isLeftWallClimb;
     self.isRightWallClimb = data.player.isRightWallClimb;
     self.isDashing = data.player.isDashing;
+    self.isCrouch = data.player.isCrouch;
 
     self.bulletList = data.bulletList;
 
@@ -266,6 +268,10 @@ function network:draw()
             love.graphics.rectangle("fill", self.x, self.y - self.height * 0.2, self.width, self.height * 0.3);
         elseif (self.isRightWallClimb) then
             love.graphics.rectangle("fill", self.x, self.y - self.height * 0.2, -self.width, self.height * 0.3);
+        end
+
+        if self.isCrouch then
+            love.graphics.rectangle("fill", self.body:getX(), self.body:getY() + self.height * 0.1, -self.width * (self.direction - 1.5) * 1.4, self.height * 0.35);
         end
 
         love.graphics.setColor(1, 1, 0);

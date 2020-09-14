@@ -31,6 +31,8 @@ function player:new(x, y)
 	self.isLeftDash = false;
 	self.isRightDash = false;
 	self.isDashAvailable = false;
+	self.isCrouch = false;
+	self.crouchHeight = layout.getY(40);
 	
 	self.directionEnum = {left = 1, right = 2};
 	self.direction = self.directionEnum.left -- true goes to left, false goes to right
@@ -429,7 +431,13 @@ function player:update(dt)
 	else 
 		self.isMoveRight = false;
 	end
-	
+
+	if love.keyboard.isDown("lctrl") and self.isStand then
+		self.isCrouch = true;
+	else
+		self.isCrouch = false;
+	end
+
 	self:move(dt);
 
     if level.activeMap and level.data.maps[level.activeMap] then
@@ -526,21 +534,28 @@ function player:draw()
 	end
 		
 	local x, y = self.body:getPosition();
+
+	local crouchShift = tern(self.isCrouch, self.crouchHeight, 0);
 	
-	love.graphics.polygon("fill", self.body:getWorldPoints(self.shape:getPoints()))
+	--love.graphics.polygon("fill", self.body:getWorldPoints(self.shape:getPoints()))
+	love.graphics.rectangle("fill", self.body:getX() - self.width * 0.5, self.body:getY() - self.height * 0.5 + crouchShift, self.width, self.height - crouchShift);
 
 	--animation:draw("player_walk", x - self.width * 0.5, y - self.height * 0.5, self.width, self.height);
 	if (self.isLeftWallClimb) then
-		love.graphics.rectangle("fill", self.body:getX(), self.body:getY()-self.height * 0.2, self.width, self.height * 0.3);
+		love.graphics.rectangle("fill", self.body:getX(), self.body:getY() - self.height * 0.2, self.width, self.height * 0.3);
 	elseif (self.isRightWallClimb) then
-		love.graphics.rectangle("fill", self.body:getX(), self.body:getY()-self.height * 0.2, -self.width, self.height * 0.3);
+		love.graphics.rectangle("fill", self.body:getX(), self.body:getY() - self.height * 0.2, -self.width, self.height * 0.3);
+	end
+
+	if self.isCrouch then
+		love.graphics.rectangle("fill", self.body:getX(), self.body:getY() + self.height * 0.1, -self.width * (self.direction - 1.5) * 1.4, self.height * 0.35);
 	end
 	
 	love.graphics.setColor(1, 1, 0);
 	if self.direction == self.directionEnum.left then 
-		love.graphics.rectangle("fill", self.body:getX() - self.width * 0.5, self.body:getY()-self.height * 0.5, self.width * 0.1, self.height * 0.3);
+		love.graphics.rectangle("fill", self.body:getX() - self.width * 0.5, self.body:getY() - self.height * 0.5 + crouchShift, self.width * 0.1, self.height * 0.3);
 	elseif self.direction == self.directionEnum.right then 
-		love.graphics.rectangle("fill", self.body:getX() + self.width * 0.4, self.body:getY()-self.height * 0.5, self.width * 0.1, self.height * 0.3);
+		love.graphics.rectangle("fill", self.body:getX() + self.width * 0.4, self.body:getY() - self.height * 0.5 + crouchShift, self.width * 0.1, self.height * 0.3);
 	end
 	
 	love.graphics.setColor(1, 1, 1);

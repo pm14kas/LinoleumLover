@@ -103,9 +103,9 @@ function level:goToSpawn(spawnName, force)
 				love.graphics.clear(0, 0, 0);
 			end
 			level:changeLevel(map, spawnName);
-			if (force) then
+			--[[if (force) then
 				self.lastPortalPass = -1;
-			end
+			end]]
 		end
 	end
 end
