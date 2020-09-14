@@ -31,6 +31,7 @@ function levelbox:selectBlock(block)
     self.state.selectedBlock = block
     if block then
         self:getSelectedBlock():select()
+        self.blockTypes[self:getSelectedBlock().type].select(self:getSelectedBlock().name, self:getSelectedBlock().map)
         if button:exists(self:getSelectedBlock():getContextMenuButtonName()) then
             button:get(self:getSelectedBlock():getContextMenuButtonName()).color = button:get(self:getSelectedBlock():getContextMenuButtonName()).colorClicked
         end

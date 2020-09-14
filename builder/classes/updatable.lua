@@ -22,7 +22,7 @@ function updatable:fieldResizeE()
         x = self.x + self.w,
         y = self.y - self:getBorderWidth(),
         w = self:getBorderWidth(),
-        h = self.h
+        h = self.h + 2 * self:getBorderWidth()
     }
 end
 
@@ -31,7 +31,7 @@ function updatable:fieldResizeW()
         x = self.x - self:getBorderWidth(),
         y = self.y - self:getBorderWidth(),
         w = self:getBorderWidth(),
-        h = self.h
+        h = self.h + 2 * self:getBorderWidth()
     }
 end
 
@@ -39,7 +39,7 @@ function updatable:fieldResizeS()
     return {
         x = self.x - self:getBorderWidth(),
         y = self.y + self.h,
-        w = self.w,
+        w = self.w + 2 * self:getBorderWidth(),
         h = self:getBorderWidth()
     }
 end
@@ -48,7 +48,7 @@ function updatable:fieldResizeN()
     return {
         x = self.x - self:getBorderWidth(),
         y = self.y - self:getBorderWidth(),
-        w = self.w,
+        w = self.w + 2 * self:getBorderWidth(),
         h = self:getBorderWidth()
     }
 end

@@ -1,11 +1,6 @@
 function levelbox:loadHelpers()
     local dirs = {
         "levelbox",
-        "levelbox/updatable",
-        "levelbox/levelView",
-        "levelbox/levelView/blocks",
-        "levelbox/mapView",
-        "levelbox/mapView/maps",
     }
     for i = 1, #dirs, 1 do
         local files = love.filesystem.getDirectoryItems(dirs[i])
@@ -156,4 +151,188 @@ function levelbox:loadLinks()
             end
         end
     end
+end
+
+function levelbox:loadBlockTypes()
+    self.blockTypes = {
+        Block = blockType:new({
+            new = function(name, map)
+                local block = levelbox:getBlock(name, map)
+                block.entityType = "Solid"
+                block.saveTo = "blocks"
+            end,
+            save = function(name, arrayToSave, map)
+                local block = levelbox:getBlock(name, map)
+                arrayToSave.maps[map][block.saveTo][name].entityType = block.entityType
+            end
+        }),
+        Spawn = blockType:new({
+            new = function(name, map)
+                local block = levelbox:getBlock(name, map)
+                block.value = "S"
+                block.w = 20
+                block.h = 20
+                block.color = { 0.1, 0.1, 0.1 }
+                local newSpawn = {
+                    x = block.x,
+                    y = block.y,
+                    w = block.w,
+                    h = block.h,
+                    link = "",
+                    c = { 1, 1, 1 },
+                    target = "",
+                    name = name
+                }
+                levelbox:getMap(map).spawns[name] = newSpawn
+                block.saveTo = "spawns"
+                return newSpawn
+            end,
+            select = function(name, map)
+                local block = levelbox:getBlock(name, map)
+                local buttonName = "newforSpawn_Active"
+                if levelbox.state.activeSpawn == name then
+                    button:get(buttonName).color = button:get(buttonName).colorClicked
+                else
+                    button:get(buttonName).color = button:get(buttonName).colorUnclicked
+                end
+            end,
+            delete = function(name, map)
+                levelbox:deletelink(levelbox:getSpawn(name).link)
+                levelbox:getMap(map).spawns[name] = nil
+            end,
+        }),
+        Portal = blockType:new({
+            new = function(name, map)
+                local block = levelbox:getBlock(name, map)
+                block.value = "P"
+                block.color = { 1, 1, 1 }
+                local newPortal = {
+                    x = block.x,
+                    y = block.y,
+                    w = block.w,
+                    h = block.h,
+                    link = "",
+                    spawn = "",
+                    c = { 1, 0, 1 },
+                    name = name
+                }
+                levelbox:getMap(map).targets[name] = newPortal
+                block.saveTo = "portals"
+                return newPortal
+            end,
+            delete = function(name, map)
+                levelbox:deletelink(levelbox:getTarget(name).link)
+                levelbox:getMap(map).targets[name] = nil
+            end,
+            save = function(name, arrayToSave, map)
+                local block = levelbox:getBlock(name, map)
+                arrayToSave.maps[map][block.saveTo][name].spawn = levelbox:getMap(map).targets[name].spawn
+            end
+        }),
+        Checkpoint = blockType:new({
+            new = function(name, map)
+                local block = levelbox:getBlock(name, map)
+                block.color = { 0, 0, 0 }
+                block.value = "C"
+                block.saveTo = "checkpoints"
+                levelbox:getMap(map).targets[name] = {
+                    x = block.x,
+                    y = block.y,
+                    w = 100,
+                    h = 200,
+                    link = "",
+                    spawn = "",
+                    c = { 0.44, 0.95, 0 },
+                    name = name
+                }
+            end,
+            delete = function(name, map)
+                levelbox:deletelink(levelbox:getTarget(name).link)
+                levelbox:getMap(map).targets[name] = nil
+            end,
+            save = function(name, arrayToSave, map)
+                local block = levelbox:getBlock(name, map)
+                arrayToSave.maps[map][block.saveTo][name].spawn = levelbox:getMap(map).targets[name].spawn
+            end
+        }),
+        Hazard = blockType:new({
+            new = function(name, map)
+                local block = levelbox:getBlock(name, map)
+                block.color = { 1, 0, 0 }
+                block.value = "H"
+                block.saveTo = "hazards"
+            end,
+        }),
+        AI = blockType:new({
+            new = function(name, map)
+                local block = levelbox:getBlock(name, map)
+                block.color = { 1, 0, 0 }
+                block.value = "A"
+                block.h = 50
+                block.entityType = "enemy"
+                block.saveTo = "ai"
+            end,
+            save = function(name, arrayToSave, map)
+                local block = levelbox:getBlock(name, map)
+                arrayToSave.maps[map][block.saveTo][name].entityType = block.entityType
+            end,
+        }),
+        Item = blockType:new({
+            new = function(name, map)
+                local block = levelbox:getBlock(name, map)
+                block.color = { 1, 1, 1 }
+                block.value = "I"
+                block.h = 50
+                block.entityType = contextMenu.screens["forItem"].categories[1].types[1].sign
+                block.saveTo = "items"
+            end,
+            save = function(name, arrayToSave, map)
+                local block = levelbox:getBlock(name, map)
+                arrayToSave.maps[map][block.saveTo][name].entityType = block.entityType
+            end,
+        }),
+        Text = blockType:new({
+            new = function(name, map)
+                local block = levelbox:getBlock(name, map)
+                block.value = "Sample Text"
+                block.h = 50
+                block.z = -1e308
+                block.saveTo = "decorations"
+            end,
+            save = function(name, arrayToSave, map)
+                local block = levelbox:getBlock(name, map)
+                arrayToSave.maps[map][block.saveTo][name].value = block.value
+            end,
+        }),
+        Button = blockType:new({
+            new = function(name, map)
+                local block = levelbox:getBlock(name, map)
+                block.h = 50
+                block.w = 50
+                block.saveTo = "buttons"
+                block.color = { 1, 1, 1 }
+            end,
+            save = function(name, arrayToSave, map)
+                local block = levelbox:getBlock(name, map)
+                arrayToSave.maps[map][block.saveTo][name].links = block.links
+            end,
+        }),
+        Door = blockType:new({
+            new = function(name, map)
+                local block = levelbox:getBlock(name, map)
+                block.entityType = contextMenu.screens["forDoor"].categories[1].types[2].sign
+                block.saveTo = "doors"
+                table.insert(levelbox:getMap(map).doors, name)
+                contextMenu.screens.forButton:reload()
+            end,
+            delete = function(name, map)
+                table.removeByValue(levelbox:getMap(map).doors, name)
+                contextMenu.screens.forButton:reload()
+            end,
+            save = function(name, arrayToSave, map)
+                local block = levelbox:getBlock(name, map)
+                arrayToSave.maps[map][block.saveTo][name].entityType = block.entityType
+            end,
+        })
+    }
 end

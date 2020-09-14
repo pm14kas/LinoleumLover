@@ -7,6 +7,7 @@ contextMenu.screens["forSpawn"].categories = {
 				sign = "Active",
 				trigger = function()
 					levelbox:makeActiveSpawn()
+                    button:get("newforSpawn_Active").color = button:get("newforSpawn_Active").colorClicked
 				end
 			},
 		}
