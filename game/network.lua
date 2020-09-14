@@ -104,8 +104,8 @@ function network:new()
     self.isCrouch = false;
     self.crouchHeight = layout.getY(40);
 
-    self.body = love.physics.newBody(world, self.x, self.y, "static");
-    self.body:setMass(0);
+    self.body = love.physics.newBody(world, self.x, self.y, "dynamic");
+    self.body:setGravityScale(0);
     self.body:setFixedRotation(true);
     self.shape = love.physics.newRectangleShape(self.width, self.height);
     self.fixture = love.physics.newFixture(self.body, self.shape);
