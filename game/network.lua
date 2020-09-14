@@ -102,8 +102,10 @@ function network:new()
     self.bulletWidth = layout.getX(10);
     self.bulletHeight = layout.getY(5);
     self.isCrouch = false;
+    self.crouchHeight = layout.getY(40);
 
-    self.body = love.physics.newBody(world, self.x, self.y, "dynamic");
+    self.body = love.physics.newBody(world, self.x, self.y, "static");
+    self.body:setMass(0);
     self.body:setFixedRotation(true);
     self.shape = love.physics.newRectangleShape(self.width, self.height);
     self.fixture = love.physics.newFixture(self.body, self.shape);
@@ -263,7 +265,10 @@ function network:draw()
             love.graphics.setColor(0.2, 0.2, 1);
         end
 
-        love.graphics.rectangle("fill", self.x - self.width * 0.5, self.y - self.height * 0.5, self.width, self.height)
+        local crouchShift = tern(self.isCrouch, self.crouchHeight, 0);
+
+        love.graphics.rectangle("fill", self.x - self.width * 0.5, self.y - self.height * 0.5 + crouchShift, self.width, self.height - crouchShift);
+
         if (self.isLeftWallClimb) then
             love.graphics.rectangle("fill", self.x, self.y - self.height * 0.2, self.width, self.height * 0.3);
         elseif (self.isRightWallClimb) then
@@ -271,14 +276,14 @@ function network:draw()
         end
 
         if self.isCrouch then
-            love.graphics.rectangle("fill", self.body:getX(), self.body:getY() + self.height * 0.1, -self.width * (self.direction - 1.5) * 1.4, self.height * 0.35);
+            love.graphics.rectangle("fill", self.x, self.y + self.height * 0.1, -self.width * (self.direction - 1.5) * 1.4, self.height * 0.35);
         end
 
         love.graphics.setColor(1, 1, 0);
         if self.direction == player.directionEnum.left then
-            love.graphics.rectangle("fill", self.x - self.width * 0.5, self.y - self.height * 0.5, self.width * 0.1, self.height * 0.3);
+            love.graphics.rectangle("fill", self.x - self.width * 0.5, self.y - self.height * 0.5 + crouchShift, self.width * 0.1, self.height * 0.3);
         elseif self.direction == player.directionEnum.right then
-            love.graphics.rectangle("fill", self.x + self.width * 0.4, self.y - self.height * 0.5, self.width * 0.1, self.height * 0.3);
+            love.graphics.rectangle("fill", self.x + self.width * 0.4, self.y - self.height * 0.5 + crouchShift, self.width * 0.1, self.height * 0.3);
         end
 
         love.graphics.setColor(0.1, 0.1, 0.1);
