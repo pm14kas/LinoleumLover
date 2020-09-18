@@ -88,6 +88,7 @@ function levelbox:loadBasic()
     self.scaleMax = 100
     self.scaleStep = 0.1
     self.scaleMult = 5
+    self.undoMax = 10
     self.grabbedBlock = nil
     self.grabbedMap = nil
     self.resize = {
@@ -130,6 +131,7 @@ function levelbox:loadState()
     self.state.selectedBlock = self.game.selectedBlock
     self.state.selectedMap = self.game.selectedMap
     self.state.highlightedBlock = self.game.highlightedBlock
+    self.state.changes = self.game.changes or {mapView = {}, levelView = {}}
 end
 
 function levelbox:loadLinks()

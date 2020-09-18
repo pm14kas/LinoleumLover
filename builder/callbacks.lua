@@ -109,9 +109,7 @@ function love.mousepressed(clickX, clickY, buttonClick, istouch)
 						else
 							mapClicked = true
                             levelbox:selectMap(k)
-							levelbox.grabbedMap = k
-							levelbox:getMap(k).grabbedX = click.x
-							levelbox:getMap(k).grabbedY = click.y
+                            levelbox:grabMap(k)
 						end
 					end
 				end
@@ -133,9 +131,7 @@ function love.mousepressed(clickX, clickY, buttonClick, istouch)
 						blockClicked = true
 						levelbox:selectBlock(k)
 						contextMenu:setActiveScreen("for" .. levelbox:getSelectedBlock().type)
-						levelbox.grabbedBlock = k
-						levelbox:getBlock(k).grabbedX = click.x
-						levelbox:getBlock(k).grabbedY = click.y
+                        levelbox:grabBlock(k)
 					end
 				end
 				if not blockClicked or love.keyboard.isDown("space") then
@@ -246,20 +242,49 @@ keyboard = {
 			end
 		end
 	},
-	undo = {
-		hold = false,
-		onpress = function()
-		end
-	},
+    z = {
+        hold = false,
+        onpress = function()
+            if love.keyboard.isDown("lctrl") then
+                local prevState = levelbox:popPreviousState()
+                if not prevState then
+                    return
+                end
+                local changedUpdatable = nil
+                if prevState.block then
+                    changedUpdatable = levelbox:getBlock(prevState.block, prevState.map)
+                else
+                    changedUpdatable = levelbox:getMap(prevState.map)
+                end
+                changedUpdatable:setProperty("x", prevState.x)
+                changedUpdatable:setProperty("y", prevState.y)
+                changedUpdatable:setProperty("w", prevState.w)
+                changedUpdatable:setProperty("h", prevState.h)
+                changedUpdatable:setProperty("color", prevState.color)
+            end
+        end
+    },
+    s = {
+        hold = false,
+        onpress = function()
+            if love.keyboard.isDown("lctrl") then
+                button:get("save").onclick()
+            end
+        end
+    },
 }
 
 function love.keypressed(keypressed, scancode, isrepeat)
-	for keyCode, key in pairs(keyboard) do
-		if keyCode == keypressed then
-			love.keyboard.setKeyRepeat(key.hold)
-			key.onpress()
-		end
-	end
+    if keyboard[keypressed] then
+        love.keyboard.setKeyRepeat(keyboard[keypressed].hold)
+        keyboard[keypressed].onpress()
+    end
+	--for keyCode, key in pairs(keyboard) do
+	--	if keyCode == keypressed then
+	--		love.keyboard.setKeyRepeat(key.hold)
+	--		key.onpress()
+	--	end
+	--end
 end
 
 function love.textinput(text)

@@ -49,6 +49,15 @@ function levelbox:selectMap(map)
     end
 end
 
+function levelbox:grabMap(map)
+    self.grabbedMap = map
+    if map then
+        self:getGrabbedMap().grabbedX = click.x
+        self:getGrabbedMap().grabbedY = click.y
+        self:pushPreviousState()
+    end
+end
+
 function levelbox:mapExists(map)
     return self.state.maps[map]
 end

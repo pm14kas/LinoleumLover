@@ -171,6 +171,56 @@ function levelbox:getLink(link)
     return self.links[link]
 end
 
+function levelbox:getPushChangesArray()
+    if self:getMapView() then
+        if not self.state.changes.mapView then
+            self.state.changes.mapView = {}
+        end
+        return self.state.changes.mapView
+    else
+        if not self.state.changes.levelView then
+            self.state.changes.levelView = {}
+        end
+        if not self.state.changes.levelView[self.state.activeMap] then
+            self.state.changes.levelView[self.state.activeMap] = {}
+        end
+        return self.state.changes.levelView[self.state.activeMap]
+    end
+end
+
+function levelbox:pushPreviousState()
+    local state = {}
+    if self:getMapView() then
+        state = {
+            map = self.state.selectedMap,
+            x = self:getSelectedMap().x,
+            y = self:getSelectedMap().y,
+            w = self:getSelectedMap().w,
+            h = self:getSelectedMap().h,
+            color = self:getSelectedMap().color,
+        }
+    else
+        state = {
+            block = self.state.selectedBlock,
+            map = self.state.activeMap,
+            x = self:getSelectedBlock().x,
+            y = self:getSelectedBlock().y,
+            w = self:getSelectedBlock().w,
+            h = self:getSelectedBlock().h,
+            color = self:getSelectedBlock().color,
+        }
+    end
+    local array = self:getPushChangesArray()
+    if #array >= self.undoMax then
+        table.remove(array, 1)
+    end
+    table.insert(self:getPushChangesArray(), state)
+end
+
+function levelbox:popPreviousState()
+    return table.remove(self:getPushChangesArray())
+end
+
 function levelbox:deletelink(link)
     if self.links[link] then
         if self:getTarget(self.links[link].target) then
@@ -339,10 +389,12 @@ function levelbox:save()
             self.blockTypes[block.type].save(kblock, save, kmap)
         end
     end
+    local saveState = self.state
+    saveState.changes = nil
     
     local savefile = io.open("mapForBuilder.linoleum", "w")
     io.output(savefile)
-    io.write(json.encode(self.state))
+    io.write(json.encode(saveState))
     io.close(savefile)
     savefile = io.open("linksForBuilder.linoleum", "w")
     io.output(savefile)

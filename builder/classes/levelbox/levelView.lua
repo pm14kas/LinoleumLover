@@ -15,6 +15,15 @@ function levelbox:getSelectedBlock(map)
     return self:getBlock(self.state.selectedBlock, map)
 end
 
+function levelbox:grabBlock(block)
+    self.grabbedBlock = block
+    if block then
+        self:getGrabbedBlock().grabbedX = click.x
+        self:getGrabbedBlock().grabbedY = click.y
+        self:pushPreviousState()
+    end
+end
+
 function levelbox:selectBlock(block)
     if self.state.selectedBlock then
         if button:exists(self:getSelectedBlock():getContextMenuButtonName()) then
@@ -89,7 +98,6 @@ function levelbox:newBlock(type, map)
         self.blockTypes[type].new(name, map)
         self:getMap(map).blocksCount = self:getMap(map).blocksCount + 1
         self:selectBlock(name)
-        self.grabbedBlock = name
         contextMenu:setActiveScreen("for" .. type)
     end
 end

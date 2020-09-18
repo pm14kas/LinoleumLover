@@ -78,6 +78,7 @@ button:add("pickColor",
 		screen = "colorPick",
 		value = "Apply",
 		onclick = function()
+            levelbox:pushPreviousState()
 			if not levelbox:getMapView() then
 				if levelbox.state.selectedBlock then
 					levelbox:getSelectedBlock().color = {colorPick.currentColor.r, colorPick.currentColor.g, colorPick.currentColor.b}

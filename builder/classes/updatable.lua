@@ -78,3 +78,16 @@ function updatable:move(dx, dy)
     self:setProperty("x", math.min(math.max(0, self.x + dx), levelbox.w - self.w))
     self:setProperty("y", math.min(math.max(0, self.y + dy), levelbox.h - self.h))
 end
+
+function updatable:pushPreviousState()
+    table.insert(self.previousStates, {
+        x = self.x,
+        y = self.y,
+        w = self.w,
+        h = self.h
+    })
+end
+
+function updatable:popPreviousState()
+    table.remove(self.previousStates)
+end

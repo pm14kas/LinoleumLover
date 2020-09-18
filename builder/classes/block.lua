@@ -9,13 +9,17 @@ function block:setProperty(prop, val)
         if not spawn then
             spawn = levelbox.blockTypes.Spawn.new(self.name, self.map)
         end
-        spawn[prop] = val
+        if spawn[prop] then
+            spawn[prop] = val
+        end
     elseif self.type == "Portal" or self.type == "Checkpoint" then
         local target = levelbox:getTarget(self)
         if not target then
             target = levelbox.blockTypes.Portal.new(self.name, self.map)
         end
-        target[prop] = val
+        if target[prop] then
+            target[prop] = val
+        end
     end
 end
 
@@ -54,6 +58,7 @@ function block:setDefaults()
     if not self.innerType then self.innerType = 1 end
     if not self.category then self.category = 1 end
     if not self.links then self.links = {} end
+    if not self.previousStates then self.previousStates = {} end
     if self.type == "Block" then
         self.saveTo = "blocks"
         if not self.entityType then self.entityType = "Solid" end

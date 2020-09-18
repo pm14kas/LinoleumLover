@@ -100,4 +100,5 @@ function map:setDefaults()
     if not self.grabbedX then self.grabbedX = 25 end
     if not self.grabbedY then self.grabbedY = 50 end
     if not self.backgroundColor then self.backgroundColor = { 1, 1, 1 } end
+    if not self.previousStates then self.previouseStates = {} end
 end
