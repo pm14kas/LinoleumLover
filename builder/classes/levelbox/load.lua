@@ -113,6 +113,10 @@ function levelbox:loadBasic()
         mult = 1,
         max = 99
     }
+    self.changes = {
+        mapView = {},
+        levelView = {}
+    }
 end
 
 function levelbox:loadState()
@@ -131,7 +135,6 @@ function levelbox:loadState()
     self.state.selectedBlock = self.game.selectedBlock
     self.state.selectedMap = self.game.selectedMap
     self.state.highlightedBlock = self.game.highlightedBlock
-    self.state.changes = self.game.changes or {mapView = {}, levelView = {}}
 end
 
 function levelbox:loadLinks()

@@ -173,18 +173,18 @@ end
 
 function levelbox:getPushChangesArray()
     if self:getMapView() then
-        if not self.state.changes.mapView then
-            self.state.changes.mapView = {}
+        if not self.changes.mapView then
+            self.changes.mapView = {}
         end
-        return self.state.changes.mapView
+        return self.changes.mapView
     else
-        if not self.state.changes.levelView then
-            self.state.changes.levelView = {}
+        if not self.changes.levelView then
+            self.changes.levelView = {}
         end
-        if not self.state.changes.levelView[self.state.activeMap] then
-            self.state.changes.levelView[self.state.activeMap] = {}
+        if not self.changes.levelView[self.state.activeMap] then
+            self.changes.levelView[self.state.activeMap] = {}
         end
-        return self.state.changes.levelView[self.state.activeMap]
+        return self.changes.levelView[self.state.activeMap]
     end
 end
 
@@ -389,12 +389,10 @@ function levelbox:save()
             self.blockTypes[block.type].save(kblock, save, kmap)
         end
     end
-    local saveState = self.state
-    saveState.changes = nil
     
     local savefile = io.open("mapForBuilder.linoleum", "w")
     io.output(savefile)
-    io.write(json.encode(saveState))
+    io.write(json.encode(self.state))
     io.close(savefile)
     savefile = io.open("linksForBuilder.linoleum", "w")
     io.output(savefile)
