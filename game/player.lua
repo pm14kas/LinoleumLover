@@ -61,12 +61,30 @@ function player:new(x, y)
 	--self.fixture:setFriction(0.99);
 	
 	self.sprite = love.graphics.newImage("graphics/particle/sprite_doublejump.png");
-	self.particleEmitter = love.graphics.newParticleSystem(self.sprite, 30);
-	self.particleEmitter:setParticleLifetime(0.1, 0.5);
-	self.particleEmitter:setSizes(0.3)
-	self.particleEmitter:setLinearAcceleration(-5, 0, 5, 100 * love.physics.getMeter());
-	self.particleEmitter:setEmissionArea("uniform", self.width * 0.4, 0, 0, true);
-	self.particleEmitter:setColors(255, 255, 255, 255, 255, 255, 255, 0);
+	self.doubleJumpParticleEmitter = love.graphics.newParticleSystem(self.sprite, 30);
+	self.doubleJumpParticleEmitter:setParticleLifetime(0.1, 0.5);
+	self.doubleJumpParticleEmitter:setSizes(0.5)
+	self.doubleJumpParticleEmitter:setLinearAcceleration(-5, 0, 5, 100 * love.physics.getMeter());
+	self.doubleJumpParticleEmitter:setEmissionArea("uniform", self.width * 0.8, 0, 0, true);
+	self.doubleJumpParticleEmitter:setColors(255, 255, 255, 255, 255, 255, 255, 0);
+    self.doubleJumpParticleEmitterCoords = {
+        x = 0,
+        y = 0,
+    };
+
+	self.dashParticleEmitter = love.graphics.newParticleSystem(self.sprite, 50);
+	self.dashParticleEmitter:setParticleLifetime(0.1, 0.5);
+	self.dashParticleEmitter:setSizes(0.5)
+	self.dashParticleEmitter:setEmissionArea("uniform", self.width, self.height, 0, false);
+	self.dashParticleEmitter:setColors(255, 255, 255, 255, 255, 255, 255, 0);
+	--[[self.dashParticleEmitter:setSpinVariation(0);
+	self.dashParticleEmitter:setSpin(0, 0);
+	self.dashParticleEmitter:setSpread(0);
+	self.dashParticleEmitter:setLinearAcceleration(0, 0, 0, 0);
+	self.dashParticleEmitter:setTangentialAcceleration(0, 0);
+	self.dashParticleEmitter:setRadialAcceleration(0, 0);
+	self.dashParticleEmitter:setSpeed(-10, -10);]]
+
 	
 	self.animationWalkSprite = love.graphics.newImage("graphics/player/player_animation.png");
 	self.animationWalk = animation:new("player_walk", {
@@ -146,7 +164,7 @@ function IsStandCallback(fixture, x, y, xn, yn, fraction)
 end
 
 function jumpKeyPressed( key, scancode, isrepeat) 
-	if key == "space" then
+	if key == "space" or key == "w" then
 		player.isJump = true;
 	end
 end
@@ -191,8 +209,9 @@ function player:move(dt)
 	else 
 		self.speedX = self.speedXRegular;
 	end
-	
-	local rayCastDepth = 1;
+
+    local rayCastDepth = layout.getY(1);
+    local wallClimbRayCastDepth = layout.getX(5);
 
 	self.isStand = false;
 	world:rayCast(self.body:getX() - self.width * 0.5, 
@@ -232,13 +251,15 @@ function player:move(dt)
 		elseif (self.jumpAmount > 0) then
 			self.jumpAmount = self.jumpAmount - 1;
 			if not (self.isLeftWallClimb or self.isRightWallClimb) then
-				player.particleEmitter:emit(30);
+                self.doubleJumpParticleEmitterCoords.x = self.body:getX();
+                self.doubleJumpParticleEmitterCoords.y = self.body:getY();
+                self.doubleJumpParticleEmitter:emit(30);
 			end
-			player:actualJump();
+            self:actualJump();
 		end
 	end
 	
-	self:checkWallClimbing(rayCastDepth);
+	self:checkWallClimbing(wallClimbRayCastDepth);
 	
 	if self.isMoveLeft then
 		self.body:applyForce(-self.speedX, 0);
@@ -256,8 +277,11 @@ function player:move(dt)
 	if self.isDashEnabled then
 		if self.isLeftDash and love.timer.getTime() < self.dashTimer + self.dashDuration and self.isDashAvailable then
 			self.isDashAvailable = false;
+			self.dashParticleEmitter:setLinearAcceleration(self.dashSpeed * 0.5, 0, self.dashSpeed, 0);
+			self.doubleJumpParticleEmitterCoords.x = self.body:getX();
+			self.doubleJumpParticleEmitterCoords.y = self.body:getY();
+			self.dashParticleEmitter:emit(100);
 			self.body:setLinearVelocity(-self.dashSpeed, 0);
-			self.particleEmitter:emit(50);
 			self.isLeftDash = true;
 		elseif love.timer.getTime() > self.dashTimer + self.dashDuration and love.timer.getTime() < self.dashTimer + self.dashDuration * 1.5 then
 			self.isLeftDash = false;
@@ -266,10 +290,13 @@ function player:move(dt)
 			self.isLeftDash = false;
 		end
 		
-		if self.isRightDash and love.timer.getTime() < self.dashTimer + self.dashDuration then
+		if self.isRightDash and love.timer.getTime() < self.dashTimer + self.dashDuration and self.isDashAvailable then
 			self.isDashAvailable = false;
+			self.dashParticleEmitter:setLinearAcceleration(-self.dashSpeed, 0, -self.dashSpeed * 0.5, 0);
+			self.doubleJumpParticleEmitterCoords.x = self.body:getX();
+			self.doubleJumpParticleEmitterCoords.y = self.body:getY();
+			self.dashParticleEmitter:emit(100);
 			self.body:setLinearVelocity(self.dashSpeed, 0);
-			self.particleEmitter:emit(50);
 			self.isRightDash = true;
 		elseif love.timer.getTime() > self.dashTimer + self.dashDuration and love.timer.getTime() < self.dashTimer + self.dashDuration * 1.5 then
 			self.isRightDash = false;
@@ -294,7 +321,9 @@ function player:move(dt)
 		self.direction = self.directionEnum.right;
 	end
 	
-	self.particleEmitter:update(dt);
+	self.doubleJumpParticleEmitter:update(dt);
+	self.dashParticleEmitter:update(dt);
+	self.dashParticleEmitter:setLinearAcceleration(0, 0, 0, 0);
 end
 
 function player:checkWallClimbing(rayCastDepth)
@@ -432,7 +461,7 @@ function player:update(dt)
 		self.isMoveRight = false;
 	end
 
-	if love.keyboard.isDown("lctrl") and self.isStand then
+	if (love.keyboard.isDown("lctrl") or love.keyboard.isDown("s")) and self.isStand then
 		self.isCrouch = true;
 	else
 		self.isCrouch = false;
@@ -566,5 +595,7 @@ function player:draw()
 	end
 
 	love.graphics.setColor(1,1,1)
-	love.graphics.draw(self.particleEmitter, self.body:getX(), self.body:getY() + self.height * 0.5)
+	love.graphics.draw(self.doubleJumpParticleEmitter, self.doubleJumpParticleEmitterCoords.x, self.doubleJumpParticleEmitterCoords.y + self.height * 0.5)
+	love.graphics.draw(self.dashParticleEmitter, self.doubleJumpParticleEmitterCoords.x, self.doubleJumpParticleEmitterCoords.y)
+	--love.graphics.draw(self.dashParticleEmitter, self.body:getX(), self.body:getY())
 end

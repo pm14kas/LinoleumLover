@@ -229,7 +229,7 @@ end
 
 function love.keypressed(key)
 	if (viewMode) then
-		if key == 'space' then
+		if key == "space" or key == "w" then
 			player.isJump = true;
 		elseif key == "a" then
 			if not player.isLeftDash then
@@ -260,7 +260,7 @@ end
 
 function love.keyreleased( key )
 	if viewMode then
-		if key == "space" then
+		if key == "space" or key == "w" then
 			player.isJump = false;
 		end
    end
