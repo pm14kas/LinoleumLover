@@ -189,6 +189,9 @@ function levelbox:getPushChangesArray()
 end
 
 function levelbox:pushPreviousState()
+    if not self.state.selectedMap and not self.state.selectedBlock then
+        return
+    end
     local state = {}
     if self:getMapView() then
         state = copy(self:getSelectedMap())
