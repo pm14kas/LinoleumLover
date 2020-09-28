@@ -116,3 +116,18 @@ function table.removeByKey(tab, key)
     tab[key] = nil
     return element
 end
+
+function copy(orig)
+    local orig_type = type(orig)
+    local copyValue
+    if orig_type == 'table' then
+        copyValue = {}
+        for orig_key, orig_value in next, orig, nil do
+            copyValue[orig_key] = copy(orig_value)
+        end
+        --setmetatable(copyValue, copy(getmetatable(orig)))
+    else
+        copyValue = orig
+    end
+    return copyValue
+end

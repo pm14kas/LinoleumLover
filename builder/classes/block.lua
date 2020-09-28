@@ -47,6 +47,8 @@ function block:setDefaults()
     if not self.category then self.category = 1 end
     if not self.innerType then self.innerType = 1 end
     if not self.z then self.z = 1 end
+    if not self.x then self.x = 0 end
+    if not self.y then self.y = 0 end
     if not self.w then self.w = 50 end
     if not self.h then self.h = 100 end
     if not self.border then self.border = 10 end
@@ -121,6 +123,7 @@ function block:draw()
         end
     else
         if self.type == "Item" then
+            love.graphics.setColor(1, 1, 1)
             love.graphics.draw(
                 contextMenu.screens["forItem"].categories[self.category].types[self.innerType].picture,
                 self.x,
