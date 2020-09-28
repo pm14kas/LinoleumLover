@@ -1,4 +1,8 @@
 player = {};
+bulletSize = {
+	width = layout.getX(20),
+	height = layout.getY(10);
+}
 function player:new(x, y)
 	if (x == nil) then
 		x = 50;
@@ -33,13 +37,17 @@ function player:new(x, y)
 	self.isDashAvailable = false;
 	self.isCrouch = false;
 	self.crouchHeight = layout.getY(40);
-	
+
+	self.isAfterWallClimbing = false;
+	self.afterWallClimbingDuration = 100;
+	self.afterWallClimbingTimer = 0;
+
 	self.directionEnum = {left = 1, right = 2};
 	self.direction = self.directionEnum.left -- true goes to left, false goes to right
 	
 	self.lastShotTimer = 0.0;
 	self.lastShotTime = -1;
-	self.bulletSpeed = layout.getX(50 * love.physics.getMeter());
+	self.bulletSpeed = layout.getX(35 * love.physics.getMeter());
 	self.bulletLifetime = 10;
 	self.bulletList = {};
 	self.isShootingEnabled = false;
@@ -62,29 +70,24 @@ function player:new(x, y)
 	
 	self.sprite = love.graphics.newImage("graphics/particle/sprite_doublejump.png");
 	self.doubleJumpParticleEmitter = love.graphics.newParticleSystem(self.sprite, 30);
-	self.doubleJumpParticleEmitter:setParticleLifetime(0.1, 0.5);
-	self.doubleJumpParticleEmitter:setSizes(0.5)
-	self.doubleJumpParticleEmitter:setLinearAcceleration(-5, 0, 5, 100 * love.physics.getMeter());
-	self.doubleJumpParticleEmitter:setEmissionArea("uniform", self.width * 0.8, 0, 0, true);
+	self.doubleJumpParticleEmitter:setParticleLifetime(0.3, 0.5);
+	self.doubleJumpParticleEmitter:setSizes(0.6)
+	self.doubleJumpParticleEmitter:setLinearAcceleration(-5, 0, 5, 50 * love.physics.getMeter());
+	self.doubleJumpParticleEmitter:setEmissionArea("uniform", self.width * 0.7, self.height * 0.1, 0, true);
 	self.doubleJumpParticleEmitter:setColors(255, 255, 255, 255, 255, 255, 255, 0);
-    self.doubleJumpParticleEmitterCoords = {
-        x = 0,
-        y = 0,
-    };
 
 	self.dashParticleEmitter = love.graphics.newParticleSystem(self.sprite, 50);
-	self.dashParticleEmitter:setParticleLifetime(0.1, 0.5);
+	self.dashParticleEmitter:setParticleLifetime(0.1, 0.9);
 	self.dashParticleEmitter:setSizes(0.5)
 	self.dashParticleEmitter:setEmissionArea("uniform", self.width, self.height, 0, false);
-	self.dashParticleEmitter:setColors(255, 255, 255, 255, 255, 255, 255, 0);
-	--[[self.dashParticleEmitter:setSpinVariation(0);
-	self.dashParticleEmitter:setSpin(0, 0);
-	self.dashParticleEmitter:setSpread(0);
-	self.dashParticleEmitter:setLinearAcceleration(0, 0, 0, 0);
-	self.dashParticleEmitter:setTangentialAcceleration(0, 0);
-	self.dashParticleEmitter:setRadialAcceleration(0, 0);
-	self.dashParticleEmitter:setSpeed(-10, -10);]]
-
+    self.dashParticleEmitter:setColors(255, 255, 255, 255, 255, 255, 255, 0);
+    self.dashParticleEmitter:setLinearDamping(1, 6);
+	self.dashParticleEmitter:setSpeed(layout.getX(300), layout.getX(450));
+    self.dashParticleEmitterCoords = {
+        x = 0,
+        y = 0,
+        isChangeAllowed = true,
+    };
 	
 	self.animationWalkSprite = love.graphics.newImage("graphics/player/player_animation.png");
 	self.animationWalk = animation:new("player_walk", {
@@ -211,7 +214,7 @@ function player:move(dt)
 	end
 
     local rayCastDepth = layout.getY(1);
-    local wallClimbRayCastDepth = layout.getX(5);
+    local wallClimbRayCastDepth = layout.getX(2);
 
 	self.isStand = false;
 	world:rayCast(self.body:getX() - self.width * 0.5, 
@@ -251,8 +254,7 @@ function player:move(dt)
 		elseif (self.jumpAmount > 0) then
 			self.jumpAmount = self.jumpAmount - 1;
 			if not (self.isLeftWallClimb or self.isRightWallClimb) then
-                self.doubleJumpParticleEmitterCoords.x = self.body:getX();
-                self.doubleJumpParticleEmitterCoords.y = self.body:getY();
+				self.doubleJumpParticleEmitter:setPosition(self.body:getX(), self.body:getY());
                 self.doubleJumpParticleEmitter:emit(30);
 			end
             self:actualJump();
@@ -277,32 +279,42 @@ function player:move(dt)
 	if self.isDashEnabled then
 		if self.isLeftDash and love.timer.getTime() < self.dashTimer + self.dashDuration and self.isDashAvailable then
 			self.isDashAvailable = false;
-			self.dashParticleEmitter:setLinearAcceleration(self.dashSpeed * 0.5, 0, self.dashSpeed, 0);
-			self.doubleJumpParticleEmitterCoords.x = self.body:getX();
-			self.doubleJumpParticleEmitterCoords.y = self.body:getY();
+			--self.dashParticleEmitter:setLinearAcceleration(self.dashSpeed * 0.5, 0, self.dashSpeed, 0);
+            self.dashParticleEmitter:setDirection(math.pi);
+            if self.dashParticleEmitterCoords.isChangeAllowed then
+				self.dashParticleEmitter:setPosition(self.body:getX(), self.body:getY());
+                self.dashParticleEmitterCoords.isChangeAllowed = false;
+            end
 			self.dashParticleEmitter:emit(100);
 			self.body:setLinearVelocity(-self.dashSpeed, 0);
 			self.isLeftDash = true;
 		elseif love.timer.getTime() > self.dashTimer + self.dashDuration and love.timer.getTime() < self.dashTimer + self.dashDuration * 1.5 then
 			self.isLeftDash = false;
 			self.body:setLinearVelocity(0, 0);
+            self.dashParticleEmitterCoords.isChangeAllowed = true;
 		elseif self.isLeftDash and love.timer.getTime() > self.dashTimer + self.dashDuration * 1.5 then
 			self.isLeftDash = false;
+            self.dashParticleEmitterCoords.isChangeAllowed = true;
 		end
 		
 		if self.isRightDash and love.timer.getTime() < self.dashTimer + self.dashDuration and self.isDashAvailable then
 			self.isDashAvailable = false;
-			self.dashParticleEmitter:setLinearAcceleration(-self.dashSpeed, 0, -self.dashSpeed * 0.5, 0);
-			self.doubleJumpParticleEmitterCoords.x = self.body:getX();
-			self.doubleJumpParticleEmitterCoords.y = self.body:getY();
+			self.dashParticleEmitter:setDirection(0);
+			--self.dashParticleEmitter:setLi(-self.dashSpeed, 0, -self.dashSpeed * 0.5, 0);
+            if self.dashParticleEmitterCoords.isChangeAllowed then
+                self.dashParticleEmitter:setPosition(self.body:getX(), self.body:getY());
+                self.dashParticleEmitterCoords.isChangeAllowed = false;
+            end
 			self.dashParticleEmitter:emit(100);
 			self.body:setLinearVelocity(self.dashSpeed, 0);
 			self.isRightDash = true;
 		elseif love.timer.getTime() > self.dashTimer + self.dashDuration and love.timer.getTime() < self.dashTimer + self.dashDuration * 1.5 then
 			self.isRightDash = false;
 			self.body:setLinearVelocity(0, 0);
+            self.dashParticleEmitterCoords.isChangeAllowed = true;
 		elseif self.isRightDash and love.timer.getTime() > self.dashTimer + self.dashDuration * 1.5 then
 			self.isRightDash = false;
+            self.dashParticleEmitterCoords.isChangeAllowed = true;
 		end
 	end
 	
@@ -323,7 +335,6 @@ function player:move(dt)
 	
 	self.doubleJumpParticleEmitter:update(dt);
 	self.dashParticleEmitter:update(dt);
-	self.dashParticleEmitter:setLinearAcceleration(0, 0, 0, 0);
 end
 
 function player:checkWallClimbing(rayCastDepth)
@@ -409,8 +420,8 @@ end
 
 function player:createBullet() 
 	local block = {};
-	block.width = layout.getX(10); 
-	block.height = layout.getY(5); 
+	block.width = bulletSize.width;
+	block.height = bulletSize.height;
 	block.x = self.body:getX(); 
 	block.y = self.body:getY() - self.height * 0.2; 
 	block.createdAt = love.timer.getTime();
@@ -561,8 +572,6 @@ function player:draw()
 	else
 		love.graphics.setColor(1, 0, 0);
 	end
-		
-	local x, y = self.body:getPosition();
 
 	local crouchShift = tern(self.isCrouch, self.crouchHeight, 0);
 	
@@ -595,7 +604,10 @@ function player:draw()
 	end
 
 	love.graphics.setColor(1,1,1)
-	love.graphics.draw(self.doubleJumpParticleEmitter, self.doubleJumpParticleEmitterCoords.x, self.doubleJumpParticleEmitterCoords.y + self.height * 0.5)
-	love.graphics.draw(self.dashParticleEmitter, self.doubleJumpParticleEmitterCoords.x, self.doubleJumpParticleEmitterCoords.y)
-	--love.graphics.draw(self.dashParticleEmitter, self.body:getX(), self.body:getY())
+	local doubleJumpX, doubleJumpY = self.doubleJumpParticleEmitter:getPosition();
+	local dashX, dashY = self.dashParticleEmitter:getPosition();
+	print(dashX .. " " .. dashY);
+	love.graphics.draw(self.doubleJumpParticleEmitter, 0, 0 + self.height * 0.5)
+	--love.graphics.draw(self.dashParticleEmitter, dashX, dashY)
+	love.graphics.draw(self.dashParticleEmitter, 0, 0)
 end
