@@ -80,6 +80,7 @@ graphics = {
 
 require("json.json");
 require("functions");
+require("timer");
 require("animation");
 require("player");
 require("level");
@@ -190,7 +191,7 @@ function love.draw()
 	for i = 1, player.jumpAmount do
 		love.graphics.draw(
 			graphics.hud.jump.picture, 
-			layout.getX(10 + (i-1) * 40), 
+			layout.getX(10 + (i - 1) * 45),
 			layout.getY(10), 
 			0, 
 			layout.getX(50/graphics.abilities.jump.picture:getWidth()), 
@@ -202,7 +203,7 @@ function love.draw()
 	if player.isDashAvailable then
 		love.graphics.draw(
 			graphics.hud.dash.picture, 
-			layout.getX(10 + iconShift * 50), 
+			layout.getX(10 + iconShift * 45),
 			layout.getY(10), 
 			0, 
 			layout.getX(50/graphics.abilities.jump.picture:getWidth()), 
@@ -215,7 +216,7 @@ function love.draw()
 		--love.graphics.print(">", 50, 10, 0, 0.5, 0.5);
 		love.graphics.draw(
 			graphics.hud.gun.picture, 
-			layout.getX(10 + iconShift * 50), 
+			layout.getX(10 + iconShift * 45),
 			layout.getY(10), 
 			0, 
 			layout.getX(50/graphics.abilities.jump.picture:getWidth()), 

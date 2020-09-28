@@ -38,15 +38,13 @@ function player:new(x, y)
 	self.isCrouch = false;
 	self.crouchHeight = layout.getY(40);
 
-	self.isAfterWallClimbing = false;
-	self.afterWallClimbingDuration = 100;
-	self.afterWallClimbingTimer = 0;
-
 	self.directionEnum = {left = 1, right = 2};
 	self.direction = self.directionEnum.left -- true goes to left, false goes to right
-	
-	self.lastShotTimer = 0.0;
-	self.lastShotTime = -1;
+
+	self.afterWallClimbingDirection = self.directionEnum.left;
+	self.afterWallClimbingTimer = timer:new(200);
+
+	self.bulletTimer = timer:new(200):start()
 	self.bulletSpeed = layout.getX(35 * love.physics.getMeter());
 	self.bulletLifetime = 10;
 	self.bulletList = {};
@@ -66,7 +64,6 @@ function player:new(x, y)
 	self.shape = love.physics.newRectangleShape(self.width, self.height);
 	self.fixture = love.physics.newFixture(self.body, self.shape);
 	self.fixture:setUserData("player");
-	--self.fixture:setFriction(0.99);
 	
 	self.sprite = love.graphics.newImage("graphics/particle/sprite_doublejump.png");
 	self.doubleJumpParticleEmitter = love.graphics.newParticleSystem(self.sprite, 30);
@@ -136,11 +133,11 @@ end
 
 function player:actualJump()
 	if (self.isJump) then
-		if self.isLeftWallClimb then
+		if self.isLeftWallClimb or (self.afterWallClimbingTimer:isNotTriggered() and self.afterWallClimbingDirection == self.directionEnum.left) then
 			self.body:setLinearVelocity(0, 0);
 			self.body:applyLinearImpulse(self.jumpImpulse, -self.jumpImpulse)
 			self.isJump = false;
-		elseif self.isRightWallClimb then
+		elseif self.isRightWallClimb or (self.afterWallClimbingTimer:isNotTriggered() and self.afterWallClimbingDirection == self.directionEnum.right) then
 			self.body:setLinearVelocity(0, 0);
 			self.body:applyLinearImpulse(-self.jumpImpulse, -self.jumpImpulse)
 			self.isJump = false;
@@ -151,6 +148,7 @@ function player:actualJump()
 			self.isJump = false;
 		end
 		self.isStand = false;
+		self.afterWallClimbingTimer:stop();
 	end
 end
 
@@ -180,6 +178,10 @@ function IsLeftWallClimbCallback(fixture, x, y, xn, yn, fraction)
 		player.isDashAvailable = true;
 		player.isJump = false;
 		player.jumpAmount = player.jumpAmountMax;
+
+		player.afterWallClimbingDirection = player.directionEnum.left;
+		player.afterWallClimbingTimer:start();
+
 		return 0;
 	else 
 		local x, y = player.body:getLinearVelocity();
@@ -197,6 +199,10 @@ function IsRightWallClimbCallback(fixture, x, y, xn, yn, fraction)
 		player.isDashAvailable = true;
 		player.isJump = false;
 		player.jumpAmount = player.jumpAmountMax;
+
+		player.afterWallClimbingDirection = player.directionEnum.right;
+		player.afterWallClimbingTimer:start();
+
 		return 0;
 	else 
 		local x, y = player.body:getLinearVelocity();
@@ -249,7 +255,7 @@ function player:move(dt)
 	);
 	
 	if self.isJump and not (self.isLeftDash or self.isRightDash) then
-		if (self.isStand or (self.isWallClimbEnabled and (self.isLeftWallClimb or self.isRightWallClimb))) then
+		if (self.isStand or (self.isWallClimbEnabled and (self.isLeftWallClimb or self.isRightWallClimb or self.afterWallClimbingTimer:isNotTriggered()))) then
 			self:actualJump();
 		elseif (self.jumpAmount > 0) then
 			self.jumpAmount = self.jumpAmount - 1;
@@ -279,7 +285,6 @@ function player:move(dt)
 	if self.isDashEnabled then
 		if self.isLeftDash and love.timer.getTime() < self.dashTimer + self.dashDuration and self.isDashAvailable then
 			self.isDashAvailable = false;
-			--self.dashParticleEmitter:setLinearAcceleration(self.dashSpeed * 0.5, 0, self.dashSpeed, 0);
             self.dashParticleEmitter:setDirection(math.pi);
             if self.dashParticleEmitterCoords.isChangeAllowed then
 				self.dashParticleEmitter:setPosition(self.body:getX(), self.body:getY());
@@ -300,7 +305,6 @@ function player:move(dt)
 		if self.isRightDash and love.timer.getTime() < self.dashTimer + self.dashDuration and self.isDashAvailable then
 			self.isDashAvailable = false;
 			self.dashParticleEmitter:setDirection(0);
-			--self.dashParticleEmitter:setLi(-self.dashSpeed, 0, -self.dashSpeed * 0.5, 0);
             if self.dashParticleEmitterCoords.isChangeAllowed then
                 self.dashParticleEmitter:setPosition(self.body:getX(), self.body:getY());
                 self.dashParticleEmitterCoords.isChangeAllowed = false;
@@ -447,28 +451,34 @@ function player:createBullet()
 end
 
 function player:keyboardShoot()
-	if (self.isShootingEnabled and (love.timer.getTime() > self.lastShotTime + self.lastShotTimer)) then
-		self.lastShotTime = love.timer.getTime();
-		self:createBullet()
+	if self.isShootingEnabled and self.bulletTimer:isTriggered() then
+		self.bulletTimer:start();
+		self:createBullet();
 	end
 end
 
 function player:update(dt)
+	self.bulletTimer:update();
+	self.afterWallClimbingTimer:update();
+	if self.afterWallClimbingTimer:isTriggered() then
+		self.afterWallClimbingTimer:stop();
+	end
+
 	if love.keyboard.isDown("lshift") then
 		self.isSprint = true;
-	else 
+	else
 		self.isSprint = false;
 	end
-	
+
 	if love.keyboard.isDown("a") then
 		self.isMoveLeft = true;
-	else 
+	else
 		self.isMoveLeft = false;
 	end
-	
+
 	if love.keyboard.isDown("d") then
 		self.isMoveRight = true;
-	else 
+	else
 		self.isMoveRight = false;
 	end
 
@@ -486,14 +496,14 @@ function player:update(dt)
             self:respawn();
         end
     end
- --self.body and v.body and not self.body:isDestroyed() and not v.body:isDestroyed() and
+
 	for k, v in pairs(level.hazards) do
 		if  self.body:isTouching(v.body) then
 			level:goToSpawn(level.activeSpawn, true);
 			break;
 		end
 	end
-	
+
 	for k, v in pairs(level.items) do
 		if self.body:isTouching(v.body) then
 			if (v.type == level.blockNameList.itemDash) then
@@ -552,18 +562,18 @@ function player:update(dt)
 			end
 		end
 	end
-		
+
 	for k, v in ipairs(self.bulletList) do
 		if (v.body:isDestroyed()) then
 			table.remove(self.bulletList, k);
 		end
-		
+
 		if ((love.timer.getTime() > v.createdAt + self.bulletLifetime)) then
 			v.body:destroy();
 			table.remove(self.bulletList, k);
 		end
 	end
-	
+
 end
 
 function player:draw()
