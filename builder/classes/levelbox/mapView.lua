@@ -13,10 +13,22 @@ function levelbox:getActiveMap()
     return levelbox:getMap(self.state.activeMap)
 end
 
+function levelbox:createMap(params)
+    local newMap = map:new(params)
+    newMap:setDefaults()
+    self.state.maps[params.name] = newMap
+    if params.blocks then
+        for blockName, block in pairs(params.blocks) do
+            self:createBlock(block)
+        end
+    end
+    return newMap
+end
+
 function levelbox:newMap(sizeX, sizeY)
     if self:getMapView() then
         local name = "map" .. self.state.mapsCount + 1
-        local newMap = map:new({
+        self:createMap({
             x = (cursor.x - self.offsetX) / self.scale,
             y = (cursor.y - self.offsetY) / self.scale,
             w = 30 * sizeX,
@@ -27,11 +39,8 @@ function levelbox:newMap(sizeX, sizeY)
             name = name,
             type = "Map",
         })
-        newMap:setDefaults()
-        self.state.maps[name] = newMap
         self.state.mapsCount = self.state.mapsCount + 1
-        self.state.selectedMap = name
-        self.grabbedMap = name
+        self:selectMap(name)
     end
 end
 

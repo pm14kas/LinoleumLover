@@ -39,6 +39,7 @@ function levelbox:selectBlock(block)
     end
     self.state.selectedBlock = block
     if block then
+        contextMenu:setActiveScreen("for" .. self:getSelectedBlock().type)
         self:getSelectedBlock():select()
         self.blockTypes[self:getSelectedBlock().type].select(self:getSelectedBlock().name, self:getSelectedBlock().map)
         if button:exists(self:getSelectedBlock():getContextMenuButtonName()) then
@@ -76,6 +77,13 @@ function levelbox:highlightBlock(block, map)
     end
 end
 
+function levelbox:createBlock(params)
+    local newBlock = block:new(params)
+    self:getMap(params.map).blocks[params.name] = newBlock
+    newBlock:setDefaults()
+    return newBlock
+end
+
 function levelbox:newBlock(type, map)
     if not inArray(type, arrayKeys(self.blockTypes)) then
         error("Type " .. type .. " doesn't exist!")
@@ -85,7 +93,7 @@ function levelbox:newBlock(type, map)
         between(0, cursor.x, screen:get("levelbox").w) and
         between(0, cursor.y, screen:get("levelbox").h) then
         local name = map .. "_" .. type .. self:getMap(map).blocksCount + 1
-        local newBlock = block:new({
+        self:createBlock({
             x = (cursor.x - self.offsetX) / self.scale,
             y = (cursor.y - self.offsetY) / self.scale,
             color = { colorPick.currentColor.r, colorPick.currentColor.g, colorPick.currentColor.b },
@@ -93,23 +101,27 @@ function levelbox:newBlock(type, map)
             name = name,
             map = map,
         })
-        newBlock:setDefaults()
-        self:getMap(map).blocks[name] = newBlock
         self.blockTypes[type].new(name, map)
         self:getMap(map).blocksCount = self:getMap(map).blocksCount + 1
         self:selectBlock(name)
-        contextMenu:setActiveScreen("for" .. type)
     end
 end
 
 function levelbox:deleteblock()
+    self:pushPreviousState()
     if self.state.selectedBlock then
-        local name = self:getSelectedBlock().name
-        local map = self:getSelectedBlock().map
-        local type = self:getSelectedBlock().type
-        self:getSelectedBlock():delete()
+        local selectedBlock = self.state.selectedBlock
+        local block = self:getBlock(selectedBlock)
+        self:selectBlock()
+        local name = block.name
+        local map = block.map
+        local type = block.type
+        block:delete()
         self.blockTypes[type].delete(name, map)
     elseif self.state.selectedMap then
-        self:getSelectedMap():delete()
+        local selectedMap = self.state.selectedMap
+        local map = self:getMap(selectedMap)
+        self:selectMap()
+        map:delete()
     end
 end

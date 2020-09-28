@@ -130,7 +130,6 @@ function love.mousepressed(clickX, clickY, buttonClick, istouch)
 						click.y < block.y + block.h + block.border / levelbox.scale + block.borderW / levelbox.scale / 2 then
 						blockClicked = true
 						levelbox:selectBlock(k)
-						contextMenu:setActiveScreen("for" .. levelbox:getSelectedBlock().type)
                         levelbox:grabBlock(k)
 					end
 				end
@@ -246,15 +245,25 @@ keyboard = {
         hold = false,
         onpress = function()
             if love.keyboard.isDown("lctrl") then
-                local prevState = levelbox:popPreviousState()
+                local prevState, type = levelbox:popPreviousState()
                 if not prevState then
                     return
                 end
                 local changedUpdatable = nil
-                if prevState.block then
-                    changedUpdatable = levelbox:getBlock(prevState.block, prevState.map)
-                else
-                    changedUpdatable = levelbox:getMap(prevState.map)
+                if type == 'block' then
+                    if levelbox:blockExists(prevState.name, prevState.map) then
+                        changedUpdatable = levelbox:getBlock(prevState.name, prevState.map)
+                    else
+                        changedUpdatable = levelbox:createBlock(prevState)
+                        levelbox:selectBlock(changedUpdatable.name)
+                    end
+                elseif type == 'map' then
+                    if levelbox:mapExists(prevState.name) then
+                        changedUpdatable = levelbox:getMap(prevState.name)
+                    else
+                        changedUpdatable = levelbox:createMap(prevState)
+                        levelbox:selectMap(changedUpdatable.name)
+                    end
                 end
                 changedUpdatable:setProperty("x", prevState.x)
                 changedUpdatable:setProperty("y", prevState.y)

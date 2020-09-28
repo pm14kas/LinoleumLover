@@ -176,7 +176,7 @@ function levelbox:getPushChangesArray()
         if not self.changes.mapView then
             self.changes.mapView = {}
         end
-        return self.changes.mapView
+        return self.changes.mapView, 'map'
     else
         if not self.changes.levelView then
             self.changes.levelView = {}
@@ -184,31 +184,16 @@ function levelbox:getPushChangesArray()
         if not self.changes.levelView[self.state.activeMap] then
             self.changes.levelView[self.state.activeMap] = {}
         end
-        return self.changes.levelView[self.state.activeMap]
+        return self.changes.levelView[self.state.activeMap], 'block'
     end
 end
 
 function levelbox:pushPreviousState()
     local state = {}
     if self:getMapView() then
-        state = {
-            map = self.state.selectedMap,
-            x = self:getSelectedMap().x,
-            y = self:getSelectedMap().y,
-            w = self:getSelectedMap().w,
-            h = self:getSelectedMap().h,
-            color = self:getSelectedMap().color,
-        }
+        state = copy(self:getSelectedMap())
     else
-        state = {
-            block = self.state.selectedBlock,
-            map = self.state.activeMap,
-            x = self:getSelectedBlock().x,
-            y = self:getSelectedBlock().y,
-            w = self:getSelectedBlock().w,
-            h = self:getSelectedBlock().h,
-            color = self:getSelectedBlock().color,
-        }
+        state = copy(self:getSelectedBlock())
     end
     local array = self:getPushChangesArray()
     if #array >= self.undoMax then
@@ -218,7 +203,8 @@ function levelbox:pushPreviousState()
 end
 
 function levelbox:popPreviousState()
-    return table.remove(self:getPushChangesArray())
+    local array, type = self:getPushChangesArray()
+    return table.remove(array), type
 end
 
 function levelbox:deletelink(link)
