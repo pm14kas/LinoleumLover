@@ -2,7 +2,7 @@ local enet = require "enet"
 local host = nil;
 local server = nil;
 local isServer = ENVIRONMENT_DEFAULT_NETWORK_ROLE == 'server';
-local isMultiplayerActive = true;
+local isMultiplayerActive = false;
 local isNatTraversalActive = false;
 local bandwidthLimiter = 0
 
@@ -99,8 +99,8 @@ function network:new()
     self.isDashing = false;
     self.bandwidthLimiter = 0;
     self.bulletList = {};
-    self.bulletWidth = layout.getX(10);
-    self.bulletHeight = layout.getY(5);
+    self.bulletWidth = bulletSize.width;
+    self.bulletHeight = bulletSize.height;
     self.isCrouch = false;
     self.crouchHeight = layout.getY(40);
 

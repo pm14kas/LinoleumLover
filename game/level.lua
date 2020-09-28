@@ -230,6 +230,7 @@ function level:appendBlock(name, x, y, width, height, color, type)
 		block.health = 10;
 		block.healthMax = 10;
 		block.picture = graphics.blocks.breakable.picture;
+		block.picture2 = graphics.blocks.breakable.picture2;
 	end
 
 	block.body = love.physics.newBody(world, block.x, block.y, "static");
@@ -539,8 +540,12 @@ function level:draw()
 				love.graphics.setColor(v.color)
 				love.graphics.polygon("fill", v.body:getWorldPoints(v.shape:getPoints()))
 				if (v.type == self.blockNameList.blockBreakable) then
-					love.graphics.setColor(1 - v.color[1], 1 - v.color[2], 1 - v.color[3], 1 - v.health / (v.healthMax + 1))
-					love.graphics.draw(v.picture, v.x - v.width * 0.5, v.y - v.height * 0.5, 0, v.width / v.picture:getWidth(), v.height / v.picture:getHeight())
+					love.graphics.setColor(1 - v.color[1], 1 - v.color[2], 1 - v.color[3], 1 - v.health / (v.healthMax * 1.1 + 1))
+					if v.health / (v.healthMax + 1) > 0.5 then
+						love.graphics.draw(v.picture, v.x - v.width * 0.5, v.y - v.height * 0.5, 0, v.width / v.picture:getWidth(), v.height / v.picture:getHeight())
+					else
+						love.graphics.draw(v.picture2, v.x - v.width * 0.5, v.y - v.height * 0.5, 0, v.width / v.picture2:getWidth(), v.height / v.picture2:getHeight())
+					end
 				end
 			end
 		end

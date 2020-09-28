@@ -44,37 +44,38 @@ keyboardEvent = {
 graphics = {
 	abilities = {
 		dash = {
-			picture = love.graphics.newImage("graphics/icons/icon_dash.png")
+			picture = love.graphics.newImage("graphics/icons/icon_dash.png"),
 		},
 		jump = {
-			picture = love.graphics.newImage("graphics/icons/icon_jump_double.png")
+			picture = love.graphics.newImage("graphics/icons/icon_jump_double.png"),
 		},
 		wallclimb = {
-			picture = love.graphics.newImage("graphics/icons/icon_wall_climb.png")
+			picture = love.graphics.newImage("graphics/icons/icon_wall_climb.png"),
 		},
 		gun = {
-			picture = love.graphics.newImage("graphics/icons/icon_gun.png")
-		}
+			picture = love.graphics.newImage("graphics/icons/icon_gun.png"),
+		},
 	},
 	hud = {
 		dash = {
-			picture = love.graphics.newImage("graphics/icons/icon_dash_text.png")
+			picture = love.graphics.newImage("graphics/icons/icon_dash_text.png"),
 		},
 		jump = {
-			picture = love.graphics.newImage("graphics/icons/icon_jump_text.png")
+			picture = love.graphics.newImage("graphics/icons/icon_jump_text.png"),
 		},
 		gun = {
-			picture = love.graphics.newImage("graphics/icons/icon_gun.png")
-		}	
+			picture = love.graphics.newImage("graphics/icons/icon_gun.png"),
+		},
 	},
 	blocks = {
 		breakable = {
-			picture = love.graphics.newImage("graphics/images/cracks.png")
-		}
+            picture = love.graphics.newImage("graphics/images/cracks.png"),
+            picture2 = love.graphics.newImage("graphics/images/cracks2.png"),
+		},
 	},
 	default = {
-		picture = love.graphics.newImage("graphics/icons/icon_404.png")	
-	}
+		picture = love.graphics.newImage("graphics/icons/icon_404.png"),
+	},
 }
 
 require("json.json");
@@ -187,7 +188,6 @@ function love.draw()
 	love.graphics.setColor(1,1,1)
 	local iconShift = 0;
 	for i = 1, player.jumpAmount do
-		--love.graphics.print("*", 10, 10);
 		love.graphics.draw(
 			graphics.hud.jump.picture, 
 			layout.getX(10 + (i-1) * 40), 
@@ -200,7 +200,6 @@ function love.draw()
 	end
 	
 	if player.isDashAvailable then
-		--love.graphics.print(">", 50, 10, 0, 0.5, 0.5);
 		love.graphics.draw(
 			graphics.hud.dash.picture, 
 			layout.getX(10 + iconShift * 50), 
