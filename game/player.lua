@@ -66,14 +66,14 @@ function player:new(x, y)
 	self.fixture:setUserData("player");
 	
 	self.sprite = love.graphics.newImage("graphics/particle/sprite_doublejump.png");
-	self.doubleJumpParticleEmitter = love.graphics.newParticleSystem(self.sprite, 30);
+	self.doubleJumpParticleEmitter = love.graphics.newParticleSystem(self.sprite, 100);
 	self.doubleJumpParticleEmitter:setParticleLifetime(0.3, 0.5);
 	self.doubleJumpParticleEmitter:setSizes(0.6)
 	self.doubleJumpParticleEmitter:setLinearAcceleration(-5, 0, 5, 50 * love.physics.getMeter());
 	self.doubleJumpParticleEmitter:setEmissionArea("uniform", self.width * 0.7, self.height * 0.1, 0, true);
 	self.doubleJumpParticleEmitter:setColors(255, 255, 255, 255, 255, 255, 255, 0);
 
-	self.dashParticleEmitter = love.graphics.newParticleSystem(self.sprite, 50);
+	self.dashParticleEmitter = love.graphics.newParticleSystem(self.sprite, 100);
 	self.dashParticleEmitter:setParticleLifetime(0.1, 0.9);
 	self.dashParticleEmitter:setSizes(0.5)
 	self.dashParticleEmitter:setEmissionArea("uniform", self.width, self.height, 0, false);
@@ -290,7 +290,7 @@ function player:move(dt)
 				self.dashParticleEmitter:setPosition(self.body:getX(), self.body:getY());
                 self.dashParticleEmitterCoords.isChangeAllowed = false;
             end
-			self.dashParticleEmitter:emit(100);
+			self.dashParticleEmitter:emit(50);
 			self.body:setLinearVelocity(-self.dashSpeed, 0);
 			self.isLeftDash = true;
 		elseif love.timer.getTime() > self.dashTimer + self.dashDuration and love.timer.getTime() < self.dashTimer + self.dashDuration * 1.5 then
@@ -309,7 +309,7 @@ function player:move(dt)
                 self.dashParticleEmitter:setPosition(self.body:getX(), self.body:getY());
                 self.dashParticleEmitterCoords.isChangeAllowed = false;
             end
-			self.dashParticleEmitter:emit(100);
+			self.dashParticleEmitter:emit(50);
 			self.body:setLinearVelocity(self.dashSpeed, 0);
 			self.isRightDash = true;
 		elseif love.timer.getTime() > self.dashTimer + self.dashDuration and love.timer.getTime() < self.dashTimer + self.dashDuration * 1.5 then
@@ -614,10 +614,6 @@ function player:draw()
 	end
 
 	love.graphics.setColor(1,1,1)
-	local doubleJumpX, doubleJumpY = self.doubleJumpParticleEmitter:getPosition();
-	local dashX, dashY = self.dashParticleEmitter:getPosition();
-	print(dashX .. " " .. dashY);
 	love.graphics.draw(self.doubleJumpParticleEmitter, 0, 0 + self.height * 0.5)
-	--love.graphics.draw(self.dashParticleEmitter, dashX, dashY)
 	love.graphics.draw(self.dashParticleEmitter, 0, 0)
 end
