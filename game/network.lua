@@ -2,7 +2,7 @@ local enet = require "enet"
 local host = nil;
 local server = nil;
 local isServer = ENVIRONMENT_DEFAULT_NETWORK_ROLE == 'server';
-local isMultiplayerActive = false;
+local isMultiplayerActive = true;
 local isNatTraversalActive = false;
 local bandwidthLimiter = 0
 

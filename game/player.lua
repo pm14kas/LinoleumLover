@@ -281,7 +281,15 @@ function player:move(dt)
 	if not self.isDashEnabled then
 		self.isDashAvailable = false;
 	end
-	
+
+	local mouseX, mouseY = love.mouse.getPosition()
+
+	if player.body:getX() + camera.offsetX < mouseX then
+		player.direction = player.directionEnum.right;
+	elseif player.body:getX() + camera.offsetX > mouseX then
+		player.direction = player.directionEnum.left;
+	end
+
 	if self.isDashEnabled then
 		if self.isLeftDash and love.timer.getTime() < self.dashTimer + self.dashDuration and self.isDashAvailable then
 			self.isDashAvailable = false;
@@ -585,7 +593,6 @@ function player:draw()
 
 	local crouchShift = tern(self.isCrouch, self.crouchHeight, 0);
 	
-	--love.graphics.polygon("fill", self.body:getWorldPoints(self.shape:getPoints()))
 	love.graphics.rectangle("fill", self.body:getX() - self.width * 0.5, self.body:getY() - self.height * 0.5 + crouchShift, self.width, self.height - crouchShift);
 
 	--animation:draw("player_walk", x - self.width * 0.5, y - self.height * 0.5, self.width, self.height);

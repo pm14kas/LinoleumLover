@@ -258,6 +258,20 @@ function love.keypressed(key)
 	end
 end
 
+function love.mousepressed(x, y, button)
+	if button == 1 then
+		player:keyboardShoot();
+	end
+end
+
+function love.mousemoved(x, y)
+	if player.body:getX() + camera.offsetX < x then
+		player.direction = player.directionEnum.right;
+	elseif player.body:getX() + camera.offsetX > x then
+		player.direction = player.directionEnum.left;
+	end
+end
+
 function love.keyreleased( key )
 	if viewMode then
 		if key == "space" or key == "w" then
